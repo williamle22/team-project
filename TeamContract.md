@@ -18,7 +18,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-*We will use Instagram as our main form of communication. 
+* We will use Instagram as our main form of communication. 
 We'll give each other one day to respond!
 
 * If you aren't able to make it to class or tutorial or if you cannot make a deadline for a task you should notify a teammate.
@@ -28,7 +28,7 @@ We'll give each other one day to respond!
 
 ### [Other Categories of norms and expectations go here]
 
-*Do your work to the best of your ability
+* Do your work to the best of your ability
 
 ---
 
