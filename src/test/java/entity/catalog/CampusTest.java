@@ -9,7 +9,7 @@ class CampusTest {
     @Test
     void fromStringRoundTrips() {
         for (Campus c : Campus.values()) {
-            assertEquals(c, Campus.fromString(c.getCampus()));
+            assertEquals(c, Campus.fromString(c.getValue()));
         }
     }
 

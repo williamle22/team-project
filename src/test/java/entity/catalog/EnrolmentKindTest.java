@@ -9,7 +9,7 @@ class EnrolmentKindTest {
     @Test
     void fromStringRoundTrips() {
         for (EnrolmentKind e : EnrolmentKind.values()) {
-            assertEquals(e, EnrolmentKind.fromString(e.getEnrolmentKind()));
+            assertEquals(e, EnrolmentKind.fromString(e.getValue()));
         }
     }
 

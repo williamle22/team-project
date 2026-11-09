@@ -9,7 +9,7 @@ class RowKindTest {
     @Test
     void fromStringRoundTrips() {
         for (RowKind r : RowKind.values()) {
-            assertEquals(r, RowKind.fromString(r.getRowKind()));
+            assertEquals(r, RowKind.fromString(r.getValue()));
         }
     }
 

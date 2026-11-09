@@ -9,7 +9,7 @@ class ProgramTypeTest {
     @Test
     void fromStringRoundTrips() {
         for (ProgramType p : ProgramType.values()) {
-            assertEquals(p, ProgramType.fromString(p.getProgramType()));
+            assertEquals(p, ProgramType.fromString(p.getValue()));
         }
     }
 

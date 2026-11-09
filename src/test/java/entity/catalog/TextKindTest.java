@@ -9,7 +9,7 @@ class TextKindTest {
     @Test
     void fromStringRoundTrips() {
         for (TextKind t : TextKind.values()) {
-            assertEquals(t, TextKind.fromString(t.getTextKind()));
+            assertEquals(t, TextKind.fromString(t.getValue()));
         }
     }
 

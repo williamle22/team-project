@@ -9,7 +9,7 @@ class SectionTest {
     @Test
     void fromStringRoundTrips() {
         for (Section s : Section.values()) {
-            assertEquals(s, Section.fromString(s.getSection()));
+            assertEquals(s, Section.fromString(s.getValue()));
         }
     }
 
