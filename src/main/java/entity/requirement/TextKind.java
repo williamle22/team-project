@@ -1,4 +1,4 @@
-package entity.catalog;
+package entity.requirement;
 
 public enum TextKind {
     PERMISSION("permission"), MEMBERSHIP("membership"), PLACEMENT("placement"), PREPARATION("preparation"),
