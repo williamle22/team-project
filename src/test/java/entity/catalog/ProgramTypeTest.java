@@ -8,9 +8,18 @@ class ProgramTypeTest {
 
     @Test
     void fromStringRoundTrips() {
-        for (ProgramType p : ProgramType.values()) {
-            assertEquals(p, ProgramType.fromString(p.getValue()));
+        for (ProgramType v : ProgramType.values()) {
+            assertEquals(v, ProgramType.fromString(v.getValue()));
         }
+    }
+
+    @Test
+    void parsesBackendStrings() {
+        assertEquals(ProgramType.SPECIALIST, ProgramType.fromString("Specialist"));
+        assertEquals(ProgramType.MAJOR, ProgramType.fromString("Major"));
+        assertEquals(ProgramType.MINOR, ProgramType.fromString("Minor"));
+        assertEquals(ProgramType.FOCUS, ProgramType.fromString("Focus"));
+        assertEquals(ProgramType.CERTIFICATE, ProgramType.fromString("Certificate"));
     }
 
     @Test
