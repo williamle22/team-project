@@ -1,4 +1,4 @@
-# Project Name
+# dgx: Degree Explorer (but better)
 
 ## Team Information
 
@@ -16,7 +16,13 @@
 
 **Education:** academic planning for undergraduate students in the Faculty of Arts & Science (FAS).
 
-[Project Description]
+The University of Toronto provides an application called Degree Explorer, which allows students to plan out courses and programs in their degree and automatically assess requirement completion. However, this application is old and slow, powered entirely by server-side calls.
+
+Our version improves on the original in a number of ways:
+1. We use a local database containing all courses and programs in the FAS to greatly speed up lookups and requirement evaluations.
+2. We integrate another UofT application, Time Table Builder, so that users can view their timetable based directly on the course plan they create.
+3. We integrate UofT's Course Evaluations, so that while creating a plan, users can explore past evaluations for courses without leaving the program.
+4. We allow users to track grades received for courses (or assignments in courses), to provide an up-to-date record of their SGPA/CGPA and credits completed.
 
 ---
 
@@ -24,13 +30,13 @@
 
 | # | User Story | Lead |
 |---|------------|------|
-| 1 | As a user, I want to be able to search up courses and see their description and requirements. | TBD |
-| 2 | As a user, I want to be able to see past course evaluations for a given course. | TBD |
-| 3 | As a user, I want to be able to create course plans for any number of semesters. | TBD |
-| 4 | As a user, I want to be able to create multiple different course plans. | TBD |
-| 5 | As a user, I want to be able to import and export my course plans. | TBD |
-| 6 | As a user, I want to be able to see whether or not I am eligible to take a given course in a given semester. | TBD |
-| 7 | As a user, I want to be able to record my achieved grade for a given course and see my CGPA automatically calculated. | TBD |
+| 1 | As a user, I want to be able to search up courses and see their description and requirements. | Kameel/Karishma |
+| 2 | As a user, I want to be able to see past course evaluations for a given course. | Karishma |
+| 3 | As a user, I want to be able to create course plans for any number of semesters. | Jonathan |
+| 4 | As a user, I want to be able to create multiple different course plans. | Jonathan |
+| 5 | As a user, I want to be able to import and export my course plans. | William |
+| 6 | As a user, I want to be able to see whether or not I am eligible to take a given course in a given semester. | Kameel |
+| 7 | As a user, I want to be able to record my achieved grade for a given course and see my CGPA automatically calculated. | William |
 
 ---
 
@@ -152,10 +158,10 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
 | Team Member | MVP Use Case |
 |-------------|--------------|
-| Kameel Ahamed | TBD |
-| Jonathan Zhu | TBD |
-| William Le | TBD |
-| Karishma Persad | TBD |
+| Kameel Ahamed | Use Case 1, 2, 8 |
+| Jonathan Zhu | Use Case 5, 6 |
+| William Le | Use Case 7, 9 |
+| Karishma Persad | Use Case 3, 4 |
 
 **Proposed MVP use cases still to claim:** Search Courses and View Course Details (2–3), Edit a Plan (5), and Record Grades and Calculate CGPA (9).
 
