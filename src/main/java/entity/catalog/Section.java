@@ -3,7 +3,7 @@ package entity.catalog;
 public enum Section {
     F("F", "first term"), S("S", "second term"), Y("Y", "both terms");
 
-    private final string value;
+    private final String value;
     private final String description;
 
     Section(String value, String description) {

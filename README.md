@@ -163,10 +163,6 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 | William Le | Use Case 7, 9 |
 | Karishma Persad | Use Case 3, 4 |
 
-**Proposed MVP use cases still to claim:** Search Courses and View Course Details (2–3), Edit a Plan (5), and Record Grades and Calculate CGPA (9).
-
-**After the MVP:** View Course Evaluations (4), Manage Plans (6), and Import and Export Plans (7).
-
 ---
 
 ## Entities
@@ -194,7 +190,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 ### Requirements
 
 **`Requirement`**: an abstract class for one node in a requirement tree. Every prerequisite, corequisite, enrolment rule, and completion rule is a tree of these.
-- Subclasses: logical nodes (`And`, `Or`, `Choose`, `Not`), academic nodes (`CourseReq`, `Credits`, `Average`, `Gpa`), and context nodes (`ProgramReq`, `RequirementRef`, `Profile`, `Text`)
+- Subclasses: logical nodes (`AndReq`, `OrReq`, `ChooseReq`, `NotReq`), academic nodes (`CourseReq`, `CreditsReq`, `AverageReq`, `GpaReq`), and context nodes (`ProgramReq`, `RowRefReq`, `ProfileReq`, `TextReq`)
 - Methods: `accept(RequirementVisitor<T> visitor)`. Visitors include evaluation, printing, and other operations.
 
 **`Status`**: the result of evaluating a requirement: `MET`, `NOT_MET`, or `REVIEW`.
@@ -260,7 +256,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
 **How it's used:**
 - dgx-backend calls it daily to record which sections (`F`, `S`, `Y`) each course is offered in this year. The app uses those to warn when a course is placed in a term it isn't offered.
-- The app will call it directly to get each course's lecture, tutorial, and practical sections and meeting times for the timetable (Use Case 9).
+- The app will call it directly to get each course's lecture, tutorial, and practical sections and meeting times for the timetable (*no use case yet*; see Use Cases).
 
 ### Course evaluations
 
