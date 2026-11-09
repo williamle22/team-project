@@ -3,19 +3,19 @@ package entity.catalog;
 public enum RowKind {
     ALLOCATION("allocation"), CONSTRAINT("constraint"), LIMIT("limit"), CHOICE("choice");
 
-    private final String rowKind;
+    private final String value;
 
-    RowKind(String rowKind) {
-        this.rowKind = rowKind;
+    RowKind(String value) {
+        this.value = value;
     }
 
-    public String getRowKind() {
-        return this.rowKind;
+    public String getValue() {
+        return this.value;
     }
 
     public static RowKind fromString(String value) throws IllegalArgumentException {
         for (RowKind r : values()) {
-            if (r.rowKind.equals(value)) {
+            if (r.value.equals(value)) {
                 return r;
             }
         }

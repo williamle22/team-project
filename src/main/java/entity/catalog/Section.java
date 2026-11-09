@@ -1,21 +1,27 @@
 package entity.catalog;
 
 public enum Section {
-    F("first term"), S("second term"), Y("both terms");
+    F("F", "first term"), S("S", "second term"), Y("Y", "both terms");
 
-    private final String section;
+    private final String value;
+    private final String description;
 
-    Section(String section) {
-        this.section = section;
+    Section(String value, String description) {
+        this.value = value;
+        this.description = description;
     }
 
-    public String getSection() {
-        return this.section;
+    public String getValue() {
+        return value;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public static Section fromString(String value) throws IllegalArgumentException {
         for (Section s : values()) {
-            if (s.section.equals(value)) {
+            if (s.value.equals(value)) {
                 return s;
             }
         }

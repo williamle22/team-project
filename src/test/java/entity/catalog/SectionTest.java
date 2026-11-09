@@ -8,9 +8,16 @@ class SectionTest {
 
     @Test
     void fromStringRoundTrips() {
-        for (Section s : Section.values()) {
-            assertEquals(s, Section.fromString(s.getSection()));
+        for (Section v : Section.values()) {
+            assertEquals(v, Section.fromString(v.getValue()));
         }
+    }
+
+    @Test
+    void parsesBackendStrings() {
+        assertEquals(Section.F, Section.fromString("F"));
+        assertEquals(Section.S, Section.fromString("S"));
+        assertEquals(Section.Y, Section.fromString("Y"));
     }
 
     @Test

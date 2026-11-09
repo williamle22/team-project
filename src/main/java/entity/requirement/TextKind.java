@@ -1,22 +1,22 @@
-package entity.catalog;
+package entity.requirement;
 
 public enum TextKind {
     PERMISSION("permission"), MEMBERSHIP("membership"), PLACEMENT("placement"), PREPARATION("preparation"),
     ADMISSION("admission"), AMBIGUITY("ambiguity"), CONTENT("content"), OTHER("other");
 
-    private final String textKind;
+    private final String value;
 
-    TextKind(String textKind) {
-        this.textKind = textKind;
+    TextKind(String value) {
+        this.value = value;
     }
 
-    public String getTextKind() {
-        return this.textKind;
+    public String getValue() {
+        return this.value;
     }
 
     public static TextKind fromString(String value) throws IllegalArgumentException {
         for (TextKind t : values()) {
-            if (t.textKind.equals(value)) {
+            if (t.value.equals(value)) {
                 return t;
             }
         }

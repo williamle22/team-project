@@ -19,6 +19,16 @@ class BreadthCategoryTest {
     }
 
     @Test
+    void numbersMatchBackend() {
+        assertEquals(BreadthCategory.CREATIVE_CULTURAL, BreadthCategory.fromInt(1));
+        assertEquals(BreadthCategory.THOUGHT_BELIEF, BreadthCategory.fromInt(2));
+        assertEquals(BreadthCategory.SOCIETY_INSTITUTIONS, BreadthCategory.fromInt(3));
+        assertEquals(BreadthCategory.LIVING_THINGS, BreadthCategory.fromInt(4));
+        assertEquals(BreadthCategory.PHYSICAL_MATHEMATICAL, BreadthCategory.fromInt(5));
+        assertThrows(IllegalArgumentException.class, () -> BreadthCategory.fromInt(6));
+    }
+
+    @Test
     void toStringFormat() {
         assertEquals("BR 1: Creative and Cultural Representations", BreadthCategory.CREATIVE_CULTURAL.toString());
     }

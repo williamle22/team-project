@@ -3,19 +3,19 @@ package entity.catalog;
 public enum EnrolmentKind {
     OPEN("open"), LIMITED("limited"), FOCUS("focus"), SUSPENDED("suspended");
 
-    private final String enrolmentKind;
+    private final String value;
 
-    EnrolmentKind(String enrolmentKind) {
-        this.enrolmentKind = enrolmentKind;
+    EnrolmentKind(String value) {
+        this.value = value;
     }
 
-    public String getEnrolmentKind() {
-        return this.enrolmentKind;
+    public String getValue() {
+        return this.value;
     }
 
     public static EnrolmentKind fromString(String value) throws IllegalArgumentException {
         for (EnrolmentKind e : values()) {
-            if (e.enrolmentKind.equals(value)) {
+            if (e.value.equals(value)) {
                 return e;
             }
         }
