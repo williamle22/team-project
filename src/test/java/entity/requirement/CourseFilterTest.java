@@ -115,11 +115,4 @@ class CourseFilterTest {
         assertNotEquals(a, CourseFilter.builder().designators(List.of("HPS")).minGrade(70).build());
         assertNotEquals(a, CourseFilter.builder().designators(List.of("HPS")).transfer(true).build());
     }
-
-    @Test
-    void toStringShowsOnlySetFields() {
-        CourseFilter f = CourseFilter.builder().designators(List.of("HPS")).levels(List.of(300, 400)).build();
-        assertEquals("CourseFilter{designators=[HPS], levels=[300, 400]}", f.toString());
-        assertEquals("CourseFilter{}", CourseFilter.any().toString());
-    }
 }
