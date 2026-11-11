@@ -1,5 +1,6 @@
 package entity.requirement;
 
+/** An operation over a requirement tree, with one method per node type. */
 public interface RequirementVisitor<R> {
     R visitAnd(AndReq node);
     R visitOr(OrReq node);

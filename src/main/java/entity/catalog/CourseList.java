@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/** A named course list, which course filters reference by {@link #getName()}. */
 public final class CourseList {
     private final String name;
     private final String title;
@@ -25,6 +26,7 @@ public final class CourseList {
         return Optional.ofNullable(title);
     }
 
+    /** Returns the requirement nodes that hold the list's courses. */
     public List<Requirement> getItems() {
         return items;
     }

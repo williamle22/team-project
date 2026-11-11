@@ -3,6 +3,7 @@ package entity.requirement;
 import java.util.Objects;
 import java.util.Optional;
 
+/** A {@code gpa} node: met when the student's GPA is at least {@code minGpa}, on a 0-4 scale. */
 public final class GpaReq extends Requirement {
     private final double minGpa;
     private final String scope;
@@ -20,6 +21,9 @@ public final class GpaReq extends Requirement {
         return minGpa;
     }
 
+    /**
+     * Returns free text naming the courses the GPA covers, such as {@code CHM credits}, or empty for the overall GPA.
+     */
     public Optional<String> getScope() {
         return Optional.ofNullable(scope);
     }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/** The prerequisites or corequisites of a course ({@code prerequisites} or {@code corequisites} column). */
 public final class Requisite {
     private final Requirement req;
     private final List<String> notes;
@@ -17,6 +18,7 @@ public final class Requisite {
         this.raw = Objects.requireNonNull(raw, "raw");
     }
 
+    /** Returns the requirement, or empty when the course requires nothing. */
     public Optional<Requirement> getReq() {
         return Optional.ofNullable(req);
     }

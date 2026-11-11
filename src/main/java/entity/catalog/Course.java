@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One course from the Faculty of Arts and Science calendar ({@code courses} table), such as {@code CSC148H1}.
+ * Equality uses only {@code code}, so a course keeps its identity across catalog updates.
+ */
 public final class Course {
     private final String code;
     private final String designator;
@@ -19,6 +23,14 @@ public final class Course {
     private final List<BreadthCategory> breadth;
     private final Sessions sessions;
 
+    /**
+     * Creates a course from the columns of the {@code courses} table, in column order.
+     * {@code prerequisites}, {@code corequisites}, {@code exclusions}, and {@code sessions} are {@code null} when
+     * their column is {@code NULL}.
+     *
+     * @throws IllegalArgumentException if {@code level} is not one of [100, 200, 300, 400] or {@code weight} isn't
+     *     {@code 0.5} or {@code 1.0}
+     */
     public Course(String code, String designator, String number, int level, double weight,
                   Campus campus, String title, String description,
                   Requisite prerequisites, Requisite corequisites, Exclusions exclusions,
@@ -48,10 +60,12 @@ public final class Course {
         return code;
     }
 
+    /** Returns the subject designator, such as {@code CSC}. */
     public String getDesignator() {
         return designator;
     }
 
+    /** Returns the course number as a string, because its level digit can be a letter A-D. */
     public String getNumber() {
         return number;
     }
@@ -60,6 +74,7 @@ public final class Course {
         return level;
     }
 
+    /** Returns the credit weight: {@code 0.5} for an H course or {@code 1.0} for a Y course. */
     public double getWeight() {
         return weight;
     }
@@ -96,6 +111,7 @@ public final class Course {
         return Optional.ofNullable(sessions);
     }
 
+    /** Returns whether the course is offered in the current academic year, meaning it has {@link Sessions}. */
     public boolean isOfferedThisYear() {
         return sessions != null;
     }

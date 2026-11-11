@@ -1,5 +1,9 @@
 package entity.requirement;
 
+/**
+ * The reason a {@code text} node has no automatic check. Each value maps to a backend string through
+ * {@link #getValue()} and {@link #fromString(String)}.
+ */
 public enum TextKind {
     PERMISSION("permission"), MEMBERSHIP("membership"), PLACEMENT("placement"), PREPARATION("preparation"),
     ADMISSION("admission"), AMBIGUITY("ambiguity"), CONTENT("content"), OTHER("other");

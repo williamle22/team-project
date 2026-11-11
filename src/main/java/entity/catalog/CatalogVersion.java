@@ -3,6 +3,7 @@ package entity.catalog;
 import java.time.Instant;
 import java.util.Objects;
 
+/** The catalog version ({@code version} table): its school year and when the backend last updated the catalog. */
 public final class CatalogVersion {
     private final String schoolYear;
     private final Instant lastUpdated;
@@ -12,6 +13,7 @@ public final class CatalogVersion {
         this.lastUpdated = Objects.requireNonNull(lastUpdated, "lastUpdated");
     }
 
+    /** Returns the school year, such as {@code "2026-2027"}. */
     public String getSchoolYear() {
         return schoolYear;
     }

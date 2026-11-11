@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/** An {@code and} node: met when every item is met. */
 public final class AndReq extends Requirement {
     private final List<Requirement> items;
     private final Double weight;
@@ -21,10 +22,15 @@ public final class AndReq extends Requirement {
         return items;
     }
 
+    /**
+     * Returns the credits this node contributes when it's a pair of courses in a course list that count only together.
+     * It's empty for any other {@code and}.
+     */
     public Optional<Double> getWeight() {
         return Optional.ofNullable(weight);
     }
 
+    /** Returns whether this node is a course pair: {@code weight} is set and every item is a {@link CourseReq}. */
     public boolean isCoursePair() {
         return getWeight().isPresent() && items.stream().allMatch(i -> i instanceof CourseReq);
     }

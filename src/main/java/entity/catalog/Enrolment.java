@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/** The enrolment rules of a program, from its {@code enrolment} JSON. */
 public final class Enrolment {
     private final EnrolmentKind kind;
     private final Requirement req;
@@ -15,6 +16,10 @@ public final class Enrolment {
     private final List<String> notes;
     private final String raw;
 
+    /**
+     * @throws IllegalArgumentException if {@code req} is {@code null} for a kind other than {@code SUSPENDED}, or
+     *     non-null for {@code SUSPENDED}
+     */
     public Enrolment(EnrolmentKind kind, Requirement req, List<ProgramReq> exclusions,
                      boolean firstRoundOnly, List<String> notes, String raw) {
         this.kind = Objects.requireNonNull(kind, "kind");
@@ -33,14 +38,17 @@ public final class Enrolment {
         return kind;
     }
 
+    /** Returns the enrolment requirement, or empty when the kind is {@code SUSPENDED}. */
     public Optional<Requirement> getReq() {
         return Optional.ofNullable(req);
     }
 
+    /** Returns the programs whose students can't enrol in this one. */
     public List<ProgramReq> getExclusions() {
         return exclusions;
     }
 
+    /** Returns whether the program considers requests only in the first enrolment round. */
     public boolean isFirstRoundOnly() {
         return firstRoundOnly;
     }

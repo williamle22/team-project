@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One program from the Faculty of Arts and Science calendar ({@code programs} table), such as {@code ASMIN1001}.
+ * Equality uses only {@code code}.
+ */
 public final class Program {
     private final String code;
     private final ProgramType type;
@@ -13,6 +17,10 @@ public final class Program {
     private final Completion completion;
     private final List<String> areas;
 
+    /**
+     * Creates a program from the columns of the {@code programs} table, in column order. {@code enrolment} and {@code completion} are {@code null} when
+     * their column is {@code NULL}.
+     */
     public Program(String code, ProgramType type, String number, String title,
                    Enrolment enrolment, Completion completion, List<String> areas) {
         this.code = Objects.requireNonNull(code, "code");
@@ -32,6 +40,7 @@ public final class Program {
         return type;
     }
 
+    /** Returns the code after its 5-character prefix, such as {@code "1001"} or {@code "1469A"}. */
     public String getNumber() {
         return number;
     }
@@ -48,6 +57,7 @@ public final class Program {
         return Optional.ofNullable(completion);
     }
 
+    /** Returns the subject areas the program belongs to. */
     public List<String> getAreas() {
         return areas;
     }

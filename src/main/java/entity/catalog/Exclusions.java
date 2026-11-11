@@ -3,6 +3,10 @@ package entity.catalog;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The exclusions of a course ({@code exclusions} column): items that block taking the course. {@link #getRaw()}
+ * can be empty when the items come from a timing restriction in the requisites.
+ */
 public final class Exclusions {
     private final List<ExclusionItem> items;
     private final List<String> notes;

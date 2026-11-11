@@ -3,8 +3,16 @@ package entity.requirement;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * A visitor that renders a requirement tree as calendar-style English for display, such as
+ * {@code (PHY131H1 or PHY151H1)} or {@code 1.0 credits in HPS at the 300/400 level}.
+ */
 public final class RequirementPrinter implements RequirementVisitor<String> {
 
+    /**
+     * Renders {@code r}, appending {@code (may be taken concurrently)} to each concurrent node at every level. Use this
+     * method instead of {@code accept}, which skips the note on {@code r} itself.
+     */
     public String print(Requirement r) {
         return r.accept(this) + (r.isConcurrent() ? " (may be taken concurrently)" : "");
     }

@@ -4,6 +4,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A visitor that collects every course code a requirement tree mentions, in tree order without duplicates.
+ *
+ * <p>It reads {@code course} nodes and the {@code courses} lists of {@code credits} and {@code average} filters. It
+ * descends through {@code and}, {@code or}, {@code choose}, {@code not}, and {@code average} items. Other nodes
+ * contribute nothing.
+ */
 public final class CourseCodeCollector implements RequirementVisitor<Set<String>> {
 
     @Override

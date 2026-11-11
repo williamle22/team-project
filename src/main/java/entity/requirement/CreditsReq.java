@@ -3,6 +3,10 @@ package entity.requirement;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A {@code credits} node: met when the student has at least {@code amount} credits from courses that match
+ * {@code filter}.
+ */
 public final class CreditsReq extends Requirement {
     private final double amount;
     private final Double maxAmount;
@@ -30,10 +34,15 @@ public final class CreditsReq extends Requirement {
         return amount;
     }
 
+    /**
+     * Returns the cap on matching credits that count, or empty for no cap. A cap of 0, used by limit rows, means no
+     * matching credits count.
+     */
     public Optional<Double> getMaxAmount() {
         return Optional.ofNullable(maxAmount);
     }
 
+    /** Returns the credits each matching course counts as, or empty to use each course's own weight. */
     public Optional<Double> getWeight() {
         return Optional.ofNullable(weight);
     }

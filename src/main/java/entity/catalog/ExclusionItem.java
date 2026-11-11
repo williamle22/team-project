@@ -6,6 +6,15 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One exclusion of a course. Each item has exactly one of the following shapes:
+ * <ul>
+ *   <li>Text ({@link #isText()}): {@code text} is set, with a {@code kind}, and needs manual review.
+ *   <li>Course set ({@link #isCourseSet()}): having taken any of {@code courses} excludes the course.
+ *   <li>Filter ({@link #isFilter()}): {@code designators}, {@code levels}, and {@code exclude} narrow which courses
+ *       exclude the course.
+ * </ul>
+ */
 public final class ExclusionItem {
     private final List<String> courses;
     private final List<String> designators;
@@ -44,10 +53,12 @@ public final class ExclusionItem {
         return exclude;
     }
 
+    /** Returns whether taking a matching course at the same time also excludes the course. */
     public boolean isConcurrent() {
         return concurrent;
     }
 
+    /** Returns the calendar's qualifier for this exclusion. */
     public Optional<String> getNote() {
         return Optional.ofNullable(note);
     }

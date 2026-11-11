@@ -3,10 +3,12 @@ package entity.requirement;
 import java.util.List;
 import java.util.Objects;
 
+/** A {@code program} node: met when the student is enrolled in a program whose code is in {@code programs}. */
 public final class ProgramReq extends Requirement {
     private final List<String> programs;
     private final String text;
 
+    /** @throws IllegalArgumentException if {@code programs} is empty */
     public ProgramReq(List<String> programs, String text, boolean concurrent) {
         super(concurrent);
         this.programs = List.copyOf(Objects.requireNonNull(programs, "programs"));
@@ -20,6 +22,7 @@ public final class ProgramReq extends Requirement {
         return programs;
     }
 
+    /** Returns the calendar wording of this requirement. */
     public String getText() {
         return text;
     }

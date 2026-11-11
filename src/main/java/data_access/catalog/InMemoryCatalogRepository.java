@@ -13,11 +13,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 
+/** A {@link CatalogReader} that holds the whole catalog in memory. */
 public final class InMemoryCatalogRepository implements CatalogReader {
     private final Map<String, Course> courses = new TreeMap<>();
     private final Map<String, Program> programs = new TreeMap<>();
     private final CatalogVersion version;
 
+    /** @throws IllegalArgumentException if two courses or two programs share a code */
     public InMemoryCatalogRepository(Collection<Course> courses, Collection<Program> programs,
                                      CatalogVersion version) {
         for (Course course : courses) {
@@ -37,6 +39,7 @@ public final class InMemoryCatalogRepository implements CatalogReader {
         this.version = null;
     }
 
+    /** Returns a repository with no catalog loaded: no courses, no programs, and no version. */
     public static InMemoryCatalogRepository empty() {
         return new InMemoryCatalogRepository();
     }

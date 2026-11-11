@@ -4,6 +4,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The course-matching fields that {@code credits} and {@code average} nodes share, as described in "Course filters"
+ * in the backend README. This class doesn't match courses itself.
+ *
+ * <p>A course passes the {@code courses} and {@code designators} check if it's in {@code courses} or has one of
+ * {@code designators}. The other fields narrow the match.
+ */
 public final class CourseFilter {
     private final List<String> courses;
     private final List<String> designators;
@@ -37,23 +44,35 @@ public final class CourseFilter {
         return new Builder();
     }
 
+    /** Returns a filter that matches every course. */
     public static CourseFilter any() {
         return builder().build();
     }
 
+    /**
+     * Returns whether {@code courses} and {@code designators} are both empty. The other fields can still narrow the
+     * match.
+     */
     public boolean matchesAnyCourse() { return courses.isEmpty() && designators.isEmpty(); }
 
     public List<String> getCourses() { return courses; }
     public List<String> getDesignators() { return designators; }
     public List<Integer> getLevels() { return levels; }
+    /** Returns breadth category numbers, 1-5. */
     public List<Integer> getBreadth() { return breadth; }
+    /** Returns names of course lists in the program's completion. A course matches if it's on any of them. */
     public List<String> getLists() { return lists; }
+    /** Returns completion row numbers. A course matches if it counts toward any of them. */
     public List<Integer> getRequirements() { return requirements; }
     public List<String> getExclude() { return exclude; }
     public List<String> getExcludeDesignators() { return excludeDesignators; }
+    /** Returns the {@code max_course_amount} cap, or empty for no cap. */
     public Optional<Double> getMaxCourseAmount() { return Optional.ofNullable(maxCourseAmount); }
+    /** Returns the minimum percent each matching course needs. Only {@code credits} nodes set it. */
     public Optional<Integer> getMinGrade() { return Optional.ofNullable(minGrade); }
+    /** Returns whether only transfer credits match. */
     public boolean isTransfer() { return transfer; }
+    /** Returns whether only courses taken Credit/No Credit match. */
     public boolean isCrNcr() { return crNcr; }
 
     @Override
@@ -153,6 +172,9 @@ public final class CourseFilter {
         public Builder transfer(boolean v) { this.transfer = v; return this; };
         public Builder crNcr(boolean v) { this.crNcr = v; return this; };
 
+        /**
+         * @throws IllegalArgumentException if {@code maxCourseAmount} is negative or {@code minGrade} is outside 0-100
+         */
         public CourseFilter build() throws IllegalArgumentException {
             if (maxCourseAmount != null && maxCourseAmount < 0) {
                 throw new IllegalArgumentException("maxCourseAmount must be >= 0");

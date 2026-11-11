@@ -3,6 +3,7 @@ package entity.requirement;
 import java.util.List;
 import java.util.Objects;
 
+/** An {@code or} node: met when at least one item is met. */
 public final class OrReq extends Requirement {
     private final List<Requirement> items;
 

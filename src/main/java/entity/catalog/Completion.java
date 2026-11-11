@@ -9,6 +9,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The completion requirements of a program, from its {@code completion} JSON: numbered rows, named course lists,
+ * and exclusions. A row can name a parent that doesn't exist. The evaluator reports that row.
+ */
 public final class Completion {
     private final List<CompletionRow> requirements;
     private final List<CourseList> lists;
@@ -16,6 +20,7 @@ public final class Completion {
     private final List<String> notes;
     private final String raw;
 
+    /** @throws IllegalArgumentException if two rows share a number or two lists share a name */
     public Completion(List<CompletionRow> requirements, List<CourseList> lists,
                       List<Requirement> exclusions, List<String> notes, String raw) {
         this.requirements = List.copyOf(Objects.requireNonNull(requirements, "requirements"));
@@ -38,6 +43,7 @@ public final class Completion {
         }
     }
 
+    /** Returns the rows in the order the backend lists them, which is by number. */
     public List<CompletionRow> getRequirements() {
         return requirements;
     }
@@ -46,6 +52,7 @@ public final class Completion {
         return lists;
     }
 
+    /** Returns requirements that describe programs a student can't combine with this one. Some might need review. */
     public List<Requirement> getExclusions() {
         return exclusions;
     }
@@ -62,12 +69,14 @@ public final class Completion {
         return requirements.stream().filter(r -> r.getNumber() == number).findFirst();
     }
 
+    /** Returns the rows whose parent is row {@code number}, in list order. */
     public List<CompletionRow> childrenOf(int number) {
         return requirements.stream()
                 .filter(r -> r.getParent().equals(Optional.of(number)))
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    /** Returns the rows without a parent, in list order. */
     public List<CompletionRow> topLevelRows() {
         return requirements.stream().filter(CompletionRow::isTopLevel).collect(Collectors.toUnmodifiableList());
     }

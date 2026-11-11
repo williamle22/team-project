@@ -2,6 +2,7 @@ package entity.requirement;
 
 import java.util.Objects;
 
+/** A {@code text} node: a rule with no automatic check, so it always needs manual review. {@code kind} says why. */
 public final class TextReq extends Requirement {
     private final TextKind kind;
     private final String text;

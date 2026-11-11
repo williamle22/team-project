@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/** One numbered row of a program's {@link Completion}. */
 public final class CompletionRow {
     private final int number;
     private final RowKind kind;
@@ -20,6 +21,7 @@ public final class CompletionRow {
     private final List<String> notes;
     private final String raw;
 
+    /** @throws IllegalArgumentException if {@code number} is less than 1 */
     public CompletionRow(int number, RowKind kind, String label, String section, Integer parent,
                          List<Integer> overlaps, Requirement req, ProfileReq audience,
                          boolean transcriptScope, List<String> notes, String raw) {
@@ -55,6 +57,7 @@ public final class CompletionRow {
         return Optional.ofNullable(section);
     }
 
+    /** Returns the parent row's number, or empty for a top-level row. */
     public Optional<Integer> getParent() {
         return Optional.ofNullable(parent);
     }
@@ -63,22 +66,29 @@ public final class CompletionRow {
         return parent == null;
     }
 
+    /** Returns the numbers of rows that can share courses with this row. */
     public List<Integer> getOverlaps() {
         return overlaps;
     }
 
+    /** Returns the row's requirement, or empty for an option group. */
     public Optional<Requirement> getReq() {
         return Optional.ofNullable(req);
     }
 
+    /** Returns whether this row is an option group: a row without a requirement, met when its child rows are met. */
     public boolean isOptionGroup() {
         return req == null;
     }
 
+    /** Returns who the row applies to, or empty when it applies to every student. */
     public Optional<ProfileReq> getAudience() {
         return Optional.ofNullable(audience);
     }
 
+    /**
+     * Returns whether the JSON {@code scope} is {@code "transcript"}. A constraint row then checks the whole transcript.
+     */
     public boolean isTranscriptScope() {
         return transcriptScope;
     }

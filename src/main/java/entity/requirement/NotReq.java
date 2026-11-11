@@ -2,6 +2,7 @@ package entity.requirement;
 
 import java.util.Objects;
 
+/** A {@code not} node: met when its item isn't met. */
 public final class NotReq extends Requirement {
     private final Requirement item;
 

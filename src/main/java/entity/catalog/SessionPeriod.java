@@ -1,5 +1,9 @@
 package entity.catalog;
 
+/**
+ * One of the two periods of an academic year. Each value maps to a backend string through {@link #getValue()} and
+ * {@link #fromString(String)}.
+ */
 public enum SessionPeriod {
     FALL_WINTER("fall_winter"), SUMMER("summer");
 

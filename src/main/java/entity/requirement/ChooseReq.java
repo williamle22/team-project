@@ -3,10 +3,12 @@ package entity.requirement;
 import java.util.List;
 import java.util.Objects;
 
+/** A {@code choose} node: met when at least {@code count} items are met. */
 public final class ChooseReq extends Requirement {
     private final int count;
     private final List<Requirement> items;
 
+    /** @throws IllegalArgumentException if {@code count} is less than 1 */
     public ChooseReq(int count, List<Requirement> items, boolean concurrent) {
         super(concurrent);
         if (count < 1) {

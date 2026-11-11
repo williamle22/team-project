@@ -3,6 +3,9 @@ package entity.requirement;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A {@code course} node: met when the student has passed {@code code}, with at least {@code minGrade} percent if set.
+ */
 public final class CourseReq extends Requirement {
     private final String code;
     private final Integer minGrade;

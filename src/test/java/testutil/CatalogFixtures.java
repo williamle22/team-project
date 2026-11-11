@@ -25,6 +25,10 @@ import entity.requirement.TextReq;
 
 import java.util.List;
 
+/**
+ * One-line builders for catalog test data. Each course's designator, number, level, and weight come from its code,
+ * so use real-format codes such as {@code CSC148H1} or {@code MATA31H3}.
+ */
 public final class CatalogFixtures {
     private CatalogFixtures() {
     }

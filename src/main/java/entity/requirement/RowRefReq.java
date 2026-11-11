@@ -3,9 +3,14 @@ package entity.requirement;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A {@code requirement} node: met when any program completion row numbered in {@code rows} is met. Only program
+ * completion trees contain this node.
+ */
 public final class RowRefReq extends Requirement {
     private final List<Integer> rows;
 
+    /** @throws IllegalArgumentException if {@code rows} is empty */
     public RowRefReq(List<Integer> rows, boolean concurrent) {
         super(concurrent);
         this.rows = List.copyOf(Objects.requireNonNull(rows, "rows"));
