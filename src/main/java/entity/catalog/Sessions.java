@@ -1,26 +1,26 @@
 package entity.catalog;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public final class Sessions {
-    private final Set<Section> fallWinter;
-    private final Set<Section> summer;
+    private final List<Section> fallWinter;
+    private final List<Section> summer;
 
-    Sessions(Set<Section> fallWinter, Set<Section> summer) {
-        this.fallWinter = Set.copyOf(Objects.requireNonNull(fallWinter, "fallWinter"));
-        this.summer = Set.copyOf(Objects.requireNonNull(summer, "summer"));
+    public Sessions(List<Section> fallWinter, List<Section> summer) {
+        this.fallWinter = List.copyOf(Objects.requireNonNull(fallWinter, "fallWinter"));
+        this.summer = List.copyOf(Objects.requireNonNull(summer, "summer"));
     }
 
-    public Set<Section> getFallWinter() {
+    public List<Section> getFallWinter() {
         return fallWinter;
     }
 
-    public Set<Section> getSummer() {
+    public List<Section> getSummer() {
         return summer;
     }
 
-    public Set<Section> sections(SessionPeriod period) {
+    public List<Section> sections(SessionPeriod period) {
         return period == SessionPeriod.SUMMER ? summer : fallWinter;
     }
 

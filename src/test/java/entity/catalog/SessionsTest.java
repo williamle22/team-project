@@ -2,8 +2,8 @@ package entity.catalog;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,7 +11,7 @@ class SessionsTest {
 
     @Test
     void phy152IsWinterOnly() {
-        Sessions s = new Sessions(Set.of(Section.S), Set.of());
+        Sessions s = new Sessions(List.of(Section.S), List.of());
         assertTrue(s.offeredInWinter());
         assertFalse(s.offeredInFall());
         assertFalse(s.offeredInSummer());
@@ -20,7 +20,7 @@ class SessionsTest {
 
     @Test
     void fullYearIsBothTerms() {
-        Sessions s = new Sessions(Set.of(Section.Y), Set.of());
+        Sessions s = new Sessions(List.of(Section.Y), List.of());
         assertTrue(s.offeredInFall());
         assertTrue(s.offeredInWinter());
         assertTrue(s.isFullYear());
@@ -28,33 +28,33 @@ class SessionsTest {
 
     @Test
     void offersChecksTheRightPeriod() {
-        Sessions s = new Sessions(Set.of(), Set.of(Section.F));
+        Sessions s = new Sessions(List.of(), List.of(Section.F));
         assertTrue(s.offers(SessionPeriod.SUMMER, Section.F));
         assertFalse(s.offers(SessionPeriod.FALL_WINTER, Section.F));
     }
 
     @Test
     void yPlacementNeedsY() {
-        Sessions s = new Sessions(Set.of(Section.F, Section.S), Set.of());
+        Sessions s = new Sessions(List.of(Section.F, Section.S), List.of());
         assertFalse(s.offers(SessionPeriod.FALL_WINTER, Section.Y));
     }
 
     @Test
-    void copiesItsSets() {
-        Set<Section> fallWinter = new HashSet<>(Set.of(Section.F));
-        Sessions s = new Sessions(fallWinter, Set.of());
+    void copiesItsLists() {
+        List<Section> fallWinter = new ArrayList<>(List.of(Section.F));
+        Sessions s = new Sessions(fallWinter, List.of());
         fallWinter.add(Section.S);
-        assertEquals(Set.of(Section.F), s.getFallWinter());
+        assertEquals(List.of(Section.F), s.getFallWinter());
         assertThrows(UnsupportedOperationException.class, () -> s.getFallWinter().add(Section.Y));
     }
 
     @Test
     void rejectsNull() {
-        assertThrows(NullPointerException.class, () -> new Sessions(null, Set.of()));
+        assertThrows(NullPointerException.class, () -> new Sessions(null, List.of()));
     }
 
     @Test
     void equalByValue() {
-        assertEquals(new Sessions(Set.of(Section.S), Set.of()), new Sessions(Set.of(Section.S), Set.of()));
+        assertEquals(new Sessions(List.of(Section.S), List.of()), new Sessions(List.of(Section.S), List.of()));
     }
 }

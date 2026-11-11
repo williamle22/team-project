@@ -174,7 +174,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - Methods: getters only. Course data is read-only.
 
 **`Sessions`**: the sections the Timetable Builder offers a course in this year.
-- Variables: `fallWinter` and `summer`, each a set of `Section` (`F`, `S`, `Y`)
+- Variables: `fallWinter` and `summer`, each a list of `Section` (`F`, `S`, `Y`)
 - Methods: `offers(SessionPeriod period, Section section)`
 
 **`Program`**: a Specialist, Major, Minor, Focus, or Certificate.
