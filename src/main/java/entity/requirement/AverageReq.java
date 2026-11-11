@@ -9,9 +9,9 @@ public final class AverageReq extends Requirement {
     private final Double amount;
     private final boolean best;
     private final CourseFilter filter;
-    private final List<CreditsReq> items;
+    private final List<Requirement> items;
 
-    public AverageReq(int minGrade, Double amount, boolean best, CourseFilter filter, List<CreditsReq> items,
+    public AverageReq(int minGrade, Double amount, boolean best, CourseFilter filter, List<Requirement> items,
                       boolean concurrent) {
         super(concurrent);
         if (minGrade < 0 || minGrade > 100) {
@@ -43,7 +43,7 @@ public final class AverageReq extends Requirement {
         return filter;
     }
 
-    public List<CreditsReq> getItems() {
+    public List<Requirement> getItems() {
         return items;
     }
 

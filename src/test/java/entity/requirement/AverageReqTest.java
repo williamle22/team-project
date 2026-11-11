@@ -26,7 +26,7 @@ class AverageReqTest {
 
     @Test
     void copiesItems() {
-        List<CreditsReq> items = new ArrayList<>();
+        List<Requirement> items = new ArrayList<>();
         AverageReq r = new AverageReq(73, null, false, ECO, items, false);
         items.add(ITEM);
         assertTrue(r.getItems().isEmpty());

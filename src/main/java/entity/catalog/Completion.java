@@ -1,6 +1,6 @@
 package entity.catalog;
 
-import entity.requirement.ProgramReq;
+import entity.requirement.Requirement;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,12 +12,12 @@ import java.util.stream.Collectors;
 public final class Completion {
     private final List<CompletionRow> requirements;
     private final List<CourseList> lists;
-    private final List<ProgramReq> exclusions;
+    private final List<Requirement> exclusions;
     private final List<String> notes;
     private final String raw;
 
     public Completion(List<CompletionRow> requirements, List<CourseList> lists,
-                      List<ProgramReq> exclusions, List<String> notes, String raw) {
+                      List<Requirement> exclusions, List<String> notes, String raw) {
         this.requirements = List.copyOf(Objects.requireNonNull(requirements, "requirements"));
         this.lists = List.copyOf(Objects.requireNonNull(lists, "lists"));
         this.exclusions = List.copyOf(Objects.requireNonNull(exclusions, "exclusions"));
@@ -46,7 +46,7 @@ public final class Completion {
         return lists;
     }
 
-    public List<ProgramReq> getExclusions() {
+    public List<Requirement> getExclusions() {
         return exclusions;
     }
 
