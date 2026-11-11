@@ -1,5 +1,8 @@
 package entity.catalog;
 
+/**
+ * A program's type. Each value maps to a backend string through {@link #getValue()} and {@link #fromString(String)}.
+ */
 public enum ProgramType {
     SPECIALIST("Specialist"), MAJOR("Major"), MINOR("Minor"), FOCUS("Focus"), CERTIFICATE("Certificate");
 

@@ -1,5 +1,6 @@
 package entity.catalog;
 
+/** A breadth requirement category, numbered 1-5. */
 public enum BreadthCategory {
     CREATIVE_CULTURAL(1, "Creative and Cultural Representations"),
     THOUGHT_BELIEF(2, "Thought, Belief and Behaviour"),
@@ -32,6 +33,7 @@ public enum BreadthCategory {
         throw new IllegalArgumentException("unknown breadth category: " + number);
     }
 
+    /** Returns the display label shown in the UI, such as {@code "BR 1: Creative and Cultural Representations"}. */
     @Override
     public String toString() {
         return "BR " + this.number + ": " + this.displayName;

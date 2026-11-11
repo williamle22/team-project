@@ -1,5 +1,8 @@
 package entity.catalog;
 
+/**
+ * A course's campus. Each value maps to a backend string through {@link #getValue()} and {@link #fromString(String)}.
+ */
 public enum Campus {
     ONLINE("online"), UTSG("utsg"), UTSC("utsc"), UTM("utm");
 

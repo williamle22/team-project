@@ -1,5 +1,9 @@
 package entity.catalog;
 
+/**
+ * A program's enrolment type. Each value maps to a backend string through {@link #getValue()} and
+ * {@link #fromString(String)}.
+ */
 public enum EnrolmentKind {
     OPEN("open"), LIMITED("limited"), FOCUS("focus"), SUSPENDED("suspended");
 

@@ -170,19 +170,19 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 ### Catalog
 
 **`Course`**: one course from the FAS calendar.
-- Variables: `code` (`CSC207H1`), `designator` (`CSC`), `number` (`207`), `level` (100–400), `weight` (0.5 or 1.0), `campus`, `title`, `description`, `prerequisites`, `corequisites`, `exclusions`, `breadth` (category numbers), `sessions`
-- Methods: getters only. Course data is read-only.
+- Variables: `code` (`CSC207H1`), `designator` (`CSC`), `number` (`207`), `level` (100–400), `weight` (0.5 or 1.0), `campus`, `title`, `description`, `prerequisites`, `corequisites`, `exclusions`, `breadth` (a list of `BreadthCategory`), `sessions`
+- Methods: getters, and `isOfferedThisYear()`. Course data is read-only.
 
 **`Sessions`**: the sections the Timetable Builder offers a course in this year.
-- Variables: `fallWinter` and `summer`, each a set of `Section` (`F`, `S`, `Y`)
+- Variables: `fallWinter` and `summer`, each a list of `Section` (`F`, `S`, `Y`)
 - Methods: `offers(SessionPeriod period, Section section)`
 
 **`Program`**: a Specialist, Major, Minor, Focus, or Certificate.
-- Variables: `code` (`ASMIN1001`), `type`, `title`, `areas`, `enrolment`, `completion`
+- Variables: `code` (`ASMIN1001`), `type`, `number` (`1001`), `title`, `areas`, `enrolment`, `completion`
 - Methods: getters only.
 
 **`Completion`** and **`CompletionRow`**: a program's numbered completion requirements.
-- Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists.
+- Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists (`CourseList`).
 
 **`Degree`**: the hardcoded rules for one degree, in the same format as a program's completion requirements.
 - Variables: `type` (`HBA`, `HBSC`, `BCOM`), `title`, `completion`, `programCombinations` (allowed counts of each program type)
