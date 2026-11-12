@@ -3,11 +3,19 @@ package entity.grades;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One graded part of a course, such as a midterm. The weight is a percent of the final grade. The score is a percent,
+ * is empty until graded, and can exceed 100 for bonus marks.
+ */
 public final class Assessment {
     private final String name;
     private final double weight;
     private final Double score;
 
+    /**
+     * @throws IllegalArgumentException if {@code weight} isn't positive and finite, or {@code score} is negative or
+     *     not finite
+     */
     public Assessment(String name, double weight, Double score) {
         this.name = Objects.requireNonNull(name, "name");
         if (!Double.isFinite(weight) || weight <= 0) {

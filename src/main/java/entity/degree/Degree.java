@@ -4,6 +4,10 @@ import entity.catalog.Completion;
 
 import java.util.Objects;
 
+/**
+ * A degree's completion rules, in the same row format as a program's {@code Completion}, and the program combinations
+ * it accepts. Degrees with the same {@code type} are equal.
+ */
 public final class Degree {
     private final DegreeType type;
     private final Completion completion;

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/** Credit totals for a plan at a given current term. All values are in credits. */
 public final class CreditSummary {
     private final double completed;
     private final double transfer;
@@ -26,6 +27,7 @@ public final class CreditSummary {
         this.planned = planned;
     }
 
+    /** Calculates the totals for {@code plan}, with {@code current} as the current term. */
     public static CreditSummary of(Plan plan, CreditWeights weights, AcademicTerm current) {
         List<PlannedCourse> graded = plan.getCourses().stream()
                 .filter(c -> c.getGrade().hasFinalGrade())
@@ -59,30 +61,40 @@ public final class CreditSummary {
         return new CreditSummary(completed, transfer, failed, awaitingGrade, inProgress, planned);
     }
 
+    /**
+     * Returns credits with a final grade of 50 or more, including CR, plus all transfer credits. Extra attempts don't
+     * count, so a repeated pass counts once.
+     */
     public double getCompleted() {
         return completed;
     }
 
+    /** Returns transfer credits alone. {@link #getCompleted()} also includes them. */
     public double getTransfer() {
         return transfer;
     }
 
+    /** Returns credits with a final grade below 50. */
     public double getFailed() {
         return failed;
     }
 
+    /** Returns credits without a final grade whose placement ends before the current term. */
     public double getAwaitingGrade() {
         return awaitingGrade;
     }
 
+    /** Returns credits without a final grade whose placement occupies the current term. */
     public double getInProgress() {
         return inProgress;
     }
 
+    /** Returns credits without a final grade whose placement starts after the current term. */
     public double getPlanned() {
         return planned;
     }
 
+    /** Returns completed, in-progress, planned, and awaiting-grade credits combined. */
     public double total() {
         return completed + inProgress + planned + awaitingGrade;
     }

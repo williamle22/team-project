@@ -2,6 +2,7 @@ package entity.term;
 
 import java.util.Objects;
 
+/** A season in a calendar year. For example, Winter 2027 is January-April 2027. Terms sort in calendar order. */
 public final class AcademicTerm implements Comparable<AcademicTerm> {
     private final Season season;
     private final int year;

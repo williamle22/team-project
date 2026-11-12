@@ -10,9 +10,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/** The program combinations that satisfy a degree. Each combination maps a program type to a minimum count. */
 public final class ProgramCombinationRule {
     private final List<Map<ProgramType, Integer>> combinations;
 
+    /**
+     * @throws IllegalArgumentException if {@code combinations} is empty, or a combination is empty or has a count
+     *     below 1
+     */
     public ProgramCombinationRule(List<Map<ProgramType, Integer>> combinations) {
         Objects.requireNonNull(combinations, "combinations");
         if (combinations.isEmpty()) {
@@ -30,6 +35,12 @@ public final class ProgramCombinationRule {
         return combinations;
     }
 
+    /**
+     * Returns whether {@code programs} meets every count in at least one combination. Extra programs don't matter.
+     *
+     * <p>This method returns a boolean instead of a {@code Status} because {@code Status} lives in
+     * {@code entity.evaluation}, which depends on this package.
+     */
     public boolean satisfiedBy(Collection<ProgramType> programs) {
         Map<ProgramType, Integer> counts = new EnumMap<>(ProgramType.class);
         for (ProgramType type : programs) {
@@ -39,6 +50,7 @@ public final class ProgramCombinationRule {
                 .allMatch(e -> counts.getOrDefault(e.getKey(), 0) >= e.getValue()));
     }
 
+    /** Returns user-facing text such as {@code 1 Specialist, or 2 Majors, or 1 Major and 2 Minors}. */
     public String describe() {
         List<String> options = new ArrayList<>();
         for (Map<ProgramType, Integer> c : combinations) {

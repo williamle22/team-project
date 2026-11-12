@@ -8,6 +8,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * One course entry in a plan. It's immutable: the {@code with} methods return copies. {@code id} identifies the entry,
+ * not the course, because a retake puts the same code in a plan twice. {@code equals} compares every field, including
+ * {@code id}.
+ */
 public final class PlannedCourse {
     private final UUID id;
     private final String code;
@@ -16,6 +21,7 @@ public final class PlannedCourse {
     private final CourseGrade grade;
     private final TimetableChoice timetable;
 
+    /** Creates an entry. {@code timetable} is {@code null} when the student hasn't chosen a timetable. */
     public PlannedCourse(UUID id, String code, Placement placement, boolean crNcr,
                          CourseGrade grade, TimetableChoice timetable) {
         this.id = Objects.requireNonNull(id, "id");
@@ -26,6 +32,7 @@ public final class PlannedCourse {
         this.timetable = timetable;
     }
 
+    /** Creates an entry with a new random id, not taken CR/NCR, with an empty grade and no timetable. */
     public static PlannedCourse create(String code, Placement placement) {
         return new PlannedCourse(UUID.randomUUID(), code, placement, false, CourseGrade.empty(), null);
     }
@@ -42,6 +49,7 @@ public final class PlannedCourse {
         return placement;
     }
 
+    /** Returns whether the student takes the course Credit/No Credit. */
     public boolean isCrNcr() {
         return crNcr;
     }
@@ -50,6 +58,7 @@ public final class PlannedCourse {
         return grade;
     }
 
+    /** Returns the chosen timetable, or empty if the student hasn't chosen one. */
     public Optional<TimetableChoice> getTimetable() {
         return Optional.ofNullable(timetable);
     }
@@ -66,6 +75,7 @@ public final class PlannedCourse {
         return new PlannedCourse(id, code, placement, crNcr, grade, timetable);
     }
 
+    /** Returns a copy with {@code timetable} chosen, or with no timetable if {@code timetable} is {@code null}. */
     public PlannedCourse withTimetable(TimetableChoice timetable) {
         return new PlannedCourse(id, code, placement, crNcr, grade, timetable);
     }

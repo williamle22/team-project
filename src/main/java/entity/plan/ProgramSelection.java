@@ -2,6 +2,7 @@ package entity.plan;
 
 import java.util.Objects;
 
+/** A program on a plan, with its {@link ProgramStatus}. It stores the program code, not the {@code Program}. */
 public final class ProgramSelection {
     private final String code;
     private final ProgramStatus status;

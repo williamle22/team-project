@@ -6,6 +6,12 @@ import entity.catalog.SessionPeriod;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * When a course runs: a session period, a year, and a section.
+ *
+ * <p>For {@code FALL_WINTER}, {@code year} is the year of the Fall term, so {@code fallWinter(2026, S)} is Winter
+ * 2027. For {@code SUMMER}, {@code year} is the year of the summer.
+ */
 public final class Placement {
     private final SessionPeriod period;
     private final int year;
@@ -25,6 +31,12 @@ public final class Placement {
         return new Placement(SessionPeriod.SUMMER, year, section);
     }
 
+    /**
+     * Returns the placement of a half course that runs in {@code term}.
+     *
+     * @throws IllegalArgumentException if {@code term} is a summer term, because a summer half course needs an
+     *     explicit section ({@code F} or {@code S})
+     */
     public static Placement halfCourseIn(AcademicTerm term) {
         switch (term.getSeason()) {
             case FALL:
@@ -66,6 +78,7 @@ public final class Placement {
         return section == Section.F ? AcademicTerm.fall(year) : AcademicTerm.winter(year + 1);
     }
 
+    /** Returns the one or two terms this placement occupies, in calendar order. */
     public List<AcademicTerm> terms() {
         AcademicTerm start = startTerm();
         AcademicTerm end = endTerm();
@@ -76,6 +89,10 @@ public final class Placement {
         return !term.isBefore(startTerm()) && !term.isAfter(endTerm());
     }
 
+    /**
+     * Returns the academic year of this placement, which is the year its Fall term starts. For example, Summer 2027
+     * belongs to 2026.
+     */
     public int academicYear() {
         return isSummer() ? year - 1 : year;
     }

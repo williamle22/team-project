@@ -2,6 +2,7 @@ package entity.timetable;
 
 import java.util.Objects;
 
+/** One meeting of a chosen activity, as the timetable view draws it. */
 public final class ScheduledMeeting {
     private final String courseCode;
     private final String activityCode;

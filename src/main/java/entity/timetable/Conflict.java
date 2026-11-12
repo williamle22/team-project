@@ -4,6 +4,7 @@ import entity.term.AcademicTerm;
 
 import java.util.Objects;
 
+/** Two chosen meetings in the same term whose times overlap. */
 public final class Conflict {
     private final ScheduledMeeting first;
     private final ScheduledMeeting second;
@@ -13,6 +14,7 @@ public final class Conflict {
         this.second = Objects.requireNonNull(second, "second");
     }
 
+    /** Returns the term both meetings are in. */
     public AcademicTerm getTerm() {
         return first.getTime().getTerm();
     }

@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** A course offering plus the student's choice of its sections. */
 public final class ScheduledCourse {
     private final CourseOffering offering;
     private final TimetableChoice choice;
@@ -25,18 +26,21 @@ public final class ScheduledCourse {
         return choice;
     }
 
+    /** Returns the chosen activities, in offering order. */
     public List<Activity> chosenActivities() {
         return offering.getActivities().stream()
                 .filter(a -> choice.get(a.getType()).equals(Optional.of(a.getCode())))
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    /** Returns the activity types that the offering has but the choice doesn't cover. */
     public Set<ActivityType> missingTypes() {
         Set<ActivityType> missing = offering.activityTypes();
         missing.removeAll(choice.chosenTypes());
         return missing;
     }
 
+    /** Returns the chosen codes that the offering no longer has, or that belong to an activity of a different type. */
     public Map<ActivityType, String> staleChoices() {
         Map<ActivityType, String> stale = new HashMap<>();
         for (Map.Entry<ActivityType, String> e : choice.asMap().entrySet()) {

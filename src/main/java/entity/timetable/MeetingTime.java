@@ -7,6 +7,10 @@ import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One weekly meeting of a section in one term. Each meeting has its own term because EASI lists a full-year (Y)
+ * course's meetings separately for Fall and Winter, and the room can differ between terms.
+ */
 public final class MeetingTime {
     private final AcademicTerm term;
     private final DayOfWeek day;
@@ -14,6 +18,11 @@ public final class MeetingTime {
     private final LocalTime end;
     private final String location;
 
+    /**
+     * Creates a meeting. {@code location} is {@code null} when EASI gives no room.
+     *
+     * @throws IllegalArgumentException if {@code start} isn't before {@code end}
+     */
     public MeetingTime(AcademicTerm term, DayOfWeek day, LocalTime start, LocalTime end, String location) {
         this.term = Objects.requireNonNull(term, "term");
         this.day = Objects.requireNonNull(day, "day");
@@ -41,10 +50,15 @@ public final class MeetingTime {
         return end;
     }
 
+    /** Returns the room, or empty when EASI gives no room. */
     public Optional<String> getLocation() {
         return Optional.ofNullable(location);
     }
 
+    /**
+     * Returns whether this meeting and {@code other} are in the same term and on the same day, with intersecting
+     * times. Back-to-back meetings, such as one that ends at 11:00 and one that starts at 11:00, don't overlap.
+     */
     public boolean overlaps(MeetingTime other) {
         return term.equals(other.term) && day == other.day
                 && start.isBefore(other.end) && other.start.isBefore(end);

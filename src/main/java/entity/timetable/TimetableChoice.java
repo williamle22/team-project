@@ -6,6 +6,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The activity code a student chooses for each activity type of one course, such as
+ * {@code {LEC: "LEC0101", TUT: "TUT0201"}}. This class is immutable: {@link #with} and {@link #without} return
+ * copies. The iteration order of {@link #asMap()} and {@link #chosenTypes()} is unspecified. To get a fixed order,
+ * loop over {@link ActivityType#values()}.
+ */
 public final class TimetableChoice {
     private final Map<ActivityType, String> chosen;
 
@@ -17,6 +23,7 @@ public final class TimetableChoice {
         return new TimetableChoice(Map.of());
     }
 
+    /** Returns the chosen activity code for {@code type}, or empty if none is chosen. */
     public Optional<String> get(ActivityType type) {
         return Optional.ofNullable(chosen.get(type));
     }

@@ -10,6 +10,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A list of scheduled courses. Its methods find the meetings in each term, time conflicts, and missing or stale
+ * choices.
+ */
 public final class Timetable {
     private final List<ScheduledCourse> courses;
 
@@ -21,6 +25,7 @@ public final class Timetable {
         return courses;
     }
 
+    /** Returns every term that a course's placement covers, sorted and without duplicates. */
     public List<AcademicTerm> termsCovered() {
         return courses.stream()
                 .flatMap(c -> c.getOffering().getPlacement().terms().stream())
@@ -29,6 +34,10 @@ public final class Timetable {
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    /**
+     * Returns the meetings of the chosen activities in {@code term}. A Y course appears in both of its terms through
+     * its per-term meetings.
+     */
     public List<ScheduledMeeting> meetingsIn(AcademicTerm term) {
         List<ScheduledMeeting> meetings = new ArrayList<>();
         for (ScheduledCourse c : courses) {
@@ -43,6 +52,10 @@ public final class Timetable {
         return meetings;
     }
 
+    /**
+     * Returns every pair of overlapping meetings within each term, including two activities of the same course. If two
+     * Y-course meetings clash in both terms, the result has one conflict for each term.
+     */
     public List<Conflict> conflicts() {
         List<Conflict> conflicts = new ArrayList<>();
         for (AcademicTerm term : termsCovered()) {
@@ -58,6 +71,10 @@ public final class Timetable {
         return conflicts;
     }
 
+    /**
+     * Returns each course's {@link ScheduledCourse#missingTypes()}, keyed by course code in course order. The map
+     * omits courses with no missing types.
+     */
     public Map<String, Set<ActivityType>> missingChoices() {
         Map<String, Set<ActivityType>> missing = new LinkedHashMap<>();
         for (ScheduledCourse c : courses) {
@@ -69,6 +86,10 @@ public final class Timetable {
         return missing;
     }
 
+    /**
+     * Returns each course's {@link ScheduledCourse#staleChoices()}, keyed by course code in course order. The map
+     * omits courses with no stale choices.
+     */
     public Map<String, Map<ActivityType, String>> staleChoices() {
         Map<String, Map<ActivityType, String>> stale = new LinkedHashMap<>();
         for (ScheduledCourse c : courses) {

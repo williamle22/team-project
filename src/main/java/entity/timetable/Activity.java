@@ -7,6 +7,7 @@ import java.util.Objects;
 //    - Sections: deliveryModes (INPER, SYNC, ASYNC), currentEnrolment, maxEnrolment, currentWaitlist, cancelInd, notes, enrolmentControls
 //    - Meeting Times: repetition, buildingURL
 
+/** One section of a course offering, such as {@code LEC0101}. */
 public final class Activity {
     private final String code;
     private final ActivityType type;
@@ -28,6 +29,7 @@ public final class Activity {
         return type;
     }
 
+    /** Returns the weekly meetings, or an empty list for an asynchronous section. */
     public List<MeetingTime> getMeetings() {
         return meetings;
     }

@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * A {@link PlanRepository} that keeps plans in memory while the app runs. It stores and returns copies, because a
+ * {@code Plan} is mutable and edits must not reach the stored plan until it's saved. {@link #listPlans()} orders plans
+ * by save order, most recent first, and each summary's last-modified time is its save time.
+ */
 public final class InMemoryPlanRepository implements PlanRepository {
     private final Map<UUID, Plan> plans = new LinkedHashMap<>();
     private final Map<UUID, Instant> savedAt = new HashMap<>();

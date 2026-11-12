@@ -1,5 +1,9 @@
 package entity.timetable;
 
+/**
+ * A kind of course section: lecture, tutorial, or practical. Each value matches an EASI {@code teachMethod} string
+ * through {@link #getValue()} and {@link #fromString(String)}.
+ */
 public enum ActivityType {
     LEC("LEC"), TUT("TUT"), PRA("PRA");
 

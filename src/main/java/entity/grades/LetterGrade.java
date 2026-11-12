@@ -2,6 +2,12 @@ package entity.grades;
 
 import java.util.Arrays;
 
+/**
+ * The University of Toronto Faculty of Arts and Science grade scale, highest grade first. Each grade has a minimum
+ * percent and grade points on a 0-4 scale.
+ *
+ * @see <a href="https://artsci.calendar.utoronto.ca/academic-record">Grading and Course Marks</a>
+ */
 public enum LetterGrade {
     A_PLUS(90, 4.0, "A+"),
     A(85, 4.0, "A"),
@@ -39,10 +45,16 @@ public enum LetterGrade {
         return display;
     }
 
+    /** Returns whether this grade passes. Only {@code F}, below 50, fails. */
     public boolean isPassing() {
         return minPercent >= 50;
     }
 
+    /**
+     * Returns the letter grade for {@code percent}.
+     *
+     * @throws IllegalArgumentException if {@code percent} isn't 0-100
+     */
     public static LetterGrade fromPercent(int percent) {
         if (percent < 0 || percent > 100) {
             throw new IllegalArgumentException("percent must be 0-100, was " + percent);

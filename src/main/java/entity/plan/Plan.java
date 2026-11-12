@@ -12,6 +12,27 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * A student's degree plan: its degree, programs, terms, courses, and transfer credits. A plan is the mutable root of
+ * this data, so change it only through its methods. Getters return read-only views. Terms stay sorted.
+ *
+ * <p>A plan enforces only these rules:
+ * <ul>
+ *   <li>Every term that a course's placement occupies is in the plan.
+ *   <li>The same code doesn't appear twice in the same placement. The same code in a different placement is a retake,
+ *       which is allowed.
+ *   <li>Terms, program codes, transfer credit codes, and course ids are unique.
+ *   <li>A term cannot be removed if it still contains courses.
+ *   <li>The name isn't {@code null} or blank.
+ * </ul>
+ * Removing a term that has courses throws {@code IllegalStateException}. Breaking any other rule, or passing an
+ * unknown id, code, or term, throws {@code IllegalArgumentException}.
+ * Evaluation checks everything else, such as prerequisites, exclusions, offerings, and retakes, so students can always
+ * build the plan they want and see warnings.
+ *
+ * <p>A plan is mutable, and its hash code changes when you edit it. Don't use a plan as a {@code HashMap} key or
+ * {@code HashSet} element.
+ */
 public final class Plan {
     private final UUID id;
     private String name;
@@ -26,10 +47,21 @@ public final class Plan {
         rename(name);
     }
 
+    /**
+     * Creates an empty plan with a new random id.
+     *
+     * @throws IllegalArgumentException if {@code name} is {@code null} or blank
+     */
     public static Plan create(String name) {
         return new Plan(UUID.randomUUID(), name);
     }
 
+    /**
+     * Rebuilds a saved plan by replaying the add methods, so the plan's rules apply.
+     *
+     * @throws IllegalArgumentException if the saved data breaks a rule, such as a course in a term the plan doesn't
+     *     have
+     */
     public static Plan restore(UUID id, String name, DegreeType degree,
                                List<ProgramSelection> programs, List<AcademicTerm> terms,
                                List<PlannedCourse> courses, List<TransferCredit> transferCredits) {
@@ -50,10 +82,15 @@ public final class Plan {
         return plan;
     }
 
+    /** Returns an independent copy with the same id. */
     public Plan copy() {
         return restore(id, name, degree, programs, terms, courses, transferCredits);
     }
 
+    /**
+     * Returns an independent copy with a new random id. Use it to duplicate a plan or to resolve an id collision on
+     * import.
+     */
     public Plan copyWithNewId() {
         return restore(UUID.randomUUID(), name, degree, programs, terms, courses, transferCredits);
     }
@@ -66,6 +103,7 @@ public final class Plan {
         return name;
     }
 
+    /** Returns the degree type, or empty if none is set. */
     public Optional<DegreeType> getDegree() {
         return Optional.ofNullable(degree);
     }
@@ -86,19 +124,26 @@ public final class Plan {
         return Collections.unmodifiableList(transferCredits);
     }
 
+    /** Returns the entry with this id, or empty if the plan has none. */
     public Optional<PlannedCourse> findCourse(UUID id) {
         return courses.stream().filter(c -> c.getId().equals(id)).findFirst();
     }
 
+    /** Returns the courses whose placement occupies {@code term}. A Y course is in both its Fall and Winter terms. */
     public List<PlannedCourse> coursesIn(AcademicTerm term) {
         return courses.stream().filter(c -> c.getPlacement().occupies(term)).collect(Collectors.toUnmodifiableList());
     }
 
+    /** Returns the courses whose last term is before {@code term}. */
     public List<PlannedCourse> coursesEndedBefore(AcademicTerm term) {
         return courses.stream().filter(c -> c.getPlacement().endTerm().isBefore(term))
                 .collect(Collectors.toUnmodifiableList());
     }
 
+    /**
+     * Returns the courses in the academic year that starts in Fall {@code academicYear}. A Summer term counts toward
+     * the preceding academic year, so Summer 2027 counts toward 2026.
+     */
     public List<PlannedCourse> coursesInAcademicYear(int academicYear) {
         return courses.stream().filter(c -> c.getPlacement().academicYear() == academicYear)
                 .collect(Collectors.toUnmodifiableList());
@@ -124,6 +169,7 @@ public final class Plan {
         this.name = name;
     }
 
+    /** Sets the degree type, or clears it if {@code degree} is {@code null}. */
     public void setDegree(DegreeType degree) {
         this.degree = degree;
     }
@@ -164,6 +210,10 @@ public final class Plan {
         Collections.sort(terms);
     }
 
+    /**
+     * @throws IllegalArgumentException if {@code term} isn't in the plan
+     * @throws IllegalStateException if a course occupies {@code term}
+     */
     public void removeTerm(AcademicTerm term) {
         if (!terms.contains(term)) {
             throw new IllegalArgumentException(term + " isn't in this plan");
@@ -174,18 +224,36 @@ public final class Plan {
         terms.remove(term);
     }
 
+    /**
+     * Adds a new entry made by {@link PlannedCourse#create} and returns it.
+     *
+     * @throws IllegalArgumentException if a term the placement occupies isn't in the plan, or the code is already in
+     *     that placement
+     */
     public PlannedCourse addCourse(String code, Placement placement) {
         PlannedCourse course = PlannedCourse.create(code, placement);
         insertCourse(course);
         return course;
     }
 
+    /**
+     * Replaces the entry that has the same id as {@code updated}.
+     *
+     * @throws IllegalArgumentException if no entry has that id, a term the placement occupies isn't in the plan, or
+     *     another entry has the same code and placement
+     */
     public void replaceCourse(PlannedCourse updated) {
         int i = courseIndex(updated.getId());
         checkFits(updated);
         courses.set(i, updated);
     }
 
+    /**
+     * Moves an entry to a new placement.
+     *
+     * @throws IllegalArgumentException if no entry has that id, a term the placement occupies isn't in the plan, or
+     *     another entry has the same code and placement
+     */
     public void moveCourse(UUID id, Placement to) {
         replaceCourse(courses.get(courseIndex(id)).withPlacement(to));
     }

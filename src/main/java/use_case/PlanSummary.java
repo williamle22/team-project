@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+/** One row of the plan list, so listing plans doesn't require loading every plan. */
 public final class PlanSummary {
     private final UUID id;
     private final String name;

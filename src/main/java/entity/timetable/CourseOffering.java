@@ -9,6 +9,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * One course's sections in one placement, as EASI lists them. EASI returns the F and S offerings of the same course
+ * code as separate offerings.
+ */
 public final class CourseOffering {
     private final String courseCode;
     private final Placement placement;
@@ -32,10 +36,12 @@ public final class CourseOffering {
         return activities;
     }
 
+    /** Returns the activity with the given code, or empty if this offering doesn't have it. */
     public Optional<Activity> activity(String code) {
         return activities.stream().filter(a -> a.getCode().equals(code)).findFirst();
     }
 
+    /** Returns the activity types this offering has, in {@code LEC}, {@code TUT}, {@code PRA} order. */
     public Set<ActivityType> activityTypes() {
         return activities.stream().map(Activity::getType)
                 .collect(Collectors.toCollection(() -> EnumSet.noneOf(ActivityType.class)));
