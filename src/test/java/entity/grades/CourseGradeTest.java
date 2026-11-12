@@ -2,6 +2,7 @@ package entity.grades;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,6 +63,31 @@ class CourseGradeTest {
         assertEquals("Assessment weights total 90.00%, not 100%.", under.weightWarning().get());
         assertTrue(partlyGraded().weightWarning().isEmpty());
         assertTrue(CourseGrade.empty().weightWarning().isEmpty());
+    }
+
+    @Test
+    void weightWarningToleratesRounding() {
+        List<Assessment> quizzes = new ArrayList<>();
+        for (int i = 1; i <= 11; i++) {
+            quizzes.add(new Assessment("Quiz " + i, 100.0 / 11, null));
+        }
+        CourseGrade g = new CourseGrade(null, quizzes);
+        assertNotEquals(100.0, g.totalWeight());
+        assertTrue(g.weightWarning().isEmpty());
+    }
+
+    @Test
+    void weightWarningOnNearMiss() {
+        CourseGrade g = partlyGraded().withAssessmentReplaced(2, new Assessment("Final", 49.99, null));
+        assertEquals("Assessment weights total 99.99%, not 100%.", g.weightWarning().get());
+    }
+
+    @Test
+    void copiesAssessments() {
+        List<Assessment> assessments = new ArrayList<>(List.of(new Assessment("Midterm", 40, null)));
+        CourseGrade g = new CourseGrade(null, assessments);
+        assessments.add(new Assessment("Final", 60, null));
+        assertEquals(1, g.getAssessments().size());
     }
 
     @Test

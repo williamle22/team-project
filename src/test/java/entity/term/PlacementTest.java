@@ -58,6 +58,24 @@ class PlacementTest {
     }
 
     @Test
+    void halfCoursesOccupyOnlyTheirTerm() {
+        Placement f = Placement.fallWinter(2026, Section.F);
+        Placement s = Placement.fallWinter(2026, Section.S);
+        assertTrue(f.occupies(fall(2026)));
+        assertFalse(f.occupies(winter(2027)));
+        assertTrue(s.occupies(winter(2027)));
+        assertFalse(s.occupies(fall(2026)));
+    }
+
+    @Test
+    void summerOccupiesOnlySummer() {
+        Placement p = Placement.summer(2027, Section.Y);
+        assertTrue(p.occupies(summer(2027)));
+        assertFalse(p.occupies(winter(2027)));
+        assertFalse(p.occupies(fall(2027)));
+    }
+
+    @Test
     void halfCourseInFallUsesSameYear() {
         assertEquals(Placement.fallWinter(2026, Section.F), Placement.halfCourseIn(fall(2026)));
     }

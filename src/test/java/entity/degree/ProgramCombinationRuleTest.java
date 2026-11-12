@@ -1,7 +1,10 @@
 package entity.degree;
 
+import entity.catalog.ProgramType;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +60,17 @@ class ProgramCombinationRuleTest {
     void describePluralizesFocus() {
         ProgramCombinationRule rule = new ProgramCombinationRule(List.of(Map.of(FOCUS, 2, CERTIFICATE, 1)));
         assertEquals("2 Focuses and 1 Certificate", rule.describe());
+    }
+
+    @Test
+    void copiesListAndMaps() {
+        Map<ProgramType, Integer> majors = new HashMap<>(Map.of(MAJOR, 2));
+        List<Map<ProgramType, Integer>> combinations = new ArrayList<>(List.of(majors));
+        ProgramCombinationRule rule = new ProgramCombinationRule(combinations);
+        majors.put(MAJOR, 1);
+        combinations.add(Map.of(MINOR, 1));
+        assertEquals(List.of(Map.of(MAJOR, 2)), rule.getCombinations());
+        assertFalse(rule.satisfiedBy(List.of(MAJOR)));
     }
 
     @Test
