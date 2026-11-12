@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -51,5 +53,32 @@ class AndReqTest {
         assertEquals(new AndReq(List.of(A, B), 0.5, false), new AndReq(List.of(A, B), 0.5, false));
         assertEquals(new AndReq(List.of(A, B), 0.5, false).hashCode(), new AndReq(List.of(A, B), 0.5, false).hashCode());
         assertNotEquals(new AndReq(List.of(A, B), 0.5, false), new AndReq(List.of(A, B), 0.5, true));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(AndReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringShowsItemsWeightAndConcurrent() {
+        String s = new AndReq(List.of(A, B), 0.5, true).toString();
+        assertTrue(s.contains("CSC148H1"));
+        assertTrue(s.contains("weight 0.5"));
+        assertTrue(s.contains("concurrent"));
+    }
+
+    @Test
+    void toStringOmitsAbsentWeightAndConcurrent() {
+        String s = new AndReq(List.of(A, B), null, false).toString();
+        assertTrue(s.contains("CSC148H1"));
+        assertFalse(s.contains("weight"));
+        assertFalse(s.contains("concurrent"));
+    }
+
+    @Test
+    void rejectsNonFiniteWeight() {
+        assertThrows(IllegalArgumentException.class, () -> new AndReq(List.of(A, B), Double.NaN, false));
     }
 }

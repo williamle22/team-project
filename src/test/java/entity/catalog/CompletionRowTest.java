@@ -2,6 +2,8 @@ package entity.catalog;
 
 import entity.requirement.CourseReq;
 import entity.requirement.ProfileReq;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -52,5 +54,31 @@ class CompletionRowTest {
     @Test
     void rejectsZeroNumber() {
         assertThrows(IllegalArgumentException.class, () -> row(0, null, false));
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        CompletionRow r = new CompletionRow(2, RowKind.CONSTRAINT, "Requirement 2", "First year", 1, List.of(3),
+                CSC148, null, false, List.of("note"), "raw");
+        assertEquals(2, r.getNumber());
+        assertEquals(RowKind.CONSTRAINT, r.getKind());
+        assertEquals("Requirement 2", r.getLabel().orElseThrow());
+        assertEquals("First year", r.getSection().orElseThrow());
+        assertEquals(List.of(3), r.getOverlaps());
+        assertEquals(CSC148, r.getReq().orElseThrow());
+        assertEquals(List.of("note"), r.getNotes());
+        assertEquals("raw", r.getRaw());
+        assertTrue(row(1, null, false).getLabel().isEmpty());
+        assertTrue(row(1, null, false).getSection().isEmpty());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CompletionRow.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringIncludesReq() {
+        assertTrue(row(1, null, false).toString().contains("CSC148H1"));
     }
 }

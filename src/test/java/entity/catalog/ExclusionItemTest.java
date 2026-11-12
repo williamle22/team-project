@@ -1,6 +1,8 @@
 package entity.catalog;
 
 import entity.requirement.TextKind;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -58,5 +60,37 @@ class ExclusionItemTest {
     @Test
     void equalByValue() {
         assertEquals(courses("JCC250H1"), courses("JCC250H1"));
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        ExclusionItem item = new ExclusionItem(List.of("CSC148H1"), List.of("CSC"), List.of(100),
+                List.of("CSC196H1"), true, "taken previously or concurrently", TextKind.OTHER, "a CSC course");
+        assertEquals(List.of("CSC148H1"), item.getCourses());
+        assertEquals(List.of("CSC"), item.getDesignators());
+        assertEquals(List.of(100), item.getLevels());
+        assertEquals(List.of("CSC196H1"), item.getExclude());
+        assertTrue(item.isConcurrent());
+        assertEquals("taken previously or concurrently", item.getNote().orElseThrow());
+        assertEquals(TextKind.OTHER, item.getKind().orElseThrow());
+        assertEquals("a CSC course", item.getText().orElseThrow());
+    }
+
+    @Test
+    void optionalPartsAreEmptyWhenAbsent() {
+        ExclusionItem item = courses("CSC148H1");
+        assertTrue(item.getNote().isEmpty());
+        assertTrue(item.getKind().isEmpty());
+        assertTrue(item.getText().isEmpty());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(ExclusionItem.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringIncludesCourses() {
+        assertTrue(courses("JCC250H1").toString().contains("JCC250H1"));
     }
 }

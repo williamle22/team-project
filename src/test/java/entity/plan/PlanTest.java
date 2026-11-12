@@ -3,6 +3,8 @@ package entity.plan;
 import entity.catalog.Section;
 import entity.degree.DegreeType;
 import entity.term.Placement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -256,5 +258,20 @@ class PlanTest {
         PlannedCourse c = PlannedCourse.create("CSC148H1", FALL_2026);
         assertThrows(IllegalArgumentException.class, () -> Plan.restore(UUID.randomUUID(), "My plan", null,
                 List.of(), List.of(fall(2026), winter(2027)), List.of(c, c.withPlacement(WINTER_2027)), List.of()));
+    }
+
+    @Test
+    void renameRejectsNull() {
+        assertThrows(IllegalArgumentException.class, () -> firstYear().rename(null));
+    }
+
+    @Test
+    void toStringShowsName() {
+        assertTrue(firstYear().toString().contains("My plan"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Plan.class).suppress(Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS).verify();
     }
 }

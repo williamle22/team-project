@@ -1,5 +1,7 @@
 package entity.timetable;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -39,5 +41,15 @@ class TimetableChoiceTest {
         TimetableChoice original = TimetableChoice.empty().with(ActivityType.LEC, "LEC0101");
         original.with(ActivityType.LEC, "LEC0102");
         assertEquals("LEC0101", original.get(ActivityType.LEC).get());
+    }
+
+    @Test
+    void toStringIncludesChosenCodes() {
+        assertTrue(TimetableChoice.empty().with(ActivityType.LEC, "LEC0101").toString().contains("LEC0101"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(TimetableChoice.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

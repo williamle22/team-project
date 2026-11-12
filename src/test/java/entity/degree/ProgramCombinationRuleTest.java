@@ -1,6 +1,8 @@
 package entity.degree;
 
 import entity.catalog.ProgramType;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -78,5 +80,15 @@ class ProgramCombinationRuleTest {
         assertThrows(IllegalArgumentException.class, () -> new ProgramCombinationRule(List.of()));
         assertThrows(IllegalArgumentException.class, () -> new ProgramCombinationRule(List.of(Map.of())));
         assertThrows(IllegalArgumentException.class, () -> new ProgramCombinationRule(List.of(Map.of(MAJOR, 0))));
+    }
+
+    @Test
+    void toStringIncludesDescription() {
+        assertTrue(ARTSCI.toString().contains("1 Specialist, or 2 Majors"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(ProgramCombinationRule.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,5 +39,27 @@ class CourseReqTest {
         assertEquals(new CourseReq("CSC148H1", 70, false).hashCode(), new CourseReq("CSC148H1", 70, false).hashCode());
         assertNotEquals(new CourseReq("CSC148H1", 70, false), new CourseReq("CSC148H1", 70, true));
         assertNotEquals(new CourseReq("CSC148H1", 70, false), new CourseReq("CSC148H1", null, false));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CourseReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringShowsCodeMinGradeAndConcurrent() {
+        String s = new CourseReq("CSC148H1", 70, true).toString();
+        assertTrue(s.contains("CSC148H1"));
+        assertTrue(s.contains("min 70"));
+        assertTrue(s.contains("concurrent"));
+    }
+
+    @Test
+    void toStringOmitsAbsentMinGradeAndConcurrent() {
+        String s = new CourseReq("CSC148H1", null, false).toString();
+        assertTrue(s.contains("CSC148H1"));
+        assertFalse(s.contains("min"));
+        assertFalse(s.contains("concurrent"));
     }
 }

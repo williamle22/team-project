@@ -2,6 +2,8 @@ package entity.timetable;
 
 import entity.catalog.Section;
 import entity.term.Placement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -51,5 +53,22 @@ class CourseOfferingTest {
         CourseOffering offering = new CourseOffering("CSC108H1", Placement.fallWinter(2026, Section.S), activities);
         activities.add(TUT0101);
         assertEquals(List.of(LEC0101), offering.getActivities());
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        assertEquals("CSC108H1", CSC108.getCourseCode());
+        assertEquals(Placement.fallWinter(2026, Section.S), CSC108.getPlacement());
+        assertEquals(List.of(TUT0101, PRA0101, LEC0101, TUT0102), CSC108.getActivities());
+    }
+
+    @Test
+    void toStringIncludesCourseCode() {
+        assertTrue(CSC108.toString().contains("CSC108H1"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CourseOffering.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

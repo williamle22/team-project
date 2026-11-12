@@ -1,5 +1,7 @@
 package entity.timetable;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
@@ -22,5 +24,24 @@ class ActivityTest {
         instructors.add("Liu");
         assertEquals(List.of(monday), a.getMeetings());
         assertEquals(List.of("Dash"), a.getInstructors());
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        Activity a = new Activity("TUT0101", ActivityType.TUT, List.of(), List.of("Dash"));
+        assertEquals("TUT0101", a.getCode());
+        assertEquals(ActivityType.TUT, a.getType());
+        assertEquals(List.of(), a.getMeetings());
+        assertEquals(List.of("Dash"), a.getInstructors());
+    }
+
+    @Test
+    void toStringIncludesCode() {
+        assertTrue(new Activity("LEC0101", ActivityType.LEC, List.of(), List.of()).toString().contains("LEC0101"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Activity.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

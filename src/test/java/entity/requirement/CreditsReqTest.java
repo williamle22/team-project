@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -53,5 +55,19 @@ class CreditsReqTest {
                 new CreditsReq(1.0, null, null, HPS, false).hashCode());
         assertNotEquals(new CreditsReq(1.0, null, null, HPS, false), new CreditsReq(1.0, null, null, HPS, true));
         assertNotEquals(new CreditsReq(1.0, null, null, HPS, false), new CreditsReq(1.0, null, null, CourseFilter.any(), false));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CreditsReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void rejectsNonFiniteAmounts() {
+        CourseFilter f = CourseFilter.builder().build();
+        assertThrows(IllegalArgumentException.class, () -> new CreditsReq(Double.NaN, null, null, f, false));
+        assertThrows(IllegalArgumentException.class, () -> new CreditsReq(1.0, Double.NaN, null, f, false));
+        assertThrows(IllegalArgumentException.class, () -> new CreditsReq(1.0, null, Double.NaN, f, false));
     }
 }

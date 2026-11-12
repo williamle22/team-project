@@ -32,4 +32,9 @@ class BreadthCategoryTest {
     void toStringFormat() {
         assertEquals("BR 1: Creative and Cultural Representations", BreadthCategory.CREATIVE_CULTURAL.toString());
     }
+
+    @Test
+    void displayNameIsCalendarWording() {
+        assertEquals("The Physical and Mathematical Universes", BreadthCategory.PHYSICAL_MATHEMATICAL.getDisplayName());
+    }
 }

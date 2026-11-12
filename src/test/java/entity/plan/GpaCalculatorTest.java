@@ -4,6 +4,8 @@ import entity.catalog.Section;
 import entity.grades.Assessment;
 import entity.grades.CourseGrade;
 import entity.term.Placement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -167,5 +169,15 @@ class GpaCalculatorTest {
         graded(plan, "CSC148H1", FALL_2026, 90);
         graded(plan, "CSC148H1", FALL_2027, 64);
         assertEquals(4.0, calculator.cgpa(plan).getAsDouble(), DELTA);
+    }
+
+    @Test
+    void toStringNamesTheClass() {
+        assertTrue(calculator.toString().startsWith("GpaCalculator{"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(GpaCalculator.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

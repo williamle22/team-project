@@ -12,4 +12,9 @@ class CreditWeightsTest {
         assertEquals(1.0, CreditWeights.FROM_CODE.weightOf("PHL100Y1"));
         assertEquals(0.5, CreditWeights.FROM_CODE.weightOf("MATA31H3"));
     }
+
+    @Test
+    void fromCodeTreatsShortCodeAsHalf() {
+        assertEquals(0.5, CreditWeights.FROM_CODE.weightOf("PHL1Y"));
+    }
 }

@@ -1,6 +1,8 @@
 package entity.term;
 
 import entity.catalog.Section;
+import entity.catalog.SessionPeriod;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -96,5 +98,18 @@ class PlacementTest {
         assertEquals("Winter 2027", Placement.fallWinter(2026, Section.S).toString());
         assertEquals("Fall-Winter 2026-2027 (Y)", Placement.fallWinter(2026, Section.Y).toString());
         assertEquals("Summer 2027 (F)", Placement.summer(2027, Section.F).toString());
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        Placement p = new Placement(SessionPeriod.SUMMER, 2027, Section.Y);
+        assertEquals(SessionPeriod.SUMMER, p.getPeriod());
+        assertEquals(2027, p.getYear());
+        assertEquals(Section.Y, p.getSection());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Placement.class).verify();
     }
 }

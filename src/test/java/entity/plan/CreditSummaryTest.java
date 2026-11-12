@@ -3,6 +3,8 @@ package entity.plan;
 import entity.catalog.Section;
 import entity.grades.CourseGrade;
 import entity.term.Placement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import static entity.term.AcademicTerm.fall;
@@ -99,5 +101,17 @@ class CreditSummaryTest {
         CreditSummary s = summary(plan);
         assertEquals(0.5, s.getCompleted(), DELTA);
         assertEquals(0.5, s.getFailed(), DELTA);
+    }
+
+    @Test
+    void toStringShowsCompleted() {
+        Plan plan = twoYears();
+        graded(plan, "CSC148H1", FALL_2026, 70);
+        assertTrue(summary(plan).toString().contains("completed 0.5"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CreditSummary.class).verify();
     }
 }

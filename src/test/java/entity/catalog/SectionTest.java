@@ -24,4 +24,11 @@ class SectionTest {
     void fromStringRejectsUnknown() {
         assertThrows(IllegalArgumentException.class, () -> Section.fromString("unknown"));
     }
+
+    @Test
+    void descriptionNamesTheTerm() {
+        assertEquals("first term", Section.F.getDescription());
+        assertEquals("second term", Section.S.getDescription());
+        assertEquals("both terms", Section.Y.getDescription());
+    }
 }

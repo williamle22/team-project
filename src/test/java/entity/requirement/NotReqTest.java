@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,5 +27,11 @@ class NotReqTest {
         assertEquals(new NotReq(A, false), new NotReq(A, false));
         assertEquals(new NotReq(A, false).hashCode(), new NotReq(A, false).hashCode());
         assertNotEquals(new NotReq(A, false), new NotReq(A, true));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(NotReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
     }
 }

@@ -1,5 +1,7 @@
 package entity.grades;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -113,5 +115,22 @@ class CourseGradeTest {
         assertEquals(lab, g.withAssessmentReplaced(0, lab).getAssessments().get(0));
         assertEquals("Midterm", g.withAssessmentRemoved(0).getAssessments().get(0).getName());
         assertEquals(3, g.getAssessments().size());
+    }
+
+    @Test
+    void toStringShowsFinalGradeOnlyWhenSet() {
+        assertTrue(partlyGraded().withFinalGrade(85).toString().contains("final 85"));
+        assertFalse(partlyGraded().toString().contains("final"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CourseGrade.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void neededOnRemainingRejectsNonFiniteTarget() {
+        assertThrows(IllegalArgumentException.class, () -> partlyGraded().neededOnRemaining(Double.NaN));
+        assertThrows(IllegalArgumentException.class, () -> partlyGraded().neededOnRemaining(Double.POSITIVE_INFINITY));
     }
 }

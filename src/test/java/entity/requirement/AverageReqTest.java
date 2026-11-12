@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -64,5 +66,17 @@ class AverageReqTest {
                 new AverageReq(73, 3.0, false, ECO, List.of(ITEM), true));
         assertNotEquals(new AverageReq(73, 3.0, false, ECO, List.of(ITEM), false),
                 new AverageReq(73, 3.0, true, ECO, List.of(ITEM), false));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(AverageReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void rejectsNegativeOrNonFiniteAmount() {
+        assertThrows(IllegalArgumentException.class, () -> new AverageReq(73, -1.0, false, ECO, List.of(), false));
+        assertThrows(IllegalArgumentException.class, () -> new AverageReq(73, Double.NaN, false, ECO, List.of(), false));
     }
 }

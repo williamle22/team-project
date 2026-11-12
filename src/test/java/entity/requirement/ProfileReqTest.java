@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,5 +59,11 @@ class ProfileReqTest {
         assertEquals(new ProfileReq("faculty", "ArtSci", "", false).hashCode(),
                 new ProfileReq("faculty", "ArtSci", "", false).hashCode());
         assertNotEquals(new ProfileReq("faculty", "ArtSci", "", false), new ProfileReq("faculty", "ArtSci", "", true));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(ProfileReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
     }
 }

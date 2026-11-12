@@ -1,5 +1,6 @@
 package entity.term;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -50,5 +51,17 @@ class AcademicTermTest {
     void toStringIsReadable() {
         assertEquals("Fall 2026", fall(2026).toString());
         assertEquals("Winter 2027", winter(2027).toString());
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        AcademicTerm t = new AcademicTerm(Season.SUMMER, 2027);
+        assertEquals(Season.SUMMER, t.getSeason());
+        assertEquals(2027, t.getYear());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(AcademicTerm.class).verify();
     }
 }

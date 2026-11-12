@@ -5,6 +5,8 @@ import entity.grades.CourseGrade;
 import entity.term.Placement;
 import entity.timetable.ActivityType;
 import entity.timetable.TimetableChoice;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -44,5 +46,18 @@ class PlannedCourseTest {
         assertEquals(choice, changed.getTimetable().get());
         assertTrue(changed.withTimetable(null).getTimetable().isEmpty());
         assertEquals(FALL_2026, c.getPlacement());
+    }
+
+    @Test
+    void toStringMarksCrNcrOnlyWhenSet() {
+        PlannedCourse c = PlannedCourse.create("PSY100H1", FALL_2026);
+        assertTrue(c.toString().contains("PSY100H1"));
+        assertFalse(c.toString().contains("CR/NCR"));
+        assertTrue(c.withCrNcr(true).toString().contains("CR/NCR"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(PlannedCourse.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }

@@ -116,4 +116,10 @@ class RequirementPrinterTest {
         AndReq r = new AndReq(List.of(course("CSC148H1"), or), null, false);
         assertEquals("(CSC148H1 and (MAT135H1 or MAT137Y1))", PRINTER.print(r));
     }
+
+    @Test
+    void printsAmountWhenMinimumAndMaximumBothSet() {
+        CourseFilter f = CourseFilter.builder().designators(List.of("HPS")).build();
+        assertEquals("1.0 credits in HPS", PRINTER.print(new CreditsReq(1.0, 2.0, null, f, false)));
+    }
 }

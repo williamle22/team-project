@@ -3,6 +3,8 @@ package entity.timetable;
 import entity.catalog.Section;
 import entity.term.AcademicTerm;
 import entity.term.Placement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
@@ -170,5 +172,24 @@ class TimetableTest {
                 scheduled(CSC148_F, Map.of()),
                 scheduled(ENG140_Y, Map.of())));
         assertEquals(List.of(fall(2026), winter(2027)), t.termsCovered());
+    }
+
+    @Test
+    void staleChoicesSkipCoursesWithValidChoices() {
+        Timetable t = new Timetable(List.of(
+                scheduled(CSC148_F, Map.of(LEC, "LEC0101", TUT, "TUT0102")),
+                scheduled(CSC108_S, Map.of(PRA, "PRA9999"))));
+        assertEquals(Map.of("CSC108H1", Map.of(PRA, "PRA9999")), t.staleChoices());
+    }
+
+    @Test
+    void toStringIncludesCourseCodes() {
+        Timetable t = new Timetable(List.of(scheduled(CSC148_F, Map.of(LEC, "LEC0101"))));
+        assertTrue(t.toString().contains("CSC148H1"));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Timetable.class).suppress(Warning.NULL_FIELDS).verify();
     }
 }
