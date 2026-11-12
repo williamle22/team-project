@@ -88,6 +88,9 @@ public final class CourseGrade {
     }
 
     public OptionalDouble neededOnRemaining(double target) {
+        if (!Double.isFinite(target)) {
+            throw new IllegalArgumentException("target must be a finite number, was " + target);
+        }
         double remaining = remainingWeight();
         if (remaining == 0) {
             return OptionalDouble.empty();

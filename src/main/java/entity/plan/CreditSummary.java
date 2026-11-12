@@ -96,8 +96,9 @@ public final class CreditSummary {
             return false;
         }
         CreditSummary that = (CreditSummary) o;
-        return completed == that.completed && transfer == that.transfer && failed == that.failed
-                && awaitingGrade == that.awaitingGrade && inProgress == that.inProgress && planned == that.planned;
+        return Double.compare(completed, that.completed) == 0 && Double.compare(transfer, that.transfer) == 0
+                && Double.compare(failed, that.failed) == 0 && Double.compare(awaitingGrade, that.awaitingGrade) == 0
+                && Double.compare(inProgress, that.inProgress) == 0 && Double.compare(planned, that.planned) == 0;
     }
 
     @Override

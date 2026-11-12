@@ -10,7 +10,7 @@ public final class GpaReq extends Requirement {
 
     public GpaReq(double minGpa, String scope, boolean concurrent) {
         super(concurrent);
-        if (minGpa < 0 || minGpa > 4) {
+        if (Double.isNaN(minGpa) || minGpa < 0 || minGpa > 4) {
             throw new IllegalArgumentException("minGpa must be 0-4, was " + minGpa);
         }
         this.minGpa = minGpa;
@@ -39,7 +39,7 @@ public final class GpaReq extends Requirement {
             return false;
         }
         GpaReq that = (GpaReq) o;
-        return minGpa == that.minGpa && Objects.equals(scope, that.scope);
+        return Double.compare(minGpa, that.minGpa) == 0 && Objects.equals(scope, that.scope);
     }
 
     @Override

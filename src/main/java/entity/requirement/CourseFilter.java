@@ -176,7 +176,7 @@ public final class CourseFilter {
          * @throws IllegalArgumentException if {@code maxCourseAmount} is negative or {@code minGrade} is outside 0-100
          */
         public CourseFilter build() throws IllegalArgumentException {
-            if (maxCourseAmount != null && maxCourseAmount < 0) {
+            if (maxCourseAmount != null && (!Double.isFinite(maxCourseAmount) || maxCourseAmount < 0)) {
                 throw new IllegalArgumentException("maxCourseAmount must be >= 0");
             }
             if (minGrade != null && (minGrade < 0 || minGrade > 100)) {

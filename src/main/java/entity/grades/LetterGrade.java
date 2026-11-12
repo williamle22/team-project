@@ -1,5 +1,7 @@
 package entity.grades;
 
+import java.util.Arrays;
+
 public enum LetterGrade {
     A_PLUS(90, 4.0, "A+"),
     A(85, 4.0, "A"),
@@ -45,11 +47,6 @@ public enum LetterGrade {
         if (percent < 0 || percent > 100) {
             throw new IllegalArgumentException("percent must be 0-100, was " + percent);
         }
-        for (LetterGrade g : values()) {
-            if (percent >= g.minPercent) {
-                return g;
-            }
-        }
-        throw new IllegalStateException("no grade for " + percent);
+        return Arrays.stream(values()).filter(g -> percent >= g.minPercent).findFirst().orElseThrow();
     }
 }

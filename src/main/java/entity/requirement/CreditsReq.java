@@ -15,13 +15,13 @@ public final class CreditsReq extends Requirement {
 
     public CreditsReq(double amount, Double maxAmount, Double weight, CourseFilter filter, boolean concurrent) {
         super(concurrent);
-        if (amount < 0) {
+        if (!Double.isFinite(amount) || amount < 0) {
             throw new IllegalArgumentException("amount must be >= 0, was " + amount);
         }
-        if (maxAmount != null && maxAmount < 0) {
+        if (maxAmount != null && (!Double.isFinite(maxAmount) || maxAmount < 0)) {
             throw new IllegalArgumentException("maxAmount must be >= 0, was " + maxAmount);
         }
-        if (weight != null && weight < 0) {
+        if (weight != null && (!Double.isFinite(weight) || weight < 0)) {
             throw new IllegalArgumentException("weight must be >= 0, was " + weight);
         }
         this.amount = amount;
@@ -62,7 +62,7 @@ public final class CreditsReq extends Requirement {
             return false;
         }
         CreditsReq that = (CreditsReq) o;
-        return amount == that.amount && Objects.equals(maxAmount, that.maxAmount)
+        return Double.compare(amount, that.amount) == 0 && Objects.equals(maxAmount, that.maxAmount)
                 && Objects.equals(weight, that.weight) && filter.equals(that.filter);
     }
 

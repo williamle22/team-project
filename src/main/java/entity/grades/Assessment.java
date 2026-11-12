@@ -10,10 +10,10 @@ public final class Assessment {
 
     public Assessment(String name, double weight, Double score) {
         this.name = Objects.requireNonNull(name, "name");
-        if (weight <= 0) {
+        if (!Double.isFinite(weight) || weight <= 0) {
             throw new IllegalArgumentException("weight must be > 0, was " + weight);
         }
-        if (score != null && score < 0) {
+        if (score != null && (!Double.isFinite(score) || score < 0)) {
             throw new IllegalArgumentException("score must be >= 0, was " + score);
         }
         this.weight = weight;
@@ -49,7 +49,7 @@ public final class Assessment {
             return false;
         }
         Assessment that = (Assessment) o;
-        return name.equals(that.name) && weight == that.weight && Objects.equals(score, that.score);
+        return name.equals(that.name) && Double.compare(weight, that.weight) == 0 && Objects.equals(score, that.score);
     }
 
     @Override

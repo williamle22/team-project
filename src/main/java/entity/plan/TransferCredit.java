@@ -8,7 +8,7 @@ public final class TransferCredit {
 
     public TransferCredit(String code, double weight) {
         this.code = Objects.requireNonNull(code, "code");
-        if (weight <= 0) {
+        if (!Double.isFinite(weight) || weight <= 0) {
             throw new IllegalArgumentException("weight must be > 0, was " + weight);
         }
         this.weight = weight;
@@ -31,7 +31,7 @@ public final class TransferCredit {
             return false;
         }
         TransferCredit that = (TransferCredit) o;
-        return code.equals(that.code) && weight == that.weight;
+        return code.equals(that.code) && Double.compare(weight, that.weight) == 0;
     }
 
     @Override

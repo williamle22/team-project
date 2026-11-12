@@ -22,6 +22,9 @@ public final class AverageReq extends Requirement {
         if (minGrade < 0 || minGrade > 100) {
             throw new IllegalArgumentException("minGrade must be 0-100, was " + minGrade);
         }
+        if (amount != null && (!Double.isFinite(amount) || amount < 0)) {
+            throw new IllegalArgumentException("amount must be >= 0, was " + amount);
+        }
         this.minGrade = minGrade;
         this.amount = amount;
         this.best = best;
