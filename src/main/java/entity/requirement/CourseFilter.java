@@ -173,10 +173,11 @@ public final class CourseFilter {
         public Builder crNcr(boolean v) { this.crNcr = v; return this; };
 
         /**
-         * @throws IllegalArgumentException if {@code maxCourseAmount} is negative or {@code minGrade} is outside 0-100
+         * @throws IllegalArgumentException if {@code maxCourseAmount} is negative or not finite, or {@code minGrade} is
+         *     outside 0-100
          */
         public CourseFilter build() throws IllegalArgumentException {
-            if (maxCourseAmount != null && maxCourseAmount < 0) {
+            if (maxCourseAmount != null && (!Double.isFinite(maxCourseAmount) || maxCourseAmount < 0)) {
                 throw new IllegalArgumentException("maxCourseAmount must be >= 0");
             }
             if (minGrade != null && (minGrade < 0 || minGrade > 100)) {

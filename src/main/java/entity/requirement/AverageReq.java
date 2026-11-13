@@ -15,12 +15,18 @@ public final class AverageReq extends Requirement {
     private final CourseFilter filter;
     private final List<Requirement> items;
 
-    /** @throws IllegalArgumentException if {@code filter} sets {@code minGrade} */
+    /**
+     * @throws IllegalArgumentException if {@code minGrade} is outside 0-100, {@code filter} sets {@code minGrade}, or
+     *     {@code amount} is negative or not finite
+     */
     public AverageReq(int minGrade, Double amount, boolean best, CourseFilter filter, List<Requirement> items,
                       boolean concurrent) {
         super(concurrent);
         if (minGrade < 0 || minGrade > 100) {
             throw new IllegalArgumentException("minGrade must be 0-100, was " + minGrade);
+        }
+        if (amount != null && (!Double.isFinite(amount) || amount < 0)) {
+            throw new IllegalArgumentException("amount must be >= 0, was " + amount);
         }
         this.minGrade = minGrade;
         this.amount = amount;

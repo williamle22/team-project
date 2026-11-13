@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -114,5 +116,49 @@ class CourseFilterTest {
         assertNotEquals(a, CourseFilter.builder().designators(List.of("PHL")).build());
         assertNotEquals(a, CourseFilter.builder().designators(List.of("HPS")).minGrade(70).build());
         assertNotEquals(a, CourseFilter.builder().designators(List.of("HPS")).transfer(true).build());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(CourseFilter.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringShowsEverySetField() {
+        String s = CourseFilter.builder()
+                .courses(List.of("HPS100H1"))
+                .designators(List.of("HPS"))
+                .levels(List.of(300, 400))
+                .breadth(List.of(4, 5))
+                .lists(List.of("Group 2"))
+                .requirements(List.of(3))
+                .exclude(List.of("HPS390H1"))
+                .excludeDesignators(List.of("JHE"))
+                .maxCourseAmount(0.5)
+                .minGrade(70)
+                .transfer(true)
+                .crNcr(true)
+                .build()
+                .toString();
+        assertTrue(s.contains("courses=[HPS100H1]"));
+        assertTrue(s.contains("excludeDesignators=[JHE]"));
+        assertTrue(s.contains("maxCourseAmount=0.5"));
+        assertTrue(s.contains("minGrade=70"));
+        assertTrue(s.contains("transfer=true"));
+        assertTrue(s.contains("crNcr=true"));
+    }
+
+    @Test
+    void toStringOmitsUnsetFields() {
+        String s = CourseFilter.builder().transfer(true).build().toString();
+        assertTrue(s.contains("transfer=true"));
+        assertFalse(s.contains("courses"));
+        assertFalse(s.contains("minGrade"));
+        assertFalse(s.contains("crNcr"));
+    }
+
+    @Test
+    void rejectsNonFiniteMaxCourseAmount() {
+        assertThrows(IllegalArgumentException.class, () -> CourseFilter.builder().maxCourseAmount(Double.NaN).build());
     }
 }

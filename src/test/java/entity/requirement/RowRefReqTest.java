@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -34,5 +36,11 @@ class RowRefReqTest {
         assertEquals(new RowRefReq(List.of(3, 4), false), new RowRefReq(List.of(3, 4), false));
         assertEquals(new RowRefReq(List.of(3, 4), false).hashCode(), new RowRefReq(List.of(3, 4), false).hashCode());
         assertNotEquals(new RowRefReq(List.of(3, 4), false), new RowRefReq(List.of(3, 4), true));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(RowRefReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
     }
 }

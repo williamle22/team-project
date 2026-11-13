@@ -3,7 +3,10 @@ package entity.catalog;
 import entity.requirement.CourseFilter;
 import entity.requirement.CourseReq;
 import entity.requirement.CreditsReq;
+import entity.requirement.ProgramReq;
 import entity.requirement.Requirement;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -76,5 +79,26 @@ class CompletionTest {
         Completion c = new Completion(List.of(ROW_1, orphan), List.of(), List.of(), List.of(), "");
         assertEquals(List.of(orphan), c.childrenOf(42));
         assertEquals(List.of(ROW_1), c.topLevelRows());
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        Requirement excluded = new ProgramReq(List.of("ASMAJ1001"), "ASMAJ1001", false);
+        Completion c = new Completion(List.of(ROW_1), List.of(GROUP_2), List.of(excluded), List.of("note"), "raw");
+        assertEquals(List.of(ROW_1), c.getRequirements());
+        assertEquals(List.of(GROUP_2), c.getLists());
+        assertEquals(List.of(excluded), c.getExclusions());
+        assertEquals(List.of("note"), c.getNotes());
+        assertEquals("raw", c.getRaw());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Completion.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringIncludesLists() {
+        assertTrue(ASMIN1001.toString().contains("Requirement 4 courses"));
     }
 }

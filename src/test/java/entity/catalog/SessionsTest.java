@@ -1,5 +1,7 @@
 package entity.catalog;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -56,5 +58,36 @@ class SessionsTest {
     @Test
     void equalByValue() {
         assertEquals(new Sessions(List.of(Section.S), List.of()), new Sessions(List.of(Section.S), List.of()));
+    }
+
+    @Test
+    void gettersReturnConstructorValues() {
+        Sessions s = new Sessions(List.of(Section.F, Section.S), List.of(Section.Y));
+        assertEquals(List.of(Section.F, Section.S), s.getFallWinter());
+        assertEquals(List.of(Section.Y), s.getSummer());
+        assertEquals(List.of(Section.Y), s.sections(SessionPeriod.SUMMER));
+        assertEquals(List.of(Section.F, Section.S), s.sections(SessionPeriod.FALL_WINTER));
+    }
+
+    @Test
+    void fallOnlyIsNotOfferedInWinter() {
+        Sessions s = new Sessions(List.of(Section.F), List.of());
+        assertTrue(s.offeredInFall());
+        assertFalse(s.offeredInWinter());
+    }
+
+    @Test
+    void offeredInSummerWithSummerSections() {
+        assertTrue(new Sessions(List.of(), List.of(Section.F)).offeredInSummer());
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(Sessions.class).suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringListsSections() {
+        assertTrue(new Sessions(List.of(Section.F), List.of(Section.S)).toString().contains("F"));
     }
 }

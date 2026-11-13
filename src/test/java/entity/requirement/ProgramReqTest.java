@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -42,5 +44,11 @@ class ProgramReqTest {
         assertEquals(new ProgramReq(DRAMA, "Drama", false), new ProgramReq(DRAMA, "Drama", false));
         assertEquals(new ProgramReq(DRAMA, "Drama", false).hashCode(), new ProgramReq(DRAMA, "Drama", false).hashCode());
         assertNotEquals(new ProgramReq(DRAMA, "Drama", false), new ProgramReq(DRAMA, "Drama", true));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(ProgramReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
     }
 }

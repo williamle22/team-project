@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -44,5 +46,20 @@ class ChooseReqTest {
         assertEquals(new ChooseReq(1, List.of(A, B), false).hashCode(), new ChooseReq(1, List.of(A, B), false).hashCode());
         assertNotEquals(new ChooseReq(1, List.of(A, B), false), new ChooseReq(1, List.of(A, B), true));
         assertNotEquals(new ChooseReq(1, List.of(A, B), false), new ChooseReq(2, List.of(A, B), false));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(ChooseReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringShowsCountItemsAndConcurrent() {
+        assertTrue(new ChooseReq(1, List.of(A, B), true).toString().contains("concurrent"));
+        String s = new ChooseReq(1, List.of(A, B), false).toString();
+        assertTrue(s.contains("1 of"));
+        assertTrue(s.contains("MAT137Y1"));
+        assertFalse(s.contains("concurrent"));
     }
 }

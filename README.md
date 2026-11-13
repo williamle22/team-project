@@ -185,7 +185,8 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists (`CourseList`).
 
 **`Degree`**: the hardcoded rules for one degree, in the same format as a program's completion requirements.
-- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `title`, `completion`, `programCombinations` (allowed counts of each program type)
+- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `completion`, `programCombinations` (a `ProgramCombinationRule`: the allowed counts of each program type, like 2 Majors)
+- Methods: getters. `getTitle()` returns the type's title.
 
 ### Requirements
 
@@ -197,12 +198,18 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
 ### Plans
 
-**`Plan`**: one of the student's named plans.
-- Variables: `id`, `name`, `degree`, `programs` (program codes), `courses` (a list of `PlannedCourse`), `transferCredits`
-- Methods: `addCourse`, `moveCourse`, `removeCourse`, `coursesIn(AcademicTerm term)`. A plan only enforces structural rules. Requirement problems are warnings from evaluation.
+**`Plan`**: one of the student's named plans. It's the only mutable entity. Change it only through its methods.
+- Variables: `id`, `name`, `degree`, `programs` (a list of `ProgramSelection`), `terms` (sorted), `courses` (a list of `PlannedCourse`), `transferCredits` (a list of `TransferCredit`)
+- Methods: `addTerm`, `addCourse`, `moveCourse`, `replaceCourse`, `removeCourse`, `coursesIn(AcademicTerm term)`, `copy()`. A plan enforces only structural rules, such as every course's terms being in the plan. Requirement problems are warnings from evaluation.
 
 **`PlannedCourse`**: a course placed in a plan.
-- Variables: `code`, `placement`, `grade` (a `CourseGrade`), `timetableChoice`
+- Variables: `id` (identifies the entry, because a retake puts the same code in a plan twice), `code`, `placement`, `crNcr`, `grade` (a `CourseGrade`), `timetable` (a `TimetableChoice`)
+
+**`ProgramSelection`**: a program on a plan.
+- Variables: `code`, `status` (`ENROLLED` or `INTENDED`)
+
+**`TransferCredit`**: credit from another institution. It always counts as taken.
+- Variables: `code`, `weight`
 
 **`Placement`**: where a course sits in the plan.
 - Variables: `period` (Fall–Winter or Summer), `year`, `section` (`F`, `S`, or `Y`)
@@ -224,19 +231,27 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`LetterGrade`**: an enum of UofT's grade scale, with each grade's minimum percent and grade points.
 - Methods: `fromPercent(int percent)`
 
+**`GpaCalculator`**: calculates a plan's GPAs from final grades, following the FAS calendar.
+- Methods: `cgpa(Plan plan)`, `sgpa(Plan plan, AcademicTerm term)`, `cgpaBefore(Plan plan, AcademicTerm term)`, `projectedCgpa(Plan plan)`. GPAs exclude CR/NCR courses, transfer credits, and repeated attempts marked Extra.
+
+**`CreditSummary`**: a plan's credits, split into completed, failed, in progress, awaiting a grade, and planned.
+- Methods: `of(Plan plan, CreditWeights weights, AcademicTerm current)`, `getCompleted()` (the total credits completed in Use Case 9)
+
 ### Timetable
 
-**`CourseOffering`**: a course's sections in the Timetable Builder.
-- Variables: `code`, `section`, `activities`
+**`CourseOffering`**: one course's sections in one placement, from the Timetable Builder.
+- Variables: `courseCode`, `placement`, `activities`
 
 **`Activity`**: one lecture, tutorial, or practical section, like `LEC0101`.
-- Variables: `code`, `type` (`LEC`, `TUT`, `PRA`), `section`, `meetingTimes`, `instructors`
+- Variables: `code`, `type` (`LEC`, `TUT`, `PRA`), `meetings`, `instructors`
 
-**`MeetingTime`**: one weekly meeting.
-- Variables: `day`, `start`, `end`, `location`
+**`MeetingTime`**: one weekly meeting in one term.
+- Variables: `term`, `day`, `start`, `end`, `location`
 
-**`Timetable`**: a plan's chosen sections for the current year.
-- Methods: `meetingsIn(AcademicTerm term)`, `conflicts()`, `missingChoices()`
+**`TimetableChoice`**: the section the student chose for each activity type, like `LEC0101` and `TUT0201`.
+
+**`Timetable`**: a plan's chosen sections.
+- Methods: `meetingsIn(AcademicTerm term)`, `conflicts()`, `missingChoices()`, `staleChoices()`
 
 ---
 
@@ -288,6 +303,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
    ```sh
    mvn test
    ```
+   This also writes a coverage report to `target/site/jacoco/index.html`. To run the same check as CI, run `mvn verify`, which fails if `entity` or `use_case` has less than 100% line or branch coverage.
 3. Run `app.Main` from IntelliJ.
 
 The first launch needs an internet connection to download the catalog, which is saved to `data/dgx.db` in the folder the app runs from (the repo root when run from IntelliJ). The `data/` folder is in `.gitignore`. After that, the app works offline, except for course evaluations.

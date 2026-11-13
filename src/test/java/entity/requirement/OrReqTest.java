@@ -1,5 +1,7 @@
 package entity.requirement;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -42,5 +44,19 @@ class OrReqTest {
     @Test
     void notEqualToAndWithSameItems() {
         assertNotEquals(new OrReq(List.of(A, B), false), new AndReq(List.of(A, B), null, false));
+    }
+
+    @Test
+    void equalsContract() {
+        EqualsVerifier.forClass(OrReq.class).usingGetClass().withRedefinedSuperclass()
+                .suppress(Warning.NULL_FIELDS).verify();
+    }
+
+    @Test
+    void toStringShowsItemsAndConcurrent() {
+        assertTrue(new OrReq(List.of(A, B), true).toString().contains("concurrent"));
+        String s = new OrReq(List.of(A, B), false).toString();
+        assertTrue(s.contains("PHY131H1"));
+        assertFalse(s.contains("concurrent"));
     }
 }

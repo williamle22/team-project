@@ -12,7 +12,7 @@ public final class AndReq extends Requirement {
     public AndReq(List<Requirement> items, Double weight, boolean concurrent) {
         super(concurrent);
         this.items = List.copyOf(Objects.requireNonNull(items, "items"));
-        if (weight != null && weight < 0) {
+        if (weight != null && (!Double.isFinite(weight) || weight < 0)) {
             throw new IllegalArgumentException("weight must be >= 0, was " + weight);
         }
         this.weight = weight;
