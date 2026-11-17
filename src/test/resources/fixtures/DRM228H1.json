@@ -1,0 +1,56 @@
+{
+  "code": "DRM228H1",
+  "designator": "DRM",
+  "number": "228",
+  "level": 200,
+  "weight": 0.5,
+  "campus": "utsg",
+  "title": "Playwriting I",
+  "description": "A hands-on study of the craft of dramatic writing. The class examines the basic elements of playwriting such as plot, structure, theme, character, dialogue, setting, with an emphasis on story-making. Attention is given to the development of students own work through written assignments and in-class exercises. Priority will be given to students in the Drama Specialist and Major.",
+  "prerequisites": {
+    "req": {
+      "type": "and",
+      "items": [
+        {
+          "type": "program",
+          "programs": [
+            "ASMAJ2148",
+            "ASSPE2148",
+            "ASMIN2148"
+          ],
+          "text": "Drama Major, Specialist or Minor"
+        },
+        {
+          "type": "course",
+          "code": "DRM101Y1"
+        }
+      ]
+    },
+    "raw": "Drama Major, Specialist or Minor;  DRM101Y1"
+  },
+  "corequisites": {
+    "req": {
+      "type": "course",
+      "code": "DRM220Y1"
+    },
+    "raw": "DRM220Y1"
+  },
+  "exclusions": {
+    "items": [
+      {
+        "courses": [
+          "DRE362H5"
+        ]
+      }
+    ],
+    "raw": "DRE362H5"
+  },
+  "breadth": [
+    1
+  ],
+  "sessions": {
+    "fall_winter": [
+      "S"
+    ]
+  }
+}

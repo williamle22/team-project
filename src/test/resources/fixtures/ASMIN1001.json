@@ -1,0 +1,166 @@
+{
+  "code": "ASMIN1001",
+  "type": "Minor",
+  "number": "1001",
+  "title": "Bioethics Minor (Arts Program)",
+  "enrolment": {
+    "kind": "open",
+    "req": {
+      "type": "credits",
+      "amount": 4
+    },
+    "raw": "This is an open enrolment program. A student who has completed 4.0 credits may enrol in the program."
+  },
+  "completion": {
+    "requirements": [
+      {
+        "number": 1,
+        "kind": "allocation",
+        "req": {
+          "type": "credits",
+          "amount": 4,
+          "designators": [
+            "PHL"
+          ]
+        },
+        "raw": "(4.0 credits including at least 1.0 credit at the 300+ level)\n5. Additional philosophy courses to a total of 4.0 credits"
+      },
+      {
+        "number": 2,
+        "kind": "constraint",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "levels": [
+            300,
+            400
+          ]
+        },
+        "raw": "including at least 1.0 credit at the 300+ level"
+      },
+      {
+        "number": 3,
+        "kind": "allocation",
+        "label": "1",
+        "parent": 1,
+        "req": {
+          "type": "course",
+          "code": "PHL281H1"
+        },
+        "raw": "1. PHL281H1"
+      },
+      {
+        "number": 4,
+        "kind": "allocation",
+        "label": "2",
+        "parent": 1,
+        "req": {
+          "type": "or",
+          "items": [
+            {
+              "type": "course",
+              "code": "PHL245H1"
+            },
+            {
+              "type": "course",
+              "code": "PHL246H1"
+            }
+          ]
+        },
+        "raw": "2. PHL245H1/ PHL246H1"
+      },
+      {
+        "number": 5,
+        "kind": "allocation",
+        "label": "3",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "lists": [
+            "Group 1"
+          ]
+        },
+        "raw": "3. 0.5 credit from Group 1 (Advanced Bioethics)"
+      },
+      {
+        "number": 6,
+        "kind": "allocation",
+        "label": "4",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "lists": [
+            "Requirement 4 courses"
+          ]
+        },
+        "raw": "4. 1.0 credit from PHL271H1 / PHL275H1 / Group 2 (Value Theory)"
+      }
+    ],
+    "lists": [
+      {
+        "name": "Group 1",
+        "title": "Group 1 - Advanced Bioethics",
+        "items": [
+          {
+            "type": "credits",
+            "courses": [
+              "PHL380H1",
+              "PHL381H1",
+              "PHL382H1",
+              "PHL383H1",
+              "PHL384H1",
+              "PHL440H1",
+              "PHL470H1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Group 2",
+        "title": "Group 2 - Value Theory",
+        "items": [
+          {
+            "type": "credits",
+            "courses": [
+              "PHL265H1",
+              "PHL295H1",
+              "PHL365H1",
+              "PHL366H1",
+              "PHL370H1",
+              "PHL375H1",
+              "PHL407H1",
+              "PHL412H1",
+              "PHL413H1",
+              "PHL483H1"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Requirement 4 courses",
+        "items": [
+          {
+            "type": "credits",
+            "courses": [
+              "PHL271H1",
+              "PHL275H1"
+            ]
+          },
+          {
+            "type": "credits",
+            "lists": [
+              "Group 2"
+            ]
+          }
+        ]
+      }
+    ],
+    "raw": "(4.0 credits including at least 1.0 credit at the 300+ level)\n1. PHL281H1\n2. PHL245H1/ PHL246H1\n3. 0.5 credit from Group 1 (Advanced Bioethics)\n4. 1.0 credit from PHL271H1 / PHL275H1 / Group 2 (Value Theory)\n5. Additional philosophy courses to a total of 4.0 credits\n_Group 1 - Advanced Bioethics:_\nPHL380H1, PHL381H1, PHL382H1, PHL383H1, PHL384H1, PHL440H1, PHL470H1\n_Group 2 - Value Theory:_\nPHL265H1, PHL295H1, PHL365H1, PHL366H1, PHL370H1, PHL375H1, PHL407H1, PHL412H1, PHL413H1, PHL483H1"
+  },
+  "areas": [
+    "Philosophy"
+  ]
+}
