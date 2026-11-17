@@ -8,6 +8,7 @@ target/
 *.iws
 *.iml
 *.ipr
+identifier.sqlite
 
 ### Eclipse ###
 .apt_generated
