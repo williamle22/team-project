@@ -81,4 +81,9 @@ public final class ProfileReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), attr, value, text);
     }
+
+    @Override
+    public String toString() {
+        return "ProfileReq{" + attr + " " + value + ", " + text + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

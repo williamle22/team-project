@@ -41,4 +41,9 @@ public final class RowRefReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), rows);
     }
+
+    @Override
+    public String toString() {
+        return "RowRefReq{rows " + rows + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

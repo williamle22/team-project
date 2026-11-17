@@ -83,4 +83,10 @@ public final class AverageReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), minGrade, amount, best, filter, items);
     }
+
+    @Override
+    public String toString() {
+        return "AverageReq{min " + minGrade + (amount == null ? "" : ", amount " + amount) + (best ? ", best" : "")
+                + ", " + filter + (items.isEmpty() ? "" : ", items " + items) + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

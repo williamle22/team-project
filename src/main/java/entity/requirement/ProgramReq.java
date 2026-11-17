@@ -45,4 +45,9 @@ public final class ProgramReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), programs, text);
     }
+
+    @Override
+    public String toString() {
+        return "ProgramReq{" + programs + ", " + text + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

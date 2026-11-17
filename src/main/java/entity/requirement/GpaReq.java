@@ -46,4 +46,9 @@ public final class GpaReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), minGpa, scope);
     }
+
+    @Override
+    public String toString() {
+        return "GpaReq{min " + minGpa + (scope == null ? "" : ", " + scope) + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }
