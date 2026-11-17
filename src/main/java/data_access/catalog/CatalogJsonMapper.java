@@ -11,6 +11,12 @@ import java.util.List;
 
 import static data_access.catalog.JsonHelpers.*;
 
+/**
+ * Converts the JSON columns of the catalog's {@code courses} and {@code programs} tables into catalog entities. Each
+ * method takes a column's raw text and throws {@link CatalogFormatException} if the JSON doesn't match the dgx-backend
+ * schema. For a {@code null} column, each method returns {@code null}, except {@link #parseBreadth} and
+ * {@link #parseAreas}, which return an empty list.
+ */
 public class CatalogJsonMapper {
     private final RequirementJsonMapper requirements;
 

@@ -10,7 +10,14 @@ import java.util.List;
 
 import static data_access.catalog.JsonHelpers.*;
 
+/** Converts dgx-backend JSON requirement nodes into {@link Requirement} trees. */
 public class RequirementJsonMapper {
+    /**
+     * Parses a node and its children.
+     *
+     * @throws CatalogFormatException if the node or a child has an unknown type, a missing or mistyped field, or an
+     *     invalid value. The message describes the innermost node that failed.
+     */
     public Requirement parseNode(JSONObject obj) {
         try {
             String type = obj.getString("type");

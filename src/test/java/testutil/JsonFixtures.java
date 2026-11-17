@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
+/** Reads test fixture files from {@code src/test/resources/fixtures}. */
 public final class JsonFixtures {
     private JsonFixtures() {}
 

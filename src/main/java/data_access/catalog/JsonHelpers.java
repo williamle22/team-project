@@ -6,6 +6,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Readers for optional JSON fields. Each reader treats a missing key like a JSON {@code null} and returns an empty
+ * list, {@code null}, or {@code false}. A value of the wrong type throws {@link org.json.JSONException}.
+ */
 final class JsonHelpers {
     private JsonHelpers() {}
 

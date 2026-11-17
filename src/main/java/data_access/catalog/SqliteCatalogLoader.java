@@ -14,11 +14,20 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Loads a catalog from the SQLite file that dgx-backend serves. */
 public class SqliteCatalogLoader {
+    /** The {@code PRAGMA user_version} that this app reads. */
     public static final int SUPPORTED_SCHEMA_VERSION = 7;
 
     private final CatalogJsonMapper mapper = new CatalogJsonMapper();
 
+    /**
+     * Reads every course and program in {@code dbFile} into memory, and prints the load time to standard error.
+     *
+     * @throws CatalogOutdatedException if the file's schema version is lower than {@link #SUPPORTED_SCHEMA_VERSION}
+     * @throws CatalogLoadException if the file is missing or unreadable, its schema version is higher, it has no
+     *     version row, or a row is malformed
+     */
     public InMemoryCatalogRepository load(Path dbFile) {
         long start = System.nanoTime();
         SQLiteConfig config = new SQLiteConfig();

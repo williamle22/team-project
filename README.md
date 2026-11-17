@@ -304,6 +304,8 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
    mvn test
    ```
    This also writes a coverage report to `target/site/jacoco/index.html`. To run the same check as CI, run `mvn verify`, which fails if `entity` or `use_case` has less than 100% line or branch coverage.
+
+   If you save a copy of the catalog at `data/dgx.db`, `SqliteCatalogLoaderTest` also checks that every row of the real catalog loads. Otherwise, JUnit skips that test.
 3. Run `app.Main` from IntelliJ.
 
 The first launch needs an internet connection to download the catalog, which is saved to `data/dgx.db` in the folder the app runs from (the repo root when run from IntelliJ). The `data/` folder is in `.gitignore`. After that, the app works offline, except for course evaluations.
