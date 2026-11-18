@@ -7,6 +7,7 @@ import use_case.CatalogLoadException;
 import use_case.sync_catalog.DownloadedCatalog;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
@@ -37,6 +38,12 @@ class FileCatalogCacheTest {
         Path nested = dir.resolve("a").resolve("b");
         new FileCatalogCache(nested, new SqliteCatalogLoader());
         assertTrue(Files.isDirectory(nested));
+    }
+
+    @Test
+    void dataDirectoryThatIsAFileThrows() throws IOException {
+        Path file = Files.writeString(dir.resolve("not-a-folder"), "x");
+        assertThrows(UncheckedIOException.class, () -> new FileCatalogCache(file, new SqliteCatalogLoader()));
     }
 
     @Test
@@ -98,6 +105,13 @@ class FileCatalogCacheTest {
     @Test
     void discardMissingFileIsFine() {
         assertDoesNotThrow(() -> cache.discard(new DownloadedCatalog(dir.resolve("gone.db.part"), null)));
+    }
+
+    @Test
+    void discardIgnoresDeleteErrors() throws IOException {
+        Path nonEmptyFolder = Files.createDirectory(dir.resolve("dgx-1.db.part"));
+        Files.writeString(nonEmptyFolder.resolve("x"), "x");
+        assertDoesNotThrow(() -> cache.discard(new DownloadedCatalog(nonEmptyFolder, null)));
     }
 
     @Test

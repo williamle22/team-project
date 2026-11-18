@@ -180,4 +180,22 @@ class HttpCatalogDownloaderTest {
         assertEquals("network error", e.getMessage());
         assertTrue(partFiles().isEmpty());
     }
+
+    @Test
+    void interruptedThrowsAndKeepsFlag() throws IOException {
+        try (ServerSocket silent = new ServerSocket(0)) {
+            HttpCatalogDownloader waiting = new HttpCatalogDownloader("http://127.0.0.1:" + silent.getLocalPort(), dir);
+            Thread.currentThread().interrupt();
+            CatalogUnavailableException e;
+            boolean stillInterrupted;
+            try {
+                e = assertThrows(CatalogUnavailableException.class, () -> waiting.fetchIfNewer(Optional.empty()));
+            } finally {
+                stillInterrupted = Thread.interrupted();
+            }
+            assertEquals("interrupted", e.getMessage());
+            assertTrue(stillInterrupted);
+            assertTrue(partFiles().isEmpty());
+        }
+    }
 }
