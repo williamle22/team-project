@@ -1,21 +1,24 @@
 package entity.catalog;
 
+/**
+ * A course's campus. Each value maps to a backend string through {@link #getValue()} and {@link #fromString(String)}.
+ */
 public enum Campus {
     ONLINE("online"), UTSG("utsg"), UTSC("utsc"), UTM("utm");
 
-    private final String campus;
+    private final String value;
 
-    Campus(String campus) {
-        this.campus = campus;
+    Campus(String value) {
+        this.value = value;
     }
 
-    public String getCampus() {
-        return this.campus;
+    public String getValue() {
+        return this.value;
     }
 
     public static Campus fromString(String value) throws IllegalArgumentException {
         for (Campus c : values()) {
-            if (c.campus.equals(value)) {
+            if (c.value.equals(value)) {
                 return c;
             }
         }

@@ -4,7 +4,7 @@ import javax.swing.*;
 
 public class AppBuilder {
     public void build() {
-        JFrame frame = new JFrame("MyProject");
+        JFrame frame = new JFrame("DegreeExplorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 300);
 

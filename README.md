@@ -163,10 +163,6 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 | William Le | Use Case 7, 9 |
 | Karishma Persad | Use Case 3, 4 |
 
-**Proposed MVP use cases still to claim:** Search Courses and View Course Details (2–3), Edit a Plan (5), and Record Grades and Calculate CGPA (9).
-
-**After the MVP:** View Course Evaluations (4), Manage Plans (6), and Import and Export Plans (7).
-
 ---
 
 ## Entities
@@ -174,39 +170,46 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 ### Catalog
 
 **`Course`**: one course from the FAS calendar.
-- Variables: `code` (`CSC207H1`), `designator` (`CSC`), `number` (`207`), `level` (100–400), `weight` (0.5 or 1.0), `campus`, `title`, `description`, `prerequisites`, `corequisites`, `exclusions`, `breadth` (category numbers), `sessions`
-- Methods: getters only. Course data is read-only.
+- Variables: `code` (`CSC207H1`), `designator` (`CSC`), `number` (`207`), `level` (100–400), `weight` (0.5 or 1.0), `campus`, `title`, `description`, `prerequisites`, `corequisites`, `exclusions`, `breadth` (a list of `BreadthCategory`), `sessions`
+- Methods: getters, and `isOfferedThisYear()`. Course data is read-only.
 
 **`Sessions`**: the sections the Timetable Builder offers a course in this year.
-- Variables: `fallWinter` and `summer`, each a set of `Section` (`F`, `S`, `Y`)
+- Variables: `fallWinter` and `summer`, each a list of `Section` (`F`, `S`, `Y`)
 - Methods: `offers(SessionPeriod period, Section section)`
 
 **`Program`**: a Specialist, Major, Minor, Focus, or Certificate.
-- Variables: `code` (`ASMIN1001`), `type`, `title`, `areas`, `enrolment`, `completion`
+- Variables: `code` (`ASMIN1001`), `type`, `number` (`1001`), `title`, `areas`, `enrolment`, `completion`
 - Methods: getters only.
 
 **`Completion`** and **`CompletionRow`**: a program's numbered completion requirements.
-- Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists.
+- Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists (`CourseList`).
 
 **`Degree`**: the hardcoded rules for one degree, in the same format as a program's completion requirements.
-- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `title`, `completion`, `programCombinations` (allowed counts of each program type)
+- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `completion`, `programCombinations` (a `ProgramCombinationRule`: the allowed counts of each program type, like 2 Majors)
+- Methods: getters. `getTitle()` returns the type's title.
 
 ### Requirements
 
 **`Requirement`**: an abstract class for one node in a requirement tree. Every prerequisite, corequisite, enrolment rule, and completion rule is a tree of these.
-- Subclasses: logical nodes (`And`, `Or`, `Choose`, `Not`), academic nodes (`CourseReq`, `Credits`, `Average`, `Gpa`), and context nodes (`ProgramReq`, `RequirementRef`, `Profile`, `Text`)
+- Subclasses: logical nodes (`AndReq`, `OrReq`, `ChooseReq`, `NotReq`), academic nodes (`CourseReq`, `CreditsReq`, `AverageReq`, `GpaReq`), and context nodes (`ProgramReq`, `RowRefReq`, `ProfileReq`, `TextReq`)
 - Methods: `accept(RequirementVisitor<T> visitor)`. Visitors include evaluation, printing, and other operations.
 
 **`Status`**: the result of evaluating a requirement: `MET`, `NOT_MET`, or `REVIEW`.
 
 ### Plans
 
-**`Plan`**: one of the student's named plans.
-- Variables: `id`, `name`, `degree`, `programs` (program codes), `courses` (a list of `PlannedCourse`), `transferCredits`
-- Methods: `addCourse`, `moveCourse`, `removeCourse`, `coursesIn(AcademicTerm term)`. A plan only enforces structural rules. Requirement problems are warnings from evaluation.
+**`Plan`**: one of the student's named plans. It's the only mutable entity. Change it only through its methods.
+- Variables: `id`, `name`, `degree`, `programs` (a list of `ProgramSelection`), `terms` (sorted), `courses` (a list of `PlannedCourse`), `transferCredits` (a list of `TransferCredit`)
+- Methods: `addTerm`, `addCourse`, `moveCourse`, `replaceCourse`, `removeCourse`, `coursesIn(AcademicTerm term)`, `copy()`. A plan enforces only structural rules, such as every course's terms being in the plan. Requirement problems are warnings from evaluation.
 
 **`PlannedCourse`**: a course placed in a plan.
-- Variables: `code`, `placement`, `grade` (a `CourseGrade`), `timetableChoice`
+- Variables: `id` (identifies the entry, because a retake puts the same code in a plan twice), `code`, `placement`, `crNcr`, `grade` (a `CourseGrade`), `timetable` (a `TimetableChoice`)
+
+**`ProgramSelection`**: a program on a plan.
+- Variables: `code`, `status` (`ENROLLED` or `INTENDED`)
+
+**`TransferCredit`**: credit from another institution. It always counts as taken.
+- Variables: `code`, `weight`
 
 **`Placement`**: where a course sits in the plan.
 - Variables: `period` (Fall–Winter or Summer), `year`, `section` (`F`, `S`, or `Y`)
@@ -228,19 +231,27 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`LetterGrade`**: an enum of UofT's grade scale, with each grade's minimum percent and grade points.
 - Methods: `fromPercent(int percent)`
 
+**`GpaCalculator`**: calculates a plan's GPAs from final grades, following the FAS calendar.
+- Methods: `cgpa(Plan plan)`, `sgpa(Plan plan, AcademicTerm term)`, `cgpaBefore(Plan plan, AcademicTerm term)`, `projectedCgpa(Plan plan)`. GPAs exclude CR/NCR courses, transfer credits, and repeated attempts marked Extra.
+
+**`CreditSummary`**: a plan's credits, split into completed, failed, in progress, awaiting a grade, and planned.
+- Methods: `of(Plan plan, CreditWeights weights, AcademicTerm current)`, `getCompleted()` (the total credits completed in Use Case 9)
+
 ### Timetable
 
-**`CourseOffering`**: a course's sections in the Timetable Builder.
-- Variables: `code`, `section`, `activities`
+**`CourseOffering`**: one course's sections in one placement, from the Timetable Builder.
+- Variables: `courseCode`, `placement`, `activities`
 
 **`Activity`**: one lecture, tutorial, or practical section, like `LEC0101`.
-- Variables: `code`, `type` (`LEC`, `TUT`, `PRA`), `section`, `meetingTimes`, `instructors`
+- Variables: `code`, `type` (`LEC`, `TUT`, `PRA`), `meetings`, `instructors`
 
-**`MeetingTime`**: one weekly meeting.
-- Variables: `day`, `start`, `end`, `location`
+**`MeetingTime`**: one weekly meeting in one term.
+- Variables: `term`, `day`, `start`, `end`, `location`
 
-**`Timetable`**: a plan's chosen sections for the current year.
-- Methods: `meetingsIn(AcademicTerm term)`, `conflicts()`, `missingChoices()`
+**`TimetableChoice`**: the section the student chose for each activity type, like `LEC0101` and `TUT0201`.
+
+**`Timetable`**: a plan's chosen sections.
+- Methods: `meetingsIn(AcademicTerm term)`, `conflicts()`, `missingChoices()`, `staleChoices()`
 
 ---
 
@@ -260,7 +271,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
 **How it's used:**
 - dgx-backend calls it daily to record which sections (`F`, `S`, `Y`) each course is offered in this year. The app uses those to warn when a course is placed in a term it isn't offered.
-- The app will call it directly to get each course's lecture, tutorial, and practical sections and meeting times for the timetable (Use Case 9).
+- The app will call it directly to get each course's lecture, tutorial, and practical sections and meeting times for the timetable (*no use case yet*; see Use Cases).
 
 ### Course evaluations
 
@@ -292,6 +303,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
    ```sh
    mvn test
    ```
+   This also writes a coverage report to `target/site/jacoco/index.html`. To run the same check as CI, run `mvn verify`, which fails if `entity` or `use_case` has less than 100% line or branch coverage.
 3. Run `app.Main` from IntelliJ.
 
 The first launch needs an internet connection to download the catalog, which is saved to `data/dgx.db` in the folder the app runs from (the repo root when run from IntelliJ). The `data/` folder is in `.gitignore`. After that, the app works offline, except for course evaluations.
