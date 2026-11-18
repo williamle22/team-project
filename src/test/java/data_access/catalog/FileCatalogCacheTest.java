@@ -11,8 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,20 +21,11 @@ class FileCatalogCacheTest {
     @TempDir
     Path dir;
 
-    private final List<Path> loaded = new ArrayList<>();
-    private final InMemoryCatalogRepository catalog = InMemoryCatalogRepository.empty();
     private FileCatalogCache cache;
 
     @BeforeEach
     void setUp() {
-        SqliteCatalogLoader loader = new SqliteCatalogLoader() {
-            @Override
-            public InMemoryCatalogRepository load(Path dbFile) {
-                loaded.add(dbFile);
-                return catalog;
-            }
-        };
-        cache = new FileCatalogCache(dir, loader);
+        cache = new FileCatalogCache(dir, new SqliteCatalogLoader());
     }
 
     private Path download(String content) throws IOException {
@@ -113,14 +102,15 @@ class FileCatalogCacheTest {
 
     @Test
     void loadCachedReadsCachePath() {
-        assertSame(catalog, cache.loadCached());
-        assertEquals(List.of(cache.path()), loaded);
+        CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> cache.loadCached());
+        assertTrue(e.getMessage().contains(cache.path().toString()));
     }
 
     @Test
     void loadReadsDownloadedFile() throws IOException {
-        Path part = download("new catalog");
-        assertSame(catalog, cache.load(new DownloadedCatalog(part, SERVER_TIME)));
-        assertEquals(List.of(part), loaded);
+        Path part = download("not a database");
+        DownloadedCatalog d = new DownloadedCatalog(part, SERVER_TIME);
+        CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> cache.load(d));
+        assertTrue(e.getMessage().contains(part.toString()));
     }
 }
