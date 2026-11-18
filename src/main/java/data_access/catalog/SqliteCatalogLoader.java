@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Loads a catalog from the SQLite file that dgx-backend serves. */
-public class SqliteCatalogLoader {
+public final class SqliteCatalogLoader {
     /** The {@code PRAGMA user_version} that this app reads. */
     public static final int SUPPORTED_SCHEMA_VERSION = 7;
 

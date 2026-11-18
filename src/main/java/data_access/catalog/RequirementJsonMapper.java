@@ -11,7 +11,7 @@ import java.util.List;
 import static data_access.catalog.JsonHelpers.*;
 
 /** Converts dgx-backend JSON requirement nodes into {@link Requirement} trees. */
-public class RequirementJsonMapper {
+public final class RequirementJsonMapper {
     /**
      * Parses a node and its children.
      *

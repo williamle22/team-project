@@ -17,7 +17,7 @@ import static data_access.catalog.JsonHelpers.*;
  * schema. For a {@code null} column, each method returns {@code null}, except {@link #parseBreadth} and
  * {@link #parseAreas}, which return an empty list.
  */
-public class CatalogJsonMapper {
+public final class CatalogJsonMapper {
     private final RequirementJsonMapper requirements;
 
     public CatalogJsonMapper() {
