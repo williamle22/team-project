@@ -1,0 +1,75 @@
+{
+  "code": "PHY152H1",
+  "designator": "PHY",
+  "number": "152",
+  "level": 100,
+  "weight": 0.5,
+  "campus": "utsg",
+  "title": "Foundations of Physics II",
+  "description": "The concept of fields will be introduced and discussed in the context of gravity and electricity. Topics include rotational motion, oscillations, waves, electricity and magnetism.",
+  "prerequisites": {
+    "req": {
+      "type": "or",
+      "items": [
+        {
+          "type": "course",
+          "code": "PHY131H1"
+        },
+        {
+          "type": "course",
+          "code": "PHY151H1"
+        }
+      ]
+    },
+    "raw": "PHY131H1/  PHY151H1"
+  },
+  "corequisites": {
+    "req": {
+      "type": "or",
+      "items": [
+        {
+          "type": "course",
+          "code": "MAT136H1"
+        },
+        {
+          "type": "course",
+          "code": "MAT149H1"
+        },
+        {
+          "type": "course",
+          "code": "MAT137Y1"
+        },
+        {
+          "type": "course",
+          "code": "MAT159H1"
+        },
+        {
+          "type": "course",
+          "code": "MAT157Y1"
+        }
+      ]
+    },
+    "notes": [
+      "MAT149H1 recommended"
+    ],
+    "raw": "MAT136H1/  MAT149H1/  MAT137Y1/  MAT159H1/  MAT157Y1 ( MAT149H1 recommended)"
+  },
+  "exclusions": {
+    "items": [
+      {
+        "courses": [
+          "PHY132H1"
+        ]
+      }
+    ],
+    "raw": "PHY132H1"
+  },
+  "breadth": [
+    5
+  ],
+  "sessions": {
+    "fall_winter": [
+      "S"
+    ]
+  }
+}

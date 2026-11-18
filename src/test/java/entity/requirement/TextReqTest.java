@@ -38,4 +38,11 @@ class TextReqTest {
         EqualsVerifier.forClass(TextReq.class).usingGetClass().withRedefinedSuperclass()
                 .suppress(Warning.NULL_FIELDS).verify();
     }
+
+    @Test
+    void toStringShowsKindTextAndConcurrent() {
+        assertTrue(new TextReq(TextKind.OTHER, "x", true).toString().contains("concurrent"));
+        assertEquals("TextReq{permission, permission of the department}",
+                new TextReq(TextKind.PERMISSION, "permission of the department", false).toString());
+    }
 }

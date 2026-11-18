@@ -2,13 +2,17 @@ package app;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
-public class Main {
-    public static void main(String[] args) {
-        // Set look and feel to FlatLaf
-        FlatLightLaf.setup();
+import javax.swing.*;
 
-        // Main project entrypoint
-        AppBuilder appBuilder = new AppBuilder();
-        appBuilder.build();
+/** Starts the app: installs the FlatLaf look and feel, opens the main window, and syncs the catalog. */
+public final class Main {
+    public static void main(String[] args) {
+        FlatLightLaf.setup();
+        SwingUtilities.invokeLater(() -> {
+            AppBuilder builder = new AppBuilder().addCatalogSync();
+            JFrame frame = builder.build();
+            frame.setVisible(true);
+            builder.startCatalogSync();
+        });
     }
 }

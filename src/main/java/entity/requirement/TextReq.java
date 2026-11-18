@@ -39,4 +39,9 @@ public final class TextReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), kind, text);
     }
+
+    @Override
+    public String toString() {
+        return "TextReq{" + kind.getValue() + ", " + text + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

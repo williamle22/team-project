@@ -70,4 +70,22 @@ class CreditsReqTest {
         assertThrows(IllegalArgumentException.class, () -> new CreditsReq(1.0, Double.NaN, null, f, false));
         assertThrows(IllegalArgumentException.class, () -> new CreditsReq(1.0, null, Double.NaN, f, false));
     }
+
+    @Test
+    void toStringShowsAmountMaxWeightFilterAndConcurrent() {
+        String s = new CreditsReq(1.0, 2.0, 0.5, HPS, true).toString();
+        assertTrue(s.contains("1.0"));
+        assertTrue(s.contains("max 2.0"));
+        assertTrue(s.contains("weight 0.5"));
+        assertTrue(s.contains("HPS"));
+        assertTrue(s.contains("concurrent"));
+    }
+
+    @Test
+    void toStringOmitsAbsentMaxWeightAndConcurrent() {
+        String s = new CreditsReq(1.0, null, null, HPS, false).toString();
+        assertFalse(s.contains("max"));
+        assertFalse(s.contains("weight"));
+        assertFalse(s.contains("concurrent"));
+    }
 }

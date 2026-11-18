@@ -34,4 +34,12 @@ class NotReqTest {
         EqualsVerifier.forClass(NotReq.class).usingGetClass().withRedefinedSuperclass()
                 .suppress(Warning.NULL_FIELDS).verify();
     }
+
+    @Test
+    void toStringShowsItemAndConcurrent() {
+        assertTrue(new NotReq(A, true).toString().contains("concurrent"));
+        String s = new NotReq(A, false).toString();
+        assertTrue(s.contains("CSC207H1"));
+        assertFalse(s.contains("concurrent"));
+    }
 }

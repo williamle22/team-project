@@ -79,4 +79,25 @@ class AverageReqTest {
         assertThrows(IllegalArgumentException.class, () -> new AverageReq(73, -1.0, false, ECO, List.of(), false));
         assertThrows(IllegalArgumentException.class, () -> new AverageReq(73, Double.NaN, false, ECO, List.of(), false));
     }
+
+    @Test
+    void toStringShowsMinAmountBestFilterItemsAndConcurrent() {
+        String s = new AverageReq(73, 2.0, true, ECO, List.of(ITEM), true).toString();
+        assertTrue(s.contains("min 73"));
+        assertTrue(s.contains("amount 2.0"));
+        assertTrue(s.contains("best"));
+        assertTrue(s.contains("ECO"));
+        assertTrue(s.contains("items [CreditsReq"));
+        assertTrue(s.contains("concurrent"));
+    }
+
+    @Test
+    void toStringOmitsAbsentAmountBestItemsAndConcurrent() {
+        String s = new AverageReq(73, null, false, ECO, List.of(), false).toString();
+        assertTrue(s.contains("min 73"));
+        assertFalse(s.contains("amount"));
+        assertFalse(s.contains("best"));
+        assertFalse(s.contains("items"));
+        assertFalse(s.contains("concurrent"));
+    }
 }

@@ -41,4 +41,17 @@ class GpaReqTest {
     void rejectsNaN() {
         assertThrows(IllegalArgumentException.class, () -> new GpaReq(Double.NaN, null, false));
     }
+
+    @Test
+    void toStringShowsMinScopeAndConcurrent() {
+        String s = new GpaReq(3.5, "APM and MAT courses", true).toString();
+        assertTrue(s.contains("min 3.5"));
+        assertTrue(s.contains("APM and MAT courses"));
+        assertTrue(s.contains("concurrent"));
+    }
+
+    @Test
+    void toStringOmitsAbsentScopeAndConcurrent() {
+        assertEquals("GpaReq{min 2.5}", new GpaReq(2.5, null, false).toString());
+    }
 }

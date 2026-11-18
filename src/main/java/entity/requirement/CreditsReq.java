@@ -70,4 +70,10 @@ public final class CreditsReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), amount, maxAmount, weight, filter);
     }
+
+    @Override
+    public String toString() {
+        return "CreditsReq{" + amount + (maxAmount == null ? "" : ", max " + maxAmount)
+                + (weight == null ? "" : ", weight " + weight) + ", " + filter + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

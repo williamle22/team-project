@@ -51,4 +51,13 @@ class ProgramReqTest {
         EqualsVerifier.forClass(ProgramReq.class).usingGetClass().withRedefinedSuperclass()
                 .suppress(Warning.NULL_FIELDS).verify();
     }
+
+    @Test
+    void toStringShowsProgramsTextAndConcurrent() {
+        assertTrue(new ProgramReq(DRAMA, "Drama", true).toString().contains("concurrent"));
+        String s = new ProgramReq(DRAMA, "Drama", false).toString();
+        assertTrue(s.contains("ASMAJ1645"));
+        assertTrue(s.contains("Drama"));
+        assertFalse(s.contains("concurrent"));
+    }
 }
