@@ -5,6 +5,10 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A downloaded catalog file that isn't installed yet, with the server's {@code Last-Modified} time if the server sent
+ * one.
+ */
 public final class DownloadedCatalog {
     private final Path file;
     private final Instant serverTime;

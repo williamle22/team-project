@@ -10,6 +10,10 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+/**
+ * The bar along the bottom of the main window that shows UC1's progress and result. Its Retry button runs the
+ * sync again. It redraws on the event dispatch thread, even when an event arrives from a background thread.
+ */
 public final class CatalogStatusBar extends JPanel implements PropertyChangeListener {
     private static final Color WARNING_COLOUR = new Color(0xB26A00);
     private static final Color ERROR_COLOUR = new Color(0xC62828);

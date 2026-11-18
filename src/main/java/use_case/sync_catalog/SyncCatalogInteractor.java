@@ -8,13 +8,18 @@ import use_case.sync_catalog.SyncCatalogOutputData.Outcome;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * Use Case 1: decides whether to use the cached catalog, a new download, or neither. It loads a download before
+ * installing it, so a bad download never replaces a good cache.
+ */
 public final class SyncCatalogInteractor implements SyncCatalogInputBoundary {
     private final CatalogSource source;
     private final CatalogCache cache;
     private final LiveCatalog live;
     private final SyncCatalogOutputBoundary presenter;
 
-    public SyncCatalogInteractor(CatalogSource source, CatalogCache cache, LiveCatalog live, SyncCatalogOutputBoundary presenter) {
+    public SyncCatalogInteractor(CatalogSource source, CatalogCache cache,
+                                 LiveCatalog live, SyncCatalogOutputBoundary presenter) {
         this.source = source;
         this.cache = cache;
         this.live = live;

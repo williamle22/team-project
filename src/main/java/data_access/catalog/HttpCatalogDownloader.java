@@ -20,6 +20,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * A {@link CatalogSource} that sends {@code GET /db} to dgx-backend. It writes each download to a temporary
+ * {@code .db.part} file in {@code downloadDirectory}. That folder must be on the same file system as the cache, so that
+ * installing the file is an atomic move. On a {@code 429} response, it waits {@code Retry-After} seconds and retries
+ * once.
+ */
 public final class HttpCatalogDownloader implements CatalogSource {
     private static final DateTimeFormatter HTTP_DATE =
             DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US).withZone(ZoneOffset.UTC);

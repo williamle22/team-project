@@ -8,6 +8,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Turns UC1's results into the status bar's message, severity, and flags. It shows dates in the system time
+ * zone.
+ */
 public final class SyncCatalogPresenter implements SyncCatalogOutputBoundary {
     private static final DateTimeFormatter DATE =
             DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH).withZone(ZoneId.systemDefault());
@@ -30,7 +34,8 @@ public final class SyncCatalogPresenter implements SyncCatalogOutputBoundary {
         switch (data.getOutcome()) {
             case UPDATED:
                 update(false, Severity.INFO, false,
-                        "Course data updated (" + data.getSchoolYear() + ", " + String.format(Locale.ENGLISH, "%,d", data.getCourseCount()) + " courses)");
+                        "Course data updated (" + data.getSchoolYear() + ", " +
+                                String.format(Locale.ENGLISH, "%,d", data.getCourseCount()) + " courses)");
                 break;
             case UP_TO_DATE:
                 update(false, Severity.INFO, false,

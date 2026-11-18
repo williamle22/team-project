@@ -10,6 +10,10 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The shared {@link CatalogReader} that every use case reads. It forwards each call to the current catalog, which
+ * starts empty. UC1 replaces it when it loads a catalog. You can read it from any thread.
+ */
 public final class LiveCatalogRepository implements CatalogReader, LiveCatalog {
     private volatile CatalogReader current = InMemoryCatalogRepository.empty();
 

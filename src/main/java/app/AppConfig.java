@@ -7,6 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+/**
+ * The app's settings, read from {@code config.properties} on the classpath. A system property with the same key, such
+ * as {@code -Ddgx.url=...}, overrides the file. A missing file or key throws {@link IllegalStateException}.
+ */
 public final class AppConfig {
     private final Properties properties;
 
@@ -29,14 +33,20 @@ public final class AppConfig {
         }
     }
 
+    /** Returns the dgx-backend base URL, without a trailing slash. */
     public String dgxUrl() {
         return url("dgx.url");
     }
 
+    /** Returns the Timetable Builder (EASI) base URL, without a trailing slash. */
     public String ttbUrl() {
         return url("ttb.url");
     }
 
+    /**
+     * Returns the absolute path of the folder for the catalog cache and saved plans. That's {@code -Ddgx.data} if it's
+     * set, and otherwise {@code data} in the working directory.
+     */
     public Path dataDirectory() {
         return Paths.get(System.getProperty("dgx.data", "data")).toAbsolutePath();
     }

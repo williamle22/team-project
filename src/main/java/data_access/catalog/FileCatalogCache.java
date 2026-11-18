@@ -14,10 +14,19 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * A {@link CatalogCache} that keeps the catalog in {@code dgx.db} in the data folder. It sets the file's modified time
+ * to the server's {@code Last-Modified} time, so the next update check uses the server's clock.
+ */
 public final class FileCatalogCache implements CatalogCache {
     private final Path dataDirectory;
     private final SqliteCatalogLoader loader;
 
+    /**
+     * Creates {@code dataDirectory} if it doesn't exist.
+     *
+     * @throws java.io.UncheckedIOException if the folder can't be created
+     */
     public FileCatalogCache(Path dataDirectory, SqliteCatalogLoader loader) {
         this.dataDirectory = dataDirectory;
         this.loader = loader;

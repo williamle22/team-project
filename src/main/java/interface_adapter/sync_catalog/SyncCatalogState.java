@@ -2,7 +2,9 @@ package interface_adapter.sync_catalog;
 
 import java.util.Objects;
 
+/** What the catalog status bar shows. */
 public final class SyncCatalogState {
+    /** How serious the message is. The status bar sets the message's color from it. */
     public enum Severity { INFO, WARNING, ERROR }
 
     private boolean loading;

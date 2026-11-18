@@ -14,8 +14,10 @@ import view.CatalogStatusBar;
 import javax.swing.*;
 import java.awt.*;
 
-// Add one add...() method per use case/view, like addCatalogSync().
-// Pass `catalog` to every use case that reads the catalog so they all see the synced data.
+/**
+ * Builds the main window. Each {@code add} method connects one use case and its view. Pass {@code catalog} to every use
+ * case that reads the catalog, so they all see the synced data.
+ */
 public final class AppBuilder {
     private final AppConfig config = AppConfig.load();
     private final LiveCatalogRepository catalog = new LiveCatalogRepository();
@@ -39,6 +41,7 @@ public final class AppBuilder {
         return this;
     }
 
+    /** Returns the main window. The caller makes it visible. */
     public JFrame build() {
         JFrame frame = new JFrame("Degree Explorer");
 
@@ -50,6 +53,9 @@ public final class AppBuilder {
         return frame;
     }
 
+    /**
+     * Starts UC1 in the background. Call it after the window is visible, so the status bar can show progress.
+     */
     public void startCatalogSync() {
         syncCatalogController.execute();
     }
