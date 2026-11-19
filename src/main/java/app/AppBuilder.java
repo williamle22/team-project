@@ -4,12 +4,17 @@ import data_access.catalog.FileCatalogCache;
 import data_access.catalog.HttpCatalogDownloader;
 import data_access.catalog.LiveCatalogRepository;
 import data_access.catalog.SqliteCatalogLoader;
+import interface_adapter.search_courses.SearchCoursesController;
+import interface_adapter.search_courses.SearchCoursesPresenter;
+import interface_adapter.search_courses.SearchCoursesViewModel;
 import interface_adapter.sync_catalog.SyncCatalogController;
 import interface_adapter.sync_catalog.SyncCatalogPresenter;
 import interface_adapter.sync_catalog.SyncCatalogViewModel;
+import use_case.search_courses.SearchCoursesInteractor;
 import use_case.sync_catalog.SyncCatalogInputBoundary;
 import use_case.sync_catalog.SyncCatalogInteractor;
 import view.CatalogStatusBar;
+import view.SearchPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,12 +28,12 @@ public final class AppBuilder {
     private final LiveCatalogRepository catalog = new LiveCatalogRepository();
     // CENTER is free for main views (CardLayout + ViewManagerModel)
     private final JPanel root = new JPanel(new BorderLayout());
+    private final SyncCatalogViewModel syncCatalogViewModel = new SyncCatalogViewModel();
 
     private SyncCatalogController syncCatalogController;
 
     public AppBuilder addCatalogSync() {
-        SyncCatalogViewModel viewModel = new SyncCatalogViewModel();
-        SyncCatalogPresenter presenter = new SyncCatalogPresenter(viewModel);
+        SyncCatalogPresenter presenter = new SyncCatalogPresenter(syncCatalogViewModel);
         SyncCatalogInputBoundary interactor = new SyncCatalogInteractor(
                 new HttpCatalogDownloader(config.dgxUrl(), config.dataDirectory()),
                 new FileCatalogCache(config.dataDirectory(), new SqliteCatalogLoader()),
@@ -36,7 +41,25 @@ public final class AppBuilder {
 
         syncCatalogController = new SyncCatalogController(interactor, presenter);
 
-        root.add(new CatalogStatusBar(viewModel, syncCatalogController), BorderLayout.SOUTH);
+        root.add(new CatalogStatusBar(syncCatalogViewModel, syncCatalogController), BorderLayout.SOUTH);
+
+        return this;
+    }
+
+    public AppBuilder addSearch() {
+        SearchCoursesViewModel viewModel = new SearchCoursesViewModel();
+        SearchCoursesPresenter presenter = new SearchCoursesPresenter(viewModel);
+        SearchCoursesInteractor interactor = new SearchCoursesInteractor(catalog, presenter);
+        SearchCoursesController controller = new SearchCoursesController(interactor);
+        SearchPanel panel = new SearchPanel(viewModel, controller);
+
+        syncCatalogViewModel.addPropertyChangeListener(e -> {
+            if (!syncCatalogViewModel.getState().isLoading()) {
+                panel.refresh();
+            }
+        });
+
+        root.add(panel, BorderLayout.WEST);
 
         return this;
     }

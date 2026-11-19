@@ -9,7 +9,7 @@ public final class Main {
     public static void main(String[] args) {
         FlatLightLaf.setup();
         SwingUtilities.invokeLater(() -> {
-            AppBuilder builder = new AppBuilder().addCatalogSync();
+            AppBuilder builder = new AppBuilder().addCatalogSync().addSearch();
             JFrame frame = builder.build();
             frame.setVisible(true);
             builder.startCatalogSync();
