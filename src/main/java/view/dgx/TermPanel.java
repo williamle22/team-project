@@ -5,11 +5,7 @@ import interface_adapter.dgx.AcademicPlannerState.TermRow;
 import interface_adapter.dgx.AddCourseToPlanController;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
@@ -25,13 +21,7 @@ public final class TermPanel extends JPanel {
         TransferHandler dropHandler = createDropHandler(term, controller);
         setTransferHandler(dropHandler);
         for (CourseRow course : term.getCourses()) {
-            JPanel courseBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            courseBox.add(new JLabel(course.getCode()));
-            courseBox.setBorder(BorderFactory.createCompoundBorder(
-                    new LineBorder(new Color(0x8A9BA8)), new EmptyBorder(2, 8, 2, 8)));
-            courseBox.setAlignmentY(Component.CENTER_ALIGNMENT);
-            courseBox.setTransferHandler(dropHandler);
-            add(courseBox);
+            add(new CourseBox(course.getCode(), dropHandler));
         }
         setMaximumSize(new Dimension(Integer.MAX_VALUE, getPreferredSize().height));
     }
