@@ -22,7 +22,7 @@ public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoun
 
     public void presentPlan(Plan plan, String message) {
         List<TermRow> rows = new ArrayList<>();
-        for (AcademicTerm term : plan.getTerms()) {
+        for (AcademicTerm term : plan.getReversedTerms()) {
             if (term.getSeason() == Season.SUMMER) {
                 continue;
             }

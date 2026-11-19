@@ -274,4 +274,15 @@ class PlanTest {
     void equalsContract() {
         EqualsVerifier.forClass(Plan.class).suppress(Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS).verify();
     }
+
+    @Test
+    void getReversedTermsReturnsReverseOrderWithoutChangingPlan() {
+        Plan plan = firstYear();
+        plan.addTerm(summer(2027));
+
+        assertEquals(List.of(summer(2027), winter(2027), fall(2026)), plan.getReversedTerms());
+        assertEquals(List.of(fall(2026), winter(2027), summer(2027)), plan.getTerms());
+        assertThrows(UnsupportedOperationException.class, () -> plan.getReversedTerms().clear());
+    }
+
 }

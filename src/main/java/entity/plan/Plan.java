@@ -116,6 +116,13 @@ public final class Plan {
         return Collections.unmodifiableList(terms);
     }
 
+    // TODO: add test?
+    public List<AcademicTerm> getReversedTerms() {
+        List<AcademicTerm> reversedTerms = new ArrayList<>(terms);
+        Collections.reverse(reversedTerms);
+        return Collections.unmodifiableList(reversedTerms);
+    }
+
     public List<PlannedCourse> getCourses() {
         return Collections.unmodifiableList(courses);
     }
