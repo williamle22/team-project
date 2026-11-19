@@ -3,6 +3,7 @@ package data_access.catalog;
 import entity.catalog.CatalogVersion;
 import entity.catalog.ProgramType;
 import org.junit.jupiter.api.Test;
+import use_case.search_courses.SearchFilters;
 
 import java.time.Instant;
 import java.util.List;
@@ -44,5 +45,18 @@ class LiveCatalogRepositoryTest {
     @Test
     void replaceRejectsNull() {
         assertThrows(NullPointerException.class, () -> new LiveCatalogRepository().replace(null));
+    }
+
+    @Test
+    void searchUsesNewCatalogAfterReplace() {
+        LiveCatalogRepository live = new LiveCatalogRepository();
+        assertEquals(List.of(), live.search("", SearchFilters.none()));
+
+        live.replace(new InMemoryCatalogRepository(List.of(course("CSC148H1")), List.of(), VERSION));
+        assertEquals(List.of(course("CSC148H1")), live.search("csc148", SearchFilters.none()));
+
+        live.replace(new InMemoryCatalogRepository(List.of(course("MAT137Y1")), List.of(), VERSION));
+        assertEquals(List.of(), live.search("csc148", SearchFilters.none()));
+        assertEquals(List.of(course("MAT137Y1")), live.search("mat", SearchFilters.none()));
     }
 }
