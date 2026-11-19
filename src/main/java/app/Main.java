@@ -11,6 +11,7 @@ public final class Main {
         SwingUtilities.invokeLater(() -> {
             AppBuilder builder = new AppBuilder()
                 .addCatalogSync()
+                .addSearch()
                 .addDgxPane();
             JFrame frame = builder.build();
             frame.setVisible(true);
