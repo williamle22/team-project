@@ -11,6 +11,7 @@ import entity.catalog.ProgramType;
 import entity.catalog.Requisite;
 import entity.catalog.Section;
 import entity.catalog.Sessions;
+import entity.evaluation.CourseRecord;
 import entity.requirement.AndReq;
 import entity.requirement.ChooseReq;
 import entity.requirement.CourseFilter;
@@ -120,5 +121,17 @@ public final class CatalogFixtures {
 
     public static Program program(String code, ProgramType type, Completion completion) {
         return new Program(code, type, code.substring(5), code + " title", null, completion, List.of());
+    }
+
+    public static CourseRecord record(String code) {
+        return new CourseRecord(course(code), null, false, false);
+    }
+
+    public static CourseRecord record(String code, int grade) {
+        return record(course(code), grade);
+    }
+
+    public static CourseRecord record(Course course, int grade) {
+        return new CourseRecord(course, grade, false, false);
     }
 }
