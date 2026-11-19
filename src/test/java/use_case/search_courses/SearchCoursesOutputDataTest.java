@@ -16,38 +16,35 @@ class SearchCoursesOutputDataTest {
 
     @Test
     void gettersReturnConstructorValues() {
-        SearchCoursesOutputData data = new SearchCoursesOutputData("csc148", List.of(CSC148), 1);
-        assertEquals("csc148", data.getQuery());
+        SearchCoursesOutputData data = new SearchCoursesOutputData(List.of(CSC148), 1);
         assertEquals(List.of(CSC148), data.getResults());
         assertEquals(1, data.getTotalMatches());
     }
 
     @Test
     void truncatedWhenMoreMatchesThanResults() {
-        assertTrue(new SearchCoursesOutputData("csc", List.of(CSC148), 412).isTruncated());
-        assertFalse(new SearchCoursesOutputData("csc148", List.of(CSC148), 1).isTruncated());
-        assertFalse(new SearchCoursesOutputData("", List.of(), 0).isTruncated());
+        assertTrue(new SearchCoursesOutputData(List.of(CSC148), 412).isTruncated());
+        assertFalse(new SearchCoursesOutputData(List.of(CSC148), 1).isTruncated());
+        assertFalse(new SearchCoursesOutputData(List.of(), 0).isTruncated());
     }
 
     @Test
     void resultsAreCopied() {
         List<SearchResultItem> results = new ArrayList<>(List.of(CSC148));
-        SearchCoursesOutputData data = new SearchCoursesOutputData("csc148", results, 1);
+        SearchCoursesOutputData data = new SearchCoursesOutputData(results, 1);
         results.clear();
         assertEquals(List.of(CSC148), data.getResults());
         assertThrows(UnsupportedOperationException.class, () -> data.getResults().add(CSC148));
     }
 
     @Test
-    void rejectsNullFields() {
-        assertThrows(NullPointerException.class, () -> new SearchCoursesOutputData(null, List.of(), 0));
-        assertThrows(NullPointerException.class, () -> new SearchCoursesOutputData("csc", null, 0));
+    void rejectsNullResults() {
+        assertThrows(NullPointerException.class, () -> new SearchCoursesOutputData(null, 0));
     }
 
     @Test
-    void toStringShowsQueryAndCounts() {
-        String s = new SearchCoursesOutputData("csc", List.of(CSC148), 412).toString();
-        assertTrue(s.contains("csc"));
+    void toStringShowsCounts() {
+        String s = new SearchCoursesOutputData(List.of(CSC148), 412).toString();
         assertTrue(s.contains("1 of 412"));
     }
 

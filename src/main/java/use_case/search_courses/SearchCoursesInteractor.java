@@ -27,11 +27,6 @@ public final class SearchCoursesInteractor implements SearchCoursesInputBoundary
             return;
         }
 
-        if (input.getQuery().isBlank() && input.getFilters().isEmpty()) {
-            presenter.prepareSuccessView(new SearchCoursesOutputData(input.getQuery(), List.of(), 0));
-            return;
-        }
-
         List<Course> matches = new ArrayList<>(catalog.search(input.getQuery(), input.getFilters()));
         matches.sort(ranking(input.getQuery()));
 
@@ -40,7 +35,7 @@ public final class SearchCoursesInteractor implements SearchCoursesInputBoundary
         List<SearchResultItem> items = results.stream().map(SearchCoursesInteractor::toItem)
                 .collect(Collectors.toList());
 
-        presenter.prepareSuccessView(new SearchCoursesOutputData(input.getQuery(), items, totalMatches));
+        presenter.prepareSuccessView(new SearchCoursesOutputData(items, totalMatches));
     }
 
     static Comparator<Course> ranking(String query) {

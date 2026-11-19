@@ -47,10 +47,6 @@ public final class SearchFilters {
         return breadth;
     }
 
-    public boolean isEmpty() {
-        return designator == null && levels.isEmpty() && campuses.isEmpty() && breadth.isEmpty();
-    }
-
     public boolean accepts(Course course) {
         return (designator == null || course.getDesignator().equals(designator))
                 && (levels.isEmpty() || levels.contains(course.getLevel()))

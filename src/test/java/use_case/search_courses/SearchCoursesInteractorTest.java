@@ -63,11 +63,14 @@ class SearchCoursesInteractorTest {
     }
 
     @Test
-    void blankQueryNoFiltersIsEmptySuccess() {
+    void blankQueryNoFiltersListsEverything() {
+        returns("MAT137Y1", "CSC108H1");
         search("   ");
         assertEquals(List.of("success"), presenter.calls);
-        assertEquals(new SearchCoursesOutputData("   ", List.of(), 0), presenter.data);
-        assertEquals(0, catalog.searches);
+        assertEquals(1, catalog.searches);
+        assertEquals("   ", catalog.lastQuery);
+        assertEquals(SearchFilters.none(), catalog.lastFilters);
+        assertEquals(List.of("CSC108H1", "MAT137Y1"), resultCodes());
     }
 
     @Test
@@ -86,14 +89,13 @@ class SearchCoursesInteractorTest {
         interactor.execute(new SearchCoursesInputData(" csc 148 ", csc));
         assertEquals(" csc 148 ", catalog.lastQuery);
         assertEquals(csc, catalog.lastFilters);
-        assertEquals(" csc 148 ", presenter.data.getQuery());
     }
 
     @Test
     void noMatchesIsEmptySuccess() {
         search("quantum basket weaving");
         assertEquals(List.of("success"), presenter.calls);
-        assertEquals(new SearchCoursesOutputData("quantum basket weaving", List.of(), 0), presenter.data);
+        assertEquals(new SearchCoursesOutputData(List.of(), 0), presenter.data);
     }
 
     @Test

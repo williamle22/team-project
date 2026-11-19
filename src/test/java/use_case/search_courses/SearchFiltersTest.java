@@ -33,9 +33,8 @@ class SearchFiltersTest {
     }
 
     @Test
-    void noneIsEmpty() {
+    void noneHasNoFilters() {
         SearchFilters none = SearchFilters.none();
-        assertTrue(none.isEmpty());
         assertEquals(Optional.empty(), none.getDesignator());
         assertEquals(Set.of(), none.getLevels());
         assertEquals(Set.of(), none.getCampuses());
@@ -52,7 +51,6 @@ class SearchFiltersTest {
     @Test
     void blankDesignatorMeansAny() {
         assertEquals(Optional.empty(), filters("  ", Set.of(), Set.of(), Set.of()).getDesignator());
-        assertTrue(filters("  ", Set.of(), Set.of(), Set.of()).isEmpty());
         assertTrue(filters("", Set.of(), Set.of(), Set.of()).accepts(CSC369));
     }
 
@@ -103,14 +101,6 @@ class SearchFiltersTest {
         assertFalse(filters("CSC", Set.of(400), c, b).accepts(CSC369));
         assertFalse(filters("CSC", l, Set.of(Campus.ONLINE), b).accepts(CSC369));
         assertFalse(filters("CSC", l, c, Set.of(LIVING_THINGS)).accepts(CSC369));
-    }
-
-    @Test
-    void anySingleFilterIsNotEmpty() {
-        assertFalse(filters("CSC", Set.of(), Set.of(), Set.of()).isEmpty());
-        assertFalse(filters(null, Set.of(300), Set.of(), Set.of()).isEmpty());
-        assertFalse(filters(null, Set.of(), Set.of(Campus.UTSG), Set.of()).isEmpty());
-        assertFalse(filters(null, Set.of(), Set.of(), Set.of(LIVING_THINGS)).isEmpty());
     }
 
     @Test
