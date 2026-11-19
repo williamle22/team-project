@@ -33,4 +33,9 @@ public final class NotReq extends Requirement {
     public int hashCode() {
         return Objects.hash(super.hashCode(), item);
     }
+
+    @Override
+    public String toString() {
+        return "NotReq{" + item + (isConcurrent() ? ", concurrent" : "") + "}";
+    }
 }

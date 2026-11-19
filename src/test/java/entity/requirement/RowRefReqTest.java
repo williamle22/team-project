@@ -43,4 +43,10 @@ class RowRefReqTest {
         EqualsVerifier.forClass(RowRefReq.class).usingGetClass().withRedefinedSuperclass()
                 .suppress(Warning.NULL_FIELDS).verify();
     }
+
+    @Test
+    void toStringShowsRowsAndConcurrent() {
+        assertTrue(new RowRefReq(List.of(3, 4), true).toString().contains("concurrent"));
+        assertEquals("RowRefReq{rows [3, 4]}", new RowRefReq(List.of(3, 4), false).toString());
+    }
 }

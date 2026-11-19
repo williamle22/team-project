@@ -1,0 +1,76 @@
+{
+  "code": "ASMIN0667",
+  "type": "Minor",
+  "number": "0667",
+  "title": "History and Philosophy of Science and Technology Minor (Arts Program)",
+  "enrolment": {
+    "kind": "open",
+    "req": {
+      "type": "credits",
+      "amount": 4
+    },
+    "raw": "This is an open enrolment program. A student who has completed 4.0 credits may enrol in the program."
+  },
+  "completion": {
+    "requirements": [
+      {
+        "number": 1,
+        "kind": "allocation",
+        "req": {
+          "type": "credits",
+          "amount": 4,
+          "designators": [
+            "HPS"
+          ],
+          "courses": [
+            "JHE353H1",
+            "JHE355H1",
+            "JPH311H1",
+            "PHL245H1",
+            "PHL356H1",
+            "PHL357H1"
+          ]
+        },
+        "raw": "(4.0 credits)\n3. Additional HPS courses to a total of 4.0 credits, with at least 1.0 credit at the 300+level. JHE353H1, JHE355H1, JPH311H1, PHL245H1, PHL356H1, or PHL357H1 may also be used to fulfill this requirement."
+      },
+      {
+        "number": 2,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "designators": [
+            "HPS"
+          ],
+          "levels": [
+            100
+          ],
+          "max_amount": 1
+        },
+        "raw": "Up to 1.0 credit in HPS courses at the 100-level will be counted towards the minor"
+      },
+      {
+        "number": 3,
+        "kind": "constraint",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "levels": [
+            300,
+            400
+          ]
+        },
+        "raw": "with at least 1.0 credit at the 300+level"
+      }
+    ],
+    "notes": [
+      "Recommended: 0.5 credit from any HPS 100-level courses",
+      "Recommended: at least 0.5 credit from any HPS 200-level courses"
+    ],
+    "raw": "(4.0 credits)\n1. Recommended: 0.5 credit from any HPS 100-level courses. Up to 1.0 credit in HPS courses at the 100-level will be counted towards the minor.\n2. Recommended: at least 0.5 credit from any HPS 200-level courses.\n3. Additional HPS courses to a total of 4.0 credits, with at least 1.0 credit at the 300+level. JHE353H1, JHE355H1, JPH311H1, PHL245H1, PHL356H1, or PHL357H1 may also be used to fulfill this requirement."
+  },
+  "areas": [
+    "History and Philosophy of Science and Technology"
+  ]
+}

@@ -66,4 +66,13 @@ class ProfileReqTest {
         EqualsVerifier.forClass(ProfileReq.class).usingGetClass().withRedefinedSuperclass()
                 .suppress(Warning.NULL_FIELDS).verify();
     }
+
+    @Test
+    void toStringShowsAttrValueTextAndConcurrent() {
+        assertTrue(new ProfileReq("faculty", "ArtSci", "", true).toString().contains("concurrent"));
+        String s = new ProfileReq("min_year", 2, "year 2 or higher", false).toString();
+        assertTrue(s.contains("min_year 2"));
+        assertTrue(s.contains("year 2 or higher"));
+        assertFalse(s.contains("concurrent"));
+    }
 }
