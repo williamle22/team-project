@@ -3,6 +3,11 @@ package interface_adapter.search_courses;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * What the search panel shows. If {@code message} isn't empty, the panel shows it instead of the results. The panel
+ * shows {@code footer} under the results when more courses matched than the list holds. Otherwise {@code footer} is
+ * empty.
+ */
 public final class SearchCoursesState {
     private List<SearchResultRow> results = List.of();
     private String message = "";

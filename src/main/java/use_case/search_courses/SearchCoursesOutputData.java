@@ -3,6 +3,7 @@ package use_case.search_courses;
 import java.util.List;
 import java.util.Objects;
 
+/** The results of one search: at most 100 courses, best match first, and the total number of matches. */
 public final class SearchCoursesOutputData {
     private final List<SearchResultItem> results;
     private final int totalMatches;
@@ -20,6 +21,7 @@ public final class SearchCoursesOutputData {
         return totalMatches;
     }
 
+    /** Returns whether more courses matched than {@link #getResults()} holds. */
     public boolean isTruncated() {
         return totalMatches > results.size();
     }

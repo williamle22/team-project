@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+/**
+ * Use Case 2: ranks the matching courses and keeps the first 100. An exact code match comes first, then codes that
+ * start with the query, then codes that contain it, then title matches. Courses with the same rank sort by code.
+ */
 public final class SearchCoursesInteractor implements SearchCoursesInputBoundary {
     static final int MAX_RESULTS = 100;
 

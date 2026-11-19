@@ -20,6 +20,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+/**
+ * The search sidebar for Use Case 2: a search box, optional filters, and the list of matching courses. It searches
+ * 200 ms after the user stops typing, and right away when a filter changes.
+ */
 public final class SearchPanel extends JPanel implements PropertyChangeListener {
     private static final int DEBOUNCE_MS = 200;
     private static final int[] LEVELS = {100, 200, 300, 400};
@@ -115,14 +119,20 @@ public final class SearchPanel extends JPanel implements PropertyChangeListener 
         search();
     }
 
+    /** Sets what happens when the user selects a course. The listener receives the course code. */
     public void setOnCourseSelected(Consumer<String> listener) {
         onCourseSelected = listener;
     }
 
+    /**
+     * Sets what happens when the user double-clicks a course or presses Enter on it. The listener receives the course
+     * code.
+     */
     public void setOnCourseActivated(Consumer<String> listener) {
         onCourseActivated = listener;
     }
 
+    /** Runs the current search again on the event dispatch thread. Call it when the catalog changes. */
     public void refresh() {
         SwingUtilities.invokeLater(this::search);
     }

@@ -2,6 +2,7 @@ package use_case.search_courses;
 
 import java.util.Objects;
 
+/** What the user typed and chose. It keeps the query exactly as the user typed it. */
 public final class SearchCoursesInputData {
     private final String query;
     private final SearchFilters filters;

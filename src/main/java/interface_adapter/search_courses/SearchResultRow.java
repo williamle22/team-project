@@ -2,6 +2,7 @@ package interface_adapter.search_courses;
 
 import java.util.Objects;
 
+/** One row of the search results list, formatted for display. */
 public final class SearchResultRow {
     private final String code;
     private final String title;

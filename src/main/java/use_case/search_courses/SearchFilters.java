@@ -9,12 +9,19 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+/** Filters that narrow a search. An empty set, or a missing designator, accepts any value. */
 public final class SearchFilters {
     private final String designator;
     private final Set<Integer> levels;
     private final Set<Campus> campuses;
     private final Set<BreadthCategory> breadth;
 
+    /**
+     * Creates filters. A blank designator means any designator. Otherwise the constructor strips and uppercases it, so
+     * {@code "csc"} matches {@code CSC}.
+     *
+     * @throws NullPointerException if a set, or any element of a set, is {@code null}
+     */
     public SearchFilters(String designator, Set<Integer> levels, Set<Campus> campuses, Set<BreadthCategory> breadth) {
         if (designator == null || designator.isBlank()) {
             this.designator = null;
@@ -27,6 +34,7 @@ public final class SearchFilters {
         this.breadth = Set.copyOf(breadth);
     }
 
+    /** Returns filters that accept every course. */
     public static SearchFilters none() {
         return new SearchFilters(null, Set.of(), Set.of(), Set.of());
     }
@@ -47,6 +55,10 @@ public final class SearchFilters {
         return breadth;
     }
 
+    /**
+     * Returns whether {@code course} passes every filter. The breadth filter passes if the course has any of the
+     * chosen categories.
+     */
     public boolean accepts(Course course) {
         return (designator == null || course.getDesignator().equals(designator))
                 && (levels.isEmpty() || levels.contains(course.getLevel()))

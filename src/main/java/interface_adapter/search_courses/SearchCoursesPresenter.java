@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+/** Turns Use Case 2's results into list rows, a message, and a footer. */
 public final class SearchCoursesPresenter implements SearchCoursesOutputBoundary {
     private static final String NO_MATCHES = "No courses match. Try fewer words or filters.";
     private static final String SEPARATOR = " \u00B7 ";

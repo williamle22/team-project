@@ -5,6 +5,7 @@ import entity.catalog.Campus;
 import java.util.List;
 import java.util.Objects;
 
+/** One search result, as plain values for the presenter. {@code breadth} holds breadth category numbers (1-5). */
 public final class SearchResultItem {
     private final String code;
     private final String title;
