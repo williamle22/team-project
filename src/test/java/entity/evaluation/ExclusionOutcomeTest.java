@@ -12,28 +12,32 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExclusionOutcomeTest {
 
+    private static final ExclusionReason EXCLUDED_BY_CSC111 =
+            new ExclusionReason("excluded by CSC111H1", ExclusionResult.EXCLUDED);
+    private static final ExclusionReason PERMISSION = new ExclusionReason("permission", ExclusionResult.REVIEW);
+
     @Test
     void gettersReturnConstructorValues() {
-        ExclusionOutcome o = new ExclusionOutcome(ExclusionResult.EXCLUDED, List.of("excluded by CSC111H1"),
+        ExclusionOutcome o = new ExclusionOutcome(ExclusionResult.EXCLUDED, List.of(EXCLUDED_BY_CSC111),
                 List.of("CSC111H1"));
 
         assertEquals(ExclusionResult.EXCLUDED, o.getResult());
-        assertEquals(List.of("excluded by CSC111H1"), o.getReasons());
+        assertEquals(List.of(EXCLUDED_BY_CSC111), o.getReasons());
         assertEquals(List.of("CSC111H1"), o.getBlockingCourses());
     }
 
     @Test
     void copiesLists() {
-        List<String> reasons = new ArrayList<>(List.of("a"));
+        List<ExclusionReason> reasons = new ArrayList<>(List.of(EXCLUDED_BY_CSC111));
         List<String> blocking = new ArrayList<>(List.of("CSC111H1"));
         ExclusionOutcome o = new ExclusionOutcome(ExclusionResult.EXCLUDED, reasons, blocking);
 
-        reasons.add("b");
+        reasons.add(PERMISSION);
         blocking.add("CSC148H1");
 
-        assertEquals(List.of("a"), o.getReasons());
+        assertEquals(List.of(EXCLUDED_BY_CSC111), o.getReasons());
         assertEquals(List.of("CSC111H1"), o.getBlockingCourses());
-        assertThrows(UnsupportedOperationException.class, () -> o.getReasons().add("c"));
+        assertThrows(UnsupportedOperationException.class, () -> o.getReasons().add(PERMISSION));
     }
 
     @Test
@@ -53,7 +57,7 @@ class ExclusionOutcomeTest {
 
     @Test
     void toStringShowsFields() {
-        String s = new ExclusionOutcome(ExclusionResult.EXCLUDED, List.of("excluded by CSC111H1"),
+        String s = new ExclusionOutcome(ExclusionResult.EXCLUDED, List.of(EXCLUDED_BY_CSC111),
                 List.of("CSC111H1")).toString();
 
         assertTrue(s.contains("EXCLUDED"));

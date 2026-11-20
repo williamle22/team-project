@@ -16,13 +16,13 @@ public final class ExclusionChecker {
 
         boolean excluded = false;
         boolean review = false;
-        List<String> reasons = new ArrayList<>();
+        List<ExclusionReason> reasons = new ArrayList<>();
         List<String> blocking = new ArrayList<>();
 
         for (ExclusionItem item : course.getExclusions().get().getItems()) {
             if (item.isText()) {
                 review = true;
-                reasons.add(item.getText().get());
+                reasons.add(new ExclusionReason(item.getText().get(), ExclusionResult.REVIEW));
                 continue;
             }
 
@@ -32,17 +32,21 @@ public final class ExclusionChecker {
                 continue;
             }
 
+            String joined = String.join(" and ", codes);
+
             if (item.hasNote()) {
                 review = true;
-                reasons.add("may be excluded by " + String.join(" and ", codes) + " " + item.getNote().get());
+                reasons.add(new ExclusionReason("may be excluded by " + joined + " " + item.getNote().get(),
+                        ExclusionResult.REVIEW));
             } else if (item.isConcurrent()) {
                 excluded = true;
                 blocking.addAll(codes);
-                reasons.add("can't be taken at the same time as " + String.join(" and ", codes));
+                reasons.add(new ExclusionReason("can't be taken at the same time as " + joined,
+                        ExclusionResult.EXCLUDED));
             } else {
                 excluded = true;
                 blocking.addAll(codes);
-                reasons.add("excluded by " + String.join(" and ", codes));
+                reasons.add(new ExclusionReason("excluded by " + joined, ExclusionResult.EXCLUDED));
             }
         }
 

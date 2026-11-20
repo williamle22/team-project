@@ -42,6 +42,10 @@ class ExclusionCheckerTest {
         return new ExclusionItem(List.of(), List.of(), List.of(), List.of(), false, null, TextKind.PLACEMENT, text);
     }
 
+    private static ExclusionReason reason(String text, ExclusionResult result) {
+        return new ExclusionReason(text, result);
+    }
+
     private static AcademicSnapshot taken(String... codes) {
         AcademicSnapshot.Builder b = AcademicSnapshot.builder();
         for (String code : codes) {
@@ -72,7 +76,7 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken("CSC111H1"));
 
         assertEquals(EXCLUDED, o.getResult());
-        assertEquals(List.of("excluded by CSC111H1"), o.getReasons());
+        assertEquals(List.of(reason("excluded by CSC111H1", EXCLUDED)), o.getReasons());
         assertEquals(List.of("CSC111H1"), o.getBlockingCourses());
     }
 
@@ -91,7 +95,7 @@ class ExclusionCheckerTest {
 
         ExclusionOutcome both = ExclusionChecker.check(c, taken("CHM361H5", "CHM362H5"));
         assertEquals(EXCLUDED, both.getResult());
-        assertEquals(List.of("excluded by CHM361H5 and CHM362H5"), both.getReasons());
+        assertEquals(List.of(reason("excluded by CHM361H5 and CHM362H5", EXCLUDED)), both.getReasons());
         assertEquals(List.of("CHM361H5", "CHM362H5"), both.getBlockingCourses());
     }
 
@@ -108,7 +112,7 @@ class ExclusionCheckerTest {
 
         ExclusionOutcome o = ExclusionChecker.check(c, concurrent("AST425Y1"));
         assertEquals(EXCLUDED, o.getResult());
-        assertEquals(List.of("can't be taken at the same time as AST425Y1"), o.getReasons());
+        assertEquals(List.of(reason("can't be taken at the same time as AST425Y1", EXCLUDED)), o.getReasons());
         assertEquals(List.of("AST425Y1"), o.getBlockingCourses());
 
         assertEquals(NOT_EXCLUDED, ExclusionChecker.check(c, taken("AST425Y1")).getResult());
@@ -121,7 +125,8 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken("NEW357H1"));
 
         assertEquals(REVIEW, o.getResult());
-        assertEquals(List.of("may be excluded by NEW357H1 (Special Topics) offered in Fall 2019"), o.getReasons());
+        assertEquals(List.of(reason("may be excluded by NEW357H1 (Special Topics) offered in Fall 2019", REVIEW)),
+                o.getReasons());
         assertTrue(o.getBlockingCourses().isEmpty());
     }
 
@@ -132,7 +137,7 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken("CSC148H1", "PHY131H1"));
 
         assertEquals(EXCLUDED, o.getResult());
-        assertEquals(List.of("excluded by PHY131H1"), o.getReasons());
+        assertEquals(List.of(reason("excluded by PHY131H1", EXCLUDED)), o.getReasons());
         assertEquals(List.of("PHY131H1"), o.getBlockingCourses());
     }
 
@@ -179,8 +184,8 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken("CSC148H1"));
 
         assertEquals(REVIEW, o.getResult());
-        assertEquals(List.of("may be excluded by CSC148H1 except AP, IB, CAPE or GCE Transfer Credits"),
-                o.getReasons());
+        assertEquals(List.of(reason("may be excluded by CSC148H1 except AP, IB, CAPE or GCE Transfer Credits",
+                REVIEW)), o.getReasons());
     }
 
     @Test
@@ -190,7 +195,7 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken());
 
         assertEquals(REVIEW, o.getResult());
-        assertEquals(List.of("placement at the FSL400+ level"), o.getReasons());
+        assertEquals(List.of(reason("placement at the FSL400+ level", REVIEW)), o.getReasons());
     }
 
     @Test
@@ -200,7 +205,8 @@ class ExclusionCheckerTest {
         ExclusionOutcome o = ExclusionChecker.check(c, taken("FSL321Y1"));
 
         assertEquals(EXCLUDED, o.getResult());
-        assertEquals(List.of("placement at the FSL400+ level", "excluded by FSL321Y1"), o.getReasons());
+        assertEquals(List.of(reason("placement at the FSL400+ level", REVIEW),
+                reason("excluded by FSL321Y1", EXCLUDED)), o.getReasons());
         assertEquals(List.of("FSL321Y1"), o.getBlockingCourses());
     }
 

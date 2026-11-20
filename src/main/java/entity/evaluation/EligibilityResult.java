@@ -51,19 +51,10 @@ public final class EligibilityResult {
     }
 
     public Status getOverall() {
-        return Status.allOf(List.of(prerequisites.getStatus(), corequisites.getStatus(), exclusionStatus(),
-                offering == OfferingStatus.NOT_OFFERED ? Status.NOT_MET : Status.MET));
-    }
+        Status offered = offering == OfferingStatus.NOT_OFFERED ? Status.NOT_MET : Status.MET;
 
-    private Status exclusionStatus() {
-        switch (exclusions.getResult()) {
-            case EXCLUDED:
-                return Status.NOT_MET;
-            case REVIEW:
-                return Status.REVIEW;
-            default:
-                return Status.MET;
-        }
+        return Status.allOf(List.of(prerequisites.getStatus(), corequisites.getStatus(),
+                exclusions.getResult().toStatus(), offered));
     }
 
     @Override

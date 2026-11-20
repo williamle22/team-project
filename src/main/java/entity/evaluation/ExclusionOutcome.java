@@ -5,10 +5,10 @@ import java.util.Objects;
 
 public final class ExclusionOutcome {
     private final ExclusionResult result;
-    private final List<String> reasons;
+    private final List<ExclusionReason> reasons;
     private final List<String> blockingCourses;
 
-    public ExclusionOutcome(ExclusionResult result, List<String> reasons, List<String> blockingCourses) {
+    public ExclusionOutcome(ExclusionResult result, List<ExclusionReason> reasons, List<String> blockingCourses) {
         this.result = Objects.requireNonNull(result, "result");
         this.reasons = List.copyOf(Objects.requireNonNull(reasons, "reasons"));
         this.blockingCourses = List.copyOf(Objects.requireNonNull(blockingCourses, "blockingCourses"));
@@ -18,7 +18,7 @@ public final class ExclusionOutcome {
         return result;
     }
 
-    public List<String> getReasons() {
+    public List<ExclusionReason> getReasons() {
         return reasons;
     }
 
