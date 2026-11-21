@@ -5,17 +5,27 @@ import entity.requirement.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Evaluates a requisite against an {@link AcademicSnapshot}. Each node that isn't {@code MET} says what's missing, such
+ * as "needs at least 60% in CSC148H1; you have 55%". Requirements that the app can't check, such as free text or a GPA
+ * in a named subject, give {@code REVIEW}.
+ */
 public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNode> {
     private final AcademicSnapshot snapshot;
     private final boolean concurrentAllowed;
     private final MembershipResolver lists;
 
+    /**
+     * {@code concurrentAllowed} sets whether concurrent courses count. A requirement marked concurrent always allows
+     * them, for itself and every node under it.
+     */
     public RequisiteEvaluator(AcademicSnapshot snapshot, boolean concurrentAllowed, MembershipResolver lists) {
         this.snapshot = Objects.requireNonNull(snapshot, "snapshot");
         this.concurrentAllowed = concurrentAllowed;
         this.lists = Objects.requireNonNull(lists, "lists");
     }
 
+    /** Evaluates {@code r} and returns a node tree with the same shape. */
     public EvaluationNode evaluate(Requirement r) {
         if (r.isConcurrent() && !concurrentAllowed) {
             return r.accept(new RequisiteEvaluator(snapshot, true, lists));

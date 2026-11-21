@@ -15,6 +15,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * Turns Use Case 8's results into view lines and a one-line summary for each course. The summary names the deepest line
+ * that decides the course's status, such as "Missing CSC148H1".
+ */
 public final class CheckEligibilityPresenter implements CheckEligibilityOutputBoundary {
     private static final Pattern COURSE_CODE = Pattern.compile("[A-Z]{3}\\d{3}[HY]\\d");
 

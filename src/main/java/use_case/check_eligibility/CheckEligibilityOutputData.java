@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The results of checking one plan. {@code courses} is keyed by planned course ID, in plan order. Plan warnings cover
+ * problems across courses, such as retakes and exclusion conflicts between courses in the same term.
+ */
 public final class CheckEligibilityOutputData {
     private final UUID planId;
     private final Map<UUID, CourseEligibility> courses;

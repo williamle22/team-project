@@ -2,6 +2,7 @@ package entity.evaluation;
 
 import java.util.Objects;
 
+/** One exclusion that applies, as text for the student, with the result that it causes by itself. */
 public final class ExclusionReason {
     private final String text;
     private final ExclusionResult result;

@@ -3,6 +3,7 @@ package use_case.check_eligibility;
 import java.util.Objects;
 import java.util.UUID;
 
+/** The plan to check. */
 public final class CheckEligibilityInputData {
     private final UUID planId;
 

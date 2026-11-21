@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One line of a course's eligibility tree, ready for display. {@code reason} is {@code null} if there's nothing to
+ * explain.
+ */
 public final class EligibilityLine {
     private final String text;
     private final Status status;

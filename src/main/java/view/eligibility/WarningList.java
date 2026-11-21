@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/** Shows warnings, one per line, each with a warning sign. It hides itself when there are no warnings. */
 public final class WarningList extends JLabel {
     private static final Color WARNING_COLOUR = new Color(0xB26A00);
 

@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The result for one planned course. {@code sections} holds Prerequisites, Corequisites, and Exclusions, then an
+ * offering line if the term is in the current academic year.
+ */
 public final class CourseEligibility {
     private final UUID plannedCourseId;
     private final String code;

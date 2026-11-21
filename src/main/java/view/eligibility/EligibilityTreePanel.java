@@ -10,6 +10,10 @@ import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * Shows one course's eligibility: a heading with its status and summary, its warnings, and its requirement tree with
+ * every row expanded.
+ */
 public final class EligibilityTreePanel extends JPanel {
     private static final int ICON_SIZE = 10;
 
@@ -60,6 +64,7 @@ public final class EligibilityTreePanel extends JPanel {
         }
     }
 
+    /** Shows a prompt to select a course. */
     public void clear() {
         badge.setVisible(false);
         title.setText("Select a course");

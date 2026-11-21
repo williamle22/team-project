@@ -3,6 +3,7 @@ package view.eligibility;
 import javax.swing.*;
 import java.awt.*;
 
+/** The {@link StatusBadge} dot as an {@link Icon}, for trees, lists, and labels. */
 public final class StatusIcon implements Icon {
     private final String status;
     private final int size;

@@ -6,9 +6,15 @@ import entity.catalog.ExclusionItem;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/** Checks a course's exclusions. */
 public final class ExclusionChecker {
     private ExclusionChecker() {}
 
+    /**
+     * Returns {@code EXCLUDED} if a course in {@code snapshot} excludes {@code course}. Returns {@code REVIEW} if an
+     * exclusion is free text, or if it matches but has a qualifying note. Otherwise, returns {@code NOT_EXCLUDED}. A
+     * concurrent exclusion counts only courses taken at the same time.
+     */
     public static ExclusionOutcome check(Course course, AcademicSnapshot snapshot) {
         if (course.getExclusions().isEmpty()) {
             return new ExclusionOutcome(ExclusionResult.NOT_EXCLUDED, List.of(), List.of());
@@ -56,6 +62,11 @@ public final class ExclusionChecker {
         return new ExclusionOutcome(result, reasons, blocking);
     }
 
+    /**
+     * Returns, for each course in {@code courses}, the other courses in {@code courses} that its exclusions name. It
+     * ignores timing and skips free text, noted, and concurrent exclusions, so the caller decides whether each pair is
+     * a real conflict. A course set conflicts only if all of its courses are present.
+     */
     public static Map<String, Set<String>> conflictsWithin(Collection<Course> courses) {
         Set<String> codes = courses.stream().map(Course::getCode).collect(Collectors.toSet());
         Map<String, Set<String>> conflicts = new LinkedHashMap<>();

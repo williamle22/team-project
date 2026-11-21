@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * One course's eligibility, formatted for display. {@code status} is {@code "met"}, {@code "not met"}, or {@code
+ * "review"}.
+ */
 public final class CourseEligibilityView {
     private final UUID plannedCourseId;
     private final String code;

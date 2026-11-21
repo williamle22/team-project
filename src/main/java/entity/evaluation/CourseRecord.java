@@ -5,6 +5,10 @@ import entity.catalog.Course;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One course that the student has taken or is taking. {@code grade} is a percentage (0-100), or {@code null} if there's
+ * no final grade yet. Transfer credits have no grade.
+ */
 public final class CourseRecord {
     private final Course course;
     private final Integer grade;

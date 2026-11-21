@@ -6,6 +6,10 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Decides whether a placement is in the academic year that the current calendar covers. From May to August, that's the
+ * current summer. Otherwise, it's the Fall-Winter year that started in the most recent September.
+ */
 public final class CurrentAcademicYear {
     private final Clock clock;
 

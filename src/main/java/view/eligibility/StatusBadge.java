@@ -3,6 +3,10 @@ package view.eligibility;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * A colored dot that shows a status: green for met, red for not met, amber for review, and gray otherwise. Its tooltip
+ * names the status.
+ */
 public final class StatusBadge extends JComponent {
     private static final int SIZE = 12;
     private static final Color MET = new Color(0x2E7D32);
@@ -46,6 +50,7 @@ public final class StatusBadge extends JComponent {
         }
     }
 
+    /** Returns the tooltip for {@code status}, or {@code null} for an unknown status. */
     public static String tooltipFor(String status) {
         switch (status) {
             case "met":

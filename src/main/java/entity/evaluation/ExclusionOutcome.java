@@ -3,6 +3,10 @@ package entity.evaluation;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * The result of checking a course's exclusions. {@code reasons} explains each exclusion that applies, and {@code
+ * blockingCourses} lists the codes that exclude the course outright.
+ */
 public final class ExclusionOutcome {
     private final ExclusionResult result;
     private final List<ExclusionReason> reasons;

@@ -3,6 +3,10 @@ package interface_adapter.check_eligibility;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * One line of the eligibility tree, as plain strings. {@code status} is {@code "met"}, {@code "not met"}, or {@code
+ * "review"}, and {@code reason} is empty if there's nothing to explain.
+ */
 public final class EligibilityLineView {
     private final String text;
     private final String status;

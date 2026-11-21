@@ -4,6 +4,11 @@ import entity.term.AcademicTerm;
 
 import java.util.*;
 
+/**
+ * What a student has done at one point in time, for checking requirements. {@code taken} holds courses finished before
+ * that point, and {@code concurrent} holds courses taken at the same time. Both are keyed by course code, and a code is
+ * never in both. Build one with {@link #builder()}.
+ */
 public final class AcademicSnapshot {
     private final Map<String, CourseRecord> taken;
     private final Map<String, CourseRecord> concurrent;
@@ -49,14 +54,19 @@ public final class AcademicSnapshot {
         return cgpa == null ? OptionalDouble.empty() : OptionalDouble.of(cgpa);
     }
 
+    /**
+     * Returns the student's value for a profile attribute, such as {@code min_year_of_study}, or empty if it's unknown.
+     */
     public Optional<Object> profileFact(String attr) {
         return Optional.ofNullable(profileFacts.get(attr));
     }
 
+    /** Returns the term being checked, or empty if the snapshot covers the whole plan. */
     public Optional<AcademicTerm> getAsOf() {
         return Optional.ofNullable(asOf);
     }
 
+    /** Returns the taken courses, then the concurrent ones. */
     public Collection<CourseRecord> allRecords() {
         Collection<CourseRecord> all = new ArrayList<>(taken.values());
         all.addAll(concurrent.values());
@@ -64,6 +74,7 @@ public final class AcademicSnapshot {
         return all;
     }
 
+    /** Returns a copy that keeps only the courses in {@code codes}. Programs, CGPA, and profile facts stay the same. */
     public AcademicSnapshot restrictedTo(Set<String> codes) {
         Map<String, CourseRecord> takenCopy = new LinkedHashMap<>(taken);
         takenCopy.keySet().retainAll(codes);
@@ -105,6 +116,7 @@ public final class AcademicSnapshot {
                 + ", asOf=" + asOf + "}";
     }
 
+    /** Builds an {@code AcademicSnapshot}. A record replaces an earlier record with the same code. */
     public static final class Builder {
         private final Map<String, CourseRecord> taken = new LinkedHashMap<>();
         private final Map<String, CourseRecord> concurrent = new LinkedHashMap<>();
@@ -168,6 +180,7 @@ public final class AcademicSnapshot {
             return this;
         }
 
+        /** @throws IllegalArgumentException if a code is both taken and concurrent */
         public AcademicSnapshot build() {
             for (String code : taken.keySet()) {
                 if (concurrent.containsKey(code)) {

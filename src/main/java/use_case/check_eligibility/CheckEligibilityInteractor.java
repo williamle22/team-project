@@ -15,6 +15,11 @@ import use_case.SnapshotFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Use Case 8: checks each planned course with an {@link EligibilityEvaluator}, and turns the results into display
+ * lines. A course missing from the catalog gets {@code REVIEW}. Plan warnings flag unknown codes, retakes, unspecified
+ * transfer credits, and pairs of courses in the same term that exclude each other.
+ */
 public final class CheckEligibilityInteractor implements CheckEligibilityInputBoundary {
     private final PlanReader plans;
     private final CatalogReader catalog;

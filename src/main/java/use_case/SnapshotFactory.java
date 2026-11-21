@@ -14,6 +14,11 @@ import entity.term.Placement;
 
 import java.util.*;
 
+/**
+ * Builds the {@link AcademicSnapshot} for checking one planned course, or for the whole plan. Failed courses never
+ * count, a retaken course keeps its best grade, and the factory skips codes missing from the catalog. Transfer credits
+ * count as taken. Unspecified ones, such as {@code MAT1**}, count only toward the year of study.
+ */
 public final class SnapshotFactory {
     private final CatalogReader catalog;
     private final GpaCalculator gpa;
@@ -23,6 +28,10 @@ public final class SnapshotFactory {
         this.gpa = Objects.requireNonNull(gpa, "gpa");
     }
 
+    /**
+     * Returns the snapshot for {@code target}. Courses that end before it starts are taken, and other courses in any of
+     * its terms are concurrent. The CGPA and year of study count only courses that end before it starts.
+     */
     public AcademicSnapshot forCourse(Plan plan, PlannedCourse target) {
         Placement placement = target.getPlacement();
         AcademicTerm start = placement.startTerm();
@@ -54,6 +63,7 @@ public final class SnapshotFactory {
                 .build();
     }
 
+    /** Returns a snapshot that treats every course in the plan as taken, for checking graduation. */
     public AcademicSnapshot wholePlan(Plan plan) {
         List<PlannedCourse> notFailed = new ArrayList<>();
 

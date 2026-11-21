@@ -7,6 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * What the eligibility views show for one plan. {@code courses} is keyed by planned course ID. If {@code error} isn't
+ * empty, the check failed and the other fields are empty.
+ */
 public final class EligibilityState {
     private UUID planId;
     private Map<UUID, CourseEligibilityView> courses = Map.of();

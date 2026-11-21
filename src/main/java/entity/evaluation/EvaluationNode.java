@@ -4,6 +4,10 @@ import entity.requirement.Requirement;
 
 import java.util.*;
 
+/**
+ * The result of evaluating one requirement node. The nodes form a tree with the same shape as the requirement tree.
+ * {@code counted} holds the course codes that this node used.
+ */
 public final class EvaluationNode {
     private final Requirement requirement;
     private final Status status;
@@ -28,6 +32,10 @@ public final class EvaluationNode {
         return new EvaluationNode(r, s, reason, List.of(), counted);
     }
 
+    /**
+     * Returns a {@code MET} node with no requirement, for a course with no prerequisites or no corequisites. {@code
+     * reason} says which, such as {@code "no prerequisites"}.
+     */
     public static EvaluationNode none(String reason) {
         return new EvaluationNode(null, Status.MET, reason, List.of(), List.of());
     }
@@ -40,6 +48,7 @@ public final class EvaluationNode {
         return status;
     }
 
+    /** Returns a short explanation for the student, usually of why the node isn't {@code MET}. */
     public Optional<String> getReason() {
         return Optional.ofNullable(reason);
     }
@@ -52,6 +61,7 @@ public final class EvaluationNode {
         return counted;
     }
 
+    /** Returns the codes counted by this node and every node under it, in order, without duplicates. */
     public Set<String> allCounted() {
         Set<String> all = new LinkedHashSet<>(counted);
 

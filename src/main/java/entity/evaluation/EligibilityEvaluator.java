@@ -8,8 +8,14 @@ import entity.term.Placement;
 import java.util.List;
 import java.util.Optional;
 
+/** Checks one course's prerequisites, corequisites, exclusions, and offering. */
 public final class EligibilityEvaluator {
 
+    /**
+     * Corequisites can be taken at the same time as the course. A prerequisite must come before it, unless the
+     * prerequisite is marked concurrent. A course with no prerequisites or corequisites meets them. {@code
+     * currentAcademicYear} sets whether to check the offering.
+     */
     public EligibilityResult evaluate(Course course, Placement placement, AcademicSnapshot snapshot,
                                       boolean currentAcademicYear) {
         EvaluationNode prerequisites = requisite(course.getPrerequisites(), snapshot, false, "no prerequisites");

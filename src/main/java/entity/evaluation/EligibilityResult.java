@@ -3,6 +3,7 @@ package entity.evaluation;
 import java.util.List;
 import java.util.Objects;
 
+/** The full eligibility check for one course in one placement. */
 public final class EligibilityResult {
     private final String courseCode;
     private final EvaluationNode prerequisites;
@@ -50,6 +51,11 @@ public final class EligibilityResult {
         return warnings;
     }
 
+    /**
+     * Returns {@code NOT_MET} if any part is {@code NOT_MET}, otherwise {@code REVIEW} if any part is {@code REVIEW},
+     * otherwise {@code MET}. A course that isn't offered is {@code NOT_MET}, and {@code NOT_APPLICABLE} counts as
+     * offered.
+     */
     public Status getOverall() {
         Status offered = offering == OfferingStatus.NOT_OFFERED ? Status.NOT_MET : Status.MET;
 
