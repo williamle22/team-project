@@ -17,7 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EligibilityStateTest {
     private static final CourseEligibilityView VIEW =
-            new CourseEligibilityView(UUID.randomUUID(), "CSC148H1", "met", "Requirements met", List.of());
+            new CourseEligibilityView(UUID.randomUUID(), "CSC148H1", "met", "Requirements met", List.of(),
+                    List.of());
 
     @Test
     void defaultsToEmpty() {
@@ -51,7 +52,7 @@ class EligibilityStateTest {
         List<UUID> ids = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             CourseEligibilityView v =
-                    new CourseEligibilityView(UUID.randomUUID(), "CSC10" + i + "H1", "met", "", List.of());
+                    new CourseEligibilityView(UUID.randomUUID(), "CSC10" + i + "H1", "met", "", List.of(), List.of());
             courses.put(v.getPlannedCourseId(), v);
             ids.add(v.getPlannedCourseId());
         }

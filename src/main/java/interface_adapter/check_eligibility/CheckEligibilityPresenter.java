@@ -57,14 +57,19 @@ public final class CheckEligibilityPresenter implements CheckEligibilityOutputBo
         List<EligibilityLineView> lines = toViews(c.getSections());
 
         return new CourseEligibilityView(c.getPlannedCourseId(), c.getCode(), status(c.getOverall()),
-                summary(c.getOverall(), lines), lines);
+                summary(c.getOverall(), lines), lines, c.getWarnings());
     }
 
     private static List<EligibilityLineView> toViews(List<EligibilityLine> lines) {
         return lines.stream()
-                .map(l -> new EligibilityLineView(l.getText(), status(l.getStatus()), l.getReason().orElse(""),
+                .map(l -> new EligibilityLineView(l.getText(), status(l.getStatus()), reason(l),
                         toViews(l.getChildren())))
                 .collect(Collectors.toList());
+    }
+
+    private static String reason(EligibilityLine line) {
+        String reason = line.getReason().orElse("");
+        return reason.equalsIgnoreCase(line.getText()) ? "" : reason;
     }
 
     private static String status(Status s) {

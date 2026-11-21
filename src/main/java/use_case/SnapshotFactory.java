@@ -23,7 +23,7 @@ public final class SnapshotFactory {
         this.gpa = Objects.requireNonNull(gpa, "gpa");
     }
 
-    public SnapshotResult forCourse(Plan plan, PlannedCourse target) {
+    public AcademicSnapshot forCourse(Plan plan, PlannedCourse target) {
         Placement placement = target.getPlacement();
         AcademicTerm start = placement.startTerm();
         List<PlannedCourse> earlier = new ArrayList<>();
@@ -41,23 +41,20 @@ public final class SnapshotFactory {
             }
         }
 
-        Set<String> warnings = new LinkedHashSet<>();
-        Map<String, CourseRecord> taken = taken(plan, earlier, warnings);
-        Map<String, CourseRecord> concurrent = records(sameTime, warnings);
+        Map<String, CourseRecord> taken = taken(plan, earlier);
+        Map<String, CourseRecord> concurrent = records(sameTime);
 
         concurrent.keySet().removeAll(taken.keySet());
         taken.remove(target.getCode());
         concurrent.remove(target.getCode());
 
-        AcademicSnapshot snapshot = builder(plan, taken, plan.coursesEndedBefore(start), gpa.cgpaBefore(plan, start))
+        return builder(plan, taken, plan.coursesEndedBefore(start), gpa.cgpaBefore(plan, start))
                 .concurrent(concurrent.values())
                 .asOf(start)
                 .build();
-
-        return new SnapshotResult(snapshot, new ArrayList<>(warnings));
     }
 
-    public SnapshotResult wholePlan(Plan plan) {
+    public AcademicSnapshot wholePlan(Plan plan) {
         List<PlannedCourse> notFailed = new ArrayList<>();
 
         for (PlannedCourse c : plan.getCourses()) {
@@ -66,35 +63,25 @@ public final class SnapshotFactory {
             }
         }
 
-        Set<String> warnings = new LinkedHashSet<>();
-        Map<String, CourseRecord> taken = taken(plan, notFailed, warnings);
-
-        AcademicSnapshot snapshot = builder(plan, taken, plan.getCourses(), gpa.cgpa(plan)).build();
-
-        return new SnapshotResult(snapshot, new ArrayList<>(warnings));
+        return builder(plan, taken(plan, notFailed), plan.getCourses(), gpa.cgpa(plan)).build();
     }
 
-    private Map<String, CourseRecord> taken(Plan plan, List<PlannedCourse> courses, Set<String> warnings) {
-        Map<String, CourseRecord> taken = records(courses, warnings);
+    private Map<String, CourseRecord> taken(Plan plan, List<PlannedCourse> courses) {
+        Map<String, CourseRecord> taken = records(courses);
 
         for (TransferCredit t : plan.getTransferCredits()) {
-            if (t.getCode().contains("*")) {
-                continue;
-            }
-
-            Optional<Course> course = resolve(t.getCode(), warnings);
-
-            course.ifPresent(value -> keepBest(taken, new CourseRecord(value, null, true, false)));
+            catalog.findCourse(t.getCode())
+                    .ifPresent(course -> keepBest(taken, new CourseRecord(course, null, true, false)));
         }
 
         return taken;
     }
 
-    private Map<String, CourseRecord> records(List<PlannedCourse> courses, Set<String> warnings) {
+    private Map<String, CourseRecord> records(List<PlannedCourse> courses) {
         Map<String, CourseRecord> records = new LinkedHashMap<>();
 
         for (PlannedCourse c : courses) {
-            Optional<Course> course = resolve(c.getCode(), warnings);
+            Optional<Course> course = catalog.findCourse(c.getCode());
 
             if (course.isPresent()) {
                 Integer grade = c.getGrade().getFinalGrade().orElse(null);
@@ -103,16 +90,6 @@ public final class SnapshotFactory {
         }
 
         return records;
-    }
-
-    private Optional<Course> resolve(String code, Set<String> warnings) {
-        Optional<Course> course = catalog.findCourse(code);
-
-        if (course.isEmpty()) {
-            warnings.add(code + " isn't in the current calendar");
-        }
-
-        return course;
     }
 
     private static void keepBest(Map<String, CourseRecord> records, CourseRecord r) {

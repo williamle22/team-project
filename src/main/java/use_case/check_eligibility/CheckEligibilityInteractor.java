@@ -11,7 +11,6 @@ import use_case.CatalogReader;
 import use_case.CurrentAcademicYear;
 import use_case.PlanReader;
 import use_case.SnapshotFactory;
-import use_case.SnapshotResult;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,8 +78,7 @@ public final class CheckEligibilityInteractor implements CheckEligibilityInputBo
 
     private CourseEligibility check(Plan plan, PlannedCourse c, Course course) {
         Placement placement = c.getPlacement();
-        SnapshotResult snapshot = snapshots.forCourse(plan, c);
-        EligibilityResult result = evaluator.evaluate(course, placement, snapshot.getSnapshot(),
+        EligibilityResult result = evaluator.evaluate(course, placement, snapshots.forCourse(plan, c),
                 currentYear.isCurrent(placement));
 
         List<EligibilityLine> sections = new ArrayList<>();
@@ -100,7 +98,6 @@ public final class CheckEligibilityInteractor implements CheckEligibilityInputBo
             warnings.add(capitalize(w));
         }
 
-        warnings.addAll(snapshot.getWarnings());
 
         return new CourseEligibility(c.getId(), c.getCode(), placement.toString(), result.getOverall(), sections,
                 warnings);
@@ -165,8 +162,26 @@ public final class CheckEligibilityInteractor implements CheckEligibilityInputBo
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
 
-    private static List<String> planWarnings(Plan plan, List<Course> resolved) {
+    private List<String> planWarnings(Plan plan, List<Course> resolved) {
         List<String> warnings = new ArrayList<>();
+        Set<String> codes = new LinkedHashSet<>();
+
+        for (PlannedCourse c : plan.getCourses()) {
+            codes.add(c.getCode());
+        }
+
+        for (TransferCredit t : plan.getTransferCredits()) {
+            if (!t.getCode().contains("*")) {
+                codes.add(t.getCode());
+            }
+        }
+
+        for (String code : codes) {
+            if (catalog.findCourse(code).isEmpty()) {
+                warnings.add(code + " isn't in the current calendar");
+            }
+        }
+
         Map<String, Integer> counts = new LinkedHashMap<>();
 
         for (PlannedCourse c : plan.getCourses()) {
@@ -187,7 +202,7 @@ public final class CheckEligibilityInteractor implements CheckEligibilityInputBo
             for (String b : e.getValue()) {
                 String pair = a.compareTo(b) < 0 ? a + " " + b : b + " " + a;
 
-                if (seen.add(pair)) {
+                if (sameTime(plan, a, b) && seen.add(pair)) {
                     warnings.add(a + " and " + b + " exclude each other");
                 }
             }
@@ -201,5 +216,18 @@ public final class CheckEligibilityInteractor implements CheckEligibilityInputBo
         }
 
         return warnings;
+    }
+
+    private static boolean sameTime(Plan plan, String a, String b) {
+        for (PlannedCourse x : plan.getCourses()) {
+            for (PlannedCourse y : plan.getCourses()) {
+                if (x.getCode().equals(a) && y.getCode().equals(b)
+                        && !Collections.disjoint(x.getPlacement().terms(), y.getPlacement().terms())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

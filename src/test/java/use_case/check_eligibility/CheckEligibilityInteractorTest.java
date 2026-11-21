@@ -312,8 +312,18 @@ class CheckEligibilityInteractorTest {
 
         assertEquals(new CourseEligibility(unknown.getId(), "XYZ123H1", "Fall 2025", REVIEW,
                 List.of(leaf("Not in the current calendar", REVIEW)), List.of()), c);
-        assertEquals(List.of("XYZ123H1 isn't in the current calendar"),
-                data.getCourses().get(later.getId()).getWarnings());
+        assertTrue(data.getCourses().get(later.getId()).getWarnings().isEmpty());
+    }
+
+    @Test
+    void unknownCodeWarnsOnce() {
+        Plan p = plan();
+        p.addCourse("XYZ123H1", FALL_2025);
+        p.addCourse("XYZ123H1", FALL_2026);
+        p.addTransferCredit(new TransferCredit("ABC123H1", 0.5));
+
+        assertEquals(List.of("XYZ123H1 isn't in the current calendar", "ABC123H1 isn't in the current calendar",
+                "XYZ123H1 appears 2 times (retake?)"), run(p).getPlanWarnings());
     }
 
     @Test
@@ -329,10 +339,23 @@ class CheckEligibilityInteractorTest {
     @Test
     void exclusionConflictWarning() {
         Plan p = plan();
-        p.addCourse("CSC148H1", FALL_2026);
+        p.addCourse("CSC148H1", WINTER_2027);
+        p.addCourse("CSC108H1", FALL_2026);
         p.addCourse("CSC111H1", WINTER_2027);
 
         assertEquals(List.of("CSC148H1 and CSC111H1 exclude each other"), run(p).getPlanWarnings());
+    }
+
+    @Test
+    void sequentialExclusionIsOnlyACourseResult() {
+        Plan p = plan();
+        p.addCourse("CSC148H1", FALL_2026);
+        PlannedCourse csc111 = p.addCourse("CSC111H1", WINTER_2027);
+
+        CheckEligibilityOutputData data = run(p);
+
+        assertTrue(data.getPlanWarnings().isEmpty());
+        assertEquals(NOT_MET, section(data.getCourses().get(csc111.getId()), "Exclusions").getStatus());
     }
 
     @Test

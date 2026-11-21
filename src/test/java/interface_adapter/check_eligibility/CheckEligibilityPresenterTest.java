@@ -40,6 +40,26 @@ class CheckEligibilityPresenterTest {
         return new EligibilityLine(text, status, reason, List.of(children));
     }
 
+    @Test
+    void dropsReasonThatRepeatsText() {
+        CourseEligibility c = course(REVIEW,
+                line("Prerequisites", REVIEW, null,
+                        line("Permission of the instructor", REVIEW, "permission of the instructor")));
+
+        CourseEligibilityView v = present(c);
+
+        assertEquals("", v.getLines().get(0).getChildren().get(0).getReason());
+        assertEquals("Needs review: permission of the instructor", v.getSummary());
+    }
+
+    @Test
+    void passesCourseWarnings() {
+        CourseEligibility c = new CourseEligibility(UUID.randomUUID(), "CSC207H1", "Winter 2027", NOT_MET,
+                List.of(line("Not offered in Winter 2027", NOT_MET, null)), List.of("Not offered in Winter 2027"));
+
+        assertEquals(List.of("Not offered in Winter 2027"), present(c).getWarnings());
+    }
+
     private static CourseEligibility course(Status overall, EligibilityLine... sections) {
         return new CourseEligibility(UUID.randomUUID(), "CSC207H1", "Fall 2026", overall, List.of(sections),
                 List.of());

@@ -4,20 +4,32 @@ import data_access.catalog.FileCatalogCache;
 import data_access.catalog.HttpCatalogDownloader;
 import data_access.catalog.LiveCatalogRepository;
 import data_access.catalog.SqliteCatalogLoader;
+import entity.evaluation.EligibilityEvaluator;
+import entity.plan.CreditWeights;
+import entity.plan.GpaCalculator;
+import interface_adapter.check_eligibility.CheckEligibilityController;
+import interface_adapter.check_eligibility.CheckEligibilityPresenter;
+import interface_adapter.check_eligibility.EligibilityViewModel;
 import interface_adapter.search_courses.SearchCoursesController;
 import interface_adapter.search_courses.SearchCoursesPresenter;
 import interface_adapter.search_courses.SearchCoursesViewModel;
 import interface_adapter.sync_catalog.SyncCatalogController;
 import interface_adapter.sync_catalog.SyncCatalogPresenter;
 import interface_adapter.sync_catalog.SyncCatalogViewModel;
+import use_case.CurrentAcademicYear;
+import use_case.PlanReader;
+import use_case.SnapshotFactory;
+import use_case.check_eligibility.CheckEligibilityInteractor;
 import use_case.search_courses.SearchCoursesInteractor;
 import use_case.sync_catalog.SyncCatalogInputBoundary;
 import use_case.sync_catalog.SyncCatalogInteractor;
 import view.CatalogStatusBar;
 import view.SearchPanel;
+import view.eligibility.EligibilityView;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.Clock;
 
 /**
  * Builds the main window. Each {@code add} method connects one use case and its view. Pass {@code catalog} to every use
@@ -31,6 +43,8 @@ public final class AppBuilder {
     private final SyncCatalogViewModel syncCatalogViewModel = new SyncCatalogViewModel();
 
     private SyncCatalogController syncCatalogController;
+    private CheckEligibilityController checkEligibilityController;
+    private EligibilityView eligibilityView;
 
     public AppBuilder addCatalogSync() {
         SyncCatalogPresenter presenter = new SyncCatalogPresenter(syncCatalogViewModel);
@@ -60,6 +74,19 @@ public final class AppBuilder {
         });
 
         root.add(panel, BorderLayout.WEST);
+
+        return this;
+    }
+
+    public AppBuilder addEligibility(PlanReader plans) {
+        EligibilityViewModel viewModel = new EligibilityViewModel();
+        CheckEligibilityInteractor interactor = new CheckEligibilityInteractor(plans, catalog,
+                new SnapshotFactory(catalog, new GpaCalculator(CreditWeights.FROM_CODE)),
+                new CurrentAcademicYear(Clock.systemDefaultZone()), new EligibilityEvaluator(),
+                new CheckEligibilityPresenter(viewModel));
+
+        checkEligibilityController = new CheckEligibilityController(interactor);
+        eligibilityView = new EligibilityView(viewModel);
 
         return this;
     }

@@ -75,15 +75,13 @@ class SnapshotFactoryTest {
         add(p, "CSC108H1", FALL_2025, 80);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2026);
 
-        SnapshotResult r = factory.forCourse(p, target);
-        AcademicSnapshot s = r.getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertEquals(Set.of("CSC108H1"), s.getTaken().keySet());
         assertEquals(Optional.of(80), s.getTaken().get("CSC108H1").getGrade());
         assertTrue(s.getConcurrent().isEmpty());
         assertEquals(Optional.of(AcademicTerm.winter(2026)), s.getAsOf());
         assertEquals(OptionalDouble.of(3.7), s.getCgpa());
-        assertTrue(r.getWarnings().isEmpty());
     }
 
     @Test
@@ -93,7 +91,7 @@ class SnapshotFactoryTest {
         add(p, "CSC207H1", FALL_2026);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2026);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertTrue(s.getTaken().isEmpty());
         assertEquals(Set.of("CSC165H1"), s.getConcurrent().keySet());
@@ -106,8 +104,8 @@ class SnapshotFactoryTest {
         PlannedCourse winter = add(p, "CSC148H1", WINTER_2026);
         PlannedCourse fall = add(p, "CSC108H1", FALL_2025);
 
-        assertEquals(Set.of("MAT137Y1"), factory.forCourse(p, winter).getSnapshot().getConcurrent().keySet());
-        assertEquals(Set.of("MAT137Y1"), factory.forCourse(p, fall).getSnapshot().getConcurrent().keySet());
+        assertEquals(Set.of("MAT137Y1"), factory.forCourse(p, winter).getConcurrent().keySet());
+        assertEquals(Set.of("MAT137Y1"), factory.forCourse(p, fall).getConcurrent().keySet());
     }
 
     @Test
@@ -116,7 +114,7 @@ class SnapshotFactoryTest {
         add(p, "MAT137Y1", FULL_YEAR_2025, 70);
         PlannedCourse target = add(p, "STA130H1", SUMMER_2026);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertEquals(Set.of("MAT137Y1"), s.getTaken().keySet());
         assertTrue(s.getConcurrent().isEmpty());
@@ -129,7 +127,7 @@ class SnapshotFactoryTest {
         add(p, "CSC165H1", WINTER_2026, 45);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2026);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertTrue(s.getTaken().isEmpty());
         assertTrue(s.getConcurrent().isEmpty());
@@ -144,7 +142,7 @@ class SnapshotFactoryTest {
         add(p, "CSC108H1", WINTER_2027);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2027);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertEquals(Optional.of(75), s.getTaken().get("CSC108H1").getGrade());
         assertTrue(s.getConcurrent().isEmpty());
@@ -157,13 +155,13 @@ class SnapshotFactoryTest {
         add(p, "CSC108H1", WINTER_2026);
         PlannedCourse target = add(p, "CSC148H1", FALL_2026);
 
-        CourseRecord r = factory.forCourse(p, target).getSnapshot().getTaken().get("CSC108H1");
+        CourseRecord r = factory.forCourse(p, target).getTaken().get("CSC108H1");
 
         assertEquals(Optional.of(60), r.getGrade());
     }
 
     @Test
-    void unknownCodeWarns() {
+    void unknownCodeIsSkipped() {
         Plan p = plan();
         add(p, "XYZ123H1", FALL_2025);
         add(p, "XYZ123H1", SUMMER_2026);
@@ -171,26 +169,21 @@ class SnapshotFactoryTest {
         p.addTransferCredit(new TransferCredit("ABC123H1", 0.5));
         PlannedCourse target = add(p, "CSC207H1", FALL_2026);
 
-        SnapshotResult r = factory.forCourse(p, target);
-
-        assertEquals(List.of("XYZ123H1 isn't in the current calendar", "ABC123H1 isn't in the current calendar"),
-                r.getWarnings());
-        assertTrue(r.getSnapshot().getTaken().isEmpty());
+        assertTrue(factory.forCourse(p, target).getTaken().isEmpty());
     }
 
     @Test
-    void unspecifiedTransferCreditSkippedWithoutWarning() {
+    void unspecifiedTransferCreditSkipped() {
         Plan p = plan();
         p.addTransferCredit(new TransferCredit("MAT1**", 0.5));
         p.addTransferCredit(new TransferCredit("USP***", 3.5));
         PlannedCourse target = add(p, "CSC148H1", FALL_2025);
 
-        SnapshotResult r = factory.forCourse(p, target);
+        AcademicSnapshot s = factory.forCourse(p, target);
 
-        assertTrue(r.getWarnings().isEmpty());
-        assertTrue(r.getSnapshot().getTaken().isEmpty());
-        assertEquals(Optional.of(2), yearOfStudy(r.getSnapshot()));
-        assertEquals(Optional.of(true), r.getSnapshot().profileFact("has_transfer_credits"));
+        assertTrue(s.getTaken().isEmpty());
+        assertEquals(Optional.of(2), yearOfStudy(s));
+        assertEquals(Optional.of(true), s.profileFact("has_transfer_credits"));
     }
 
     @Test
@@ -199,7 +192,7 @@ class SnapshotFactoryTest {
         p.addTransferCredit(new TransferCredit("CSC108H1", 0.5));
         PlannedCourse target = add(p, "CSC148H1", FALL_2025);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
         CourseRecord r = s.getTaken().get("CSC108H1");
 
         assertTrue(r.isTransfer());
@@ -212,7 +205,7 @@ class SnapshotFactoryTest {
         Plan p = plan();
         PlannedCourse target = add(p, "CSC148H1", FALL_2025);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertEquals(Optional.of(false), s.profileFact("has_transfer_credits"));
     }
@@ -224,7 +217,7 @@ class SnapshotFactoryTest {
         add(p, "CSC108H1", FALL_2025, 70);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2026);
 
-        CourseRecord r = factory.forCourse(p, target).getSnapshot().getTaken().get("CSC108H1");
+        CourseRecord r = factory.forCourse(p, target).getTaken().get("CSC108H1");
 
         assertFalse(r.isTransfer());
         assertEquals(Optional.of(70), r.getGrade());
@@ -238,7 +231,7 @@ class SnapshotFactoryTest {
         add(p, "CSC165H1", WINTER_2026);
         PlannedCourse target = add(p, "CSC148H1", WINTER_2026);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertTrue(s.getTaken().isEmpty());
         assertEquals(Set.of("CSC165H1"), s.getConcurrent().keySet());
@@ -251,7 +244,7 @@ class SnapshotFactoryTest {
         p.addProgram("ASSPE1689", ProgramStatus.INTENDED);
         PlannedCourse target = add(p, "CSC148H1", FALL_2025);
 
-        AcademicSnapshot s = factory.forCourse(p, target).getSnapshot();
+        AcademicSnapshot s = factory.forCourse(p, target);
 
         assertEquals(Set.of("ASMAJ1689"), s.getEnrolledPrograms());
         assertEquals(Set.of("ASSPE1689"), s.getIntendedPrograms());
@@ -270,8 +263,8 @@ class SnapshotFactoryTest {
         p.addTransferCredit(new TransferCredit("ABC1**", 2.0));
         PlannedCourse target = add(p, "CSC148H1", FALL_2026);
 
-        assertEquals(Optional.of(1), yearOfStudy(factory.forCourse(p, target).getSnapshot()));
-        assertEquals(Optional.of(2), yearOfStudy(factory.wholePlan(p).getSnapshot()));
+        assertEquals(Optional.of(1), yearOfStudy(factory.forCourse(p, target)));
+        assertEquals(Optional.of(2), yearOfStudy(factory.wholePlan(p)));
     }
 
     @Test
@@ -282,7 +275,7 @@ class SnapshotFactoryTest {
             Plan p = plan();
             p.addTransferCredit(new TransferCredit("ABC1**", c[0]));
 
-            assertEquals(Optional.of((int) c[1]), yearOfStudy(factory.wholePlan(p).getSnapshot()), "credits " + c[0]);
+            assertEquals(Optional.of((int) c[1]), yearOfStudy(factory.wholePlan(p)), "credits " + c[0]);
         }
     }
 
@@ -295,7 +288,7 @@ class SnapshotFactoryTest {
         add(p, "CSC207H1", WINTER_2027, 70);
         p.addTransferCredit(new TransferCredit("STA130H1", 0.5));
 
-        AcademicSnapshot s = factory.wholePlan(p).getSnapshot();
+        AcademicSnapshot s = factory.wholePlan(p);
 
         assertEquals(List.of("CSC108H1", "CSC148H1", "CSC207H1", "STA130H1"), List.copyOf(s.getTaken().keySet()));
         assertTrue(s.getConcurrent().isEmpty());
