@@ -10,7 +10,7 @@ import java.util.Optional;
  * One exclusion of a course. Each item has exactly one of the following shapes:
  * <ul>
  *   <li>Text ({@link #isText()}): {@code text} is set, with a {@code kind}, and needs manual review.
- *   <li>Course set ({@link #isCourseSet()}): having taken any of {@code courses} excludes the course.
+ *   <li>Course set ({@link #isCourseSet()}): having taken all of {@code courses} excludes the course.
  *   <li>Filter ({@link #isFilter()}): {@code designators}, {@code levels}, and {@code exclude} narrow which courses
  *       exclude the course.
  * </ul>
@@ -53,7 +53,7 @@ public final class ExclusionItem {
         return exclude;
     }
 
-    /** Returns whether taking a matching course at the same time also excludes the course. */
+    /** Returns whether taking a matching course at the same time excludes the course. */
     public boolean isConcurrent() {
         return concurrent;
     }

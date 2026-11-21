@@ -130,15 +130,21 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **Actor:** Student (runs automatically whenever the plan changes)
 
 **Main flow:**
-1. For each course in the plan, the app builds a snapshot of the student's record as of that term: courses that ended before it count as taken, and courses running at the same time count as concurrent.
-2. The app evaluates the course's prerequisites against taken courses, its corequisites against taken and concurrent courses, and its exclusions against everything in the plan.
-3. For courses in the current academic year, the app checks that the course is offered in the chosen section.
+1. For each course in the plan, the app builds a snapshot of the student's record as of that course's term. Courses that ended before it count as taken, and courses running at the same time count as concurrent. Failed courses don't count, a retaken course counts once with its best grade, and transfer credits count as taken.
+2. The app checks the course's prerequisites against taken courses, and its corequisites against taken and concurrent courses. It checks exclusions against taken courses, and against concurrent courses for exclusions that say "not concurrently with".
+3. For courses in the current academic year, the app checks that the course is offered in the chosen term and section.
 4. Each course shows Met, Not Met, or Review, with a reason for every requirement that isn't met.
+5. The app also warns about problems across the plan: retakes, codes that aren't in the current calendar, and two courses in the same term that exclude each other.
 
 **Alternative flows:**
 - A requirement needs a minimum grade in a course with no recorded grade yet: Review.
 - A requirement needs human judgement (for example, instructor permission): Review.
-- The course is outside the current academic year: the offering check is skipped.
+- A course the student has taken excludes this one: Not Met.
+- An exclusion is free text, or has a qualifying note: Review.
+- The course isn't offered in the chosen term and section: Not Met.
+- The course is outside the current academic year: the app skips the offering check.
+- The course isn't in the current calendar: Review, plus a plan warning.
+- The plan has an unspecified transfer credit, like `MAT1**`: it doesn't count toward any requirement, and the app warns that it counts only with the department's permission.
 
 ### Use Case 9: Record Grades and Calculate CGPA (User Story 7)
 **Actor:** Student
@@ -194,7 +200,20 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - Subclasses: logical nodes (`AndReq`, `OrReq`, `ChooseReq`, `NotReq`), academic nodes (`CourseReq`, `CreditsReq`, `AverageReq`, `GpaReq`), and context nodes (`ProgramReq`, `RowRefReq`, `ProfileReq`, `TextReq`)
 - Methods: `accept(RequirementVisitor<T> visitor)`. Visitors include evaluation, printing, and other operations.
 
+### Evaluation
+
+**`AcademicSnapshot`**: what a student has done as of one term, for checking requirements.
+- Variables: `taken` and `concurrent` (course code to `CourseRecord`), `enrolledPrograms`, `intendedPrograms`, `cgpa`, `profileFacts` (like `min_year_of_study`), `asOf`
+- Methods: getters, `builder()`, `restrictedTo(codes)`
+
+**`CourseRecord`**: one course as it counts toward requirements: the `Course`, its final `grade` if there is one, and whether it's a transfer credit or CR/NCR.
+
 **`Status`**: the result of evaluating a requirement: `MET`, `NOT_MET`, or `REVIEW`.
+
+**`EvaluationNode`**: the result of checking one requirement node: a `status`, a `reason`, `children` in the same shape as the requirement tree, and the course codes it `counted`.
+
+**`EligibilityResult`**: one course's full check: `prerequisites` and `corequisites` (`EvaluationNode`s), `exclusions` (an `ExclusionOutcome`), `offering` (`OfferingStatus`), and `warnings`.
+- Methods: getters, `getOverall()`
 
 ### Plans
 
@@ -208,12 +227,12 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`ProgramSelection`**: a program on a plan.
 - Variables: `code`, `status` (`ENROLLED` or `INTENDED`)
 
-**`TransferCredit`**: credit from another institution. It always counts as taken.
+**`TransferCredit`**: credit from another institution. A specific credit, like `MAT135H1`, counts as taken. An unspecified one, like `MAT1**`, counts toward total credits but not toward requirements, because UofT counts it only with the department's permission.
 - Variables: `code`, `weight`
 
 **`Placement`**: where a course sits in the plan.
 - Variables: `period` (Fall–Winter or Summer), `year`, `section` (`F`, `S`, or `Y`)
-- Methods: `startTerm()`, `endTerm()`, `occupies(AcademicTerm term)`, `academicYear()`
+- Methods: `startTerm()`, `endTerm()`, `terms()`, `occupies(AcademicTerm term)`, `academicYear()`
 
 **`AcademicTerm`**: a season and a year, like Winter 2027.
 - Variables: `season`, `year`
@@ -234,7 +253,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`GpaCalculator`**: calculates a plan's GPAs from final grades, following the FAS calendar.
 - Methods: `cgpa(Plan plan)`, `sgpa(Plan plan, AcademicTerm term)`, `cgpaBefore(Plan plan, AcademicTerm term)`, `projectedCgpa(Plan plan)`. GPAs exclude CR/NCR courses, transfer credits, and repeated attempts marked Extra.
 
-**`CreditSummary`**: a plan's credits, split into completed, failed, in progress, awaiting a grade, and planned.
+**`CreditSummary`**: a plan's credits, split into completed, transfer, failed, in progress, awaiting a grade, and planned.
 - Methods: `of(Plan plan, CreditWeights weights, AcademicTerm current)`, `getCompleted()` (the total credits completed in Use Case 9)
 
 ### Timetable
@@ -270,7 +289,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **Documentation:** [https://apis.io/apis/university-of-toronto/university-of-toronto-courses-api/](https://apis.io/apis/university-of-toronto/university-of-toronto-courses-api/)
 
 **How it's used:**
-- dgx-backend calls it daily to record which sections (`F`, `S`, `Y`) each course is offered in this year. The app uses those to warn when a course is placed in a term it isn't offered.
+- dgx-backend calls it daily to record which sections (`F`, `S`, `Y`) each course is offered in this year. The app uses those to mark a course Not Met when it's placed in a term it isn't offered in (Use Case 8).
 - The app will call it directly to get each course's lecture, tutorial, and practical sections and meeting times for the timetable (*no use case yet*; see Use Cases).
 
 ### Course evaluations
@@ -307,6 +326,11 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
    If you save a copy of the catalog at `data/dgx.db`, `SqliteCatalogLoaderTest` also checks that every row of the real catalog loads. Otherwise, JUnit skips that test.
 3. Run `app.Main` from IntelliJ.
+
+To see eligibility checking without the planner, run the demo from the repo root. It needs the catalog at `data/dgx.db`, and it shows two sample plans with each course's status and requirement tree:
+```sh
+mvn -q test-compile exec:java -Dexec.mainClass=demo.EligibilityDemo -Dexec.classpathScope=test
+```
 
 The first launch needs an internet connection to download the catalog, which is saved to `data/dgx.db` in the folder the app runs from (the repo root when run from IntelliJ). The `data/` folder is in `.gitignore`. After that, the app works offline, except for course evaluations.
 
