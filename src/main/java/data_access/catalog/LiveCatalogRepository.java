@@ -20,12 +20,12 @@ import java.util.Optional;
  */
 public final class LiveCatalogRepository implements CatalogReader, LiveCatalog, SearchCoursesDataAccessInterface {
     private volatile CatalogReader current = InMemoryCatalogRepository.empty();
-    private volatile CourseSearchIndex index = CourseSearchIndex.empty();
+    private volatile SearchIndex<Course> index = SearchIndex.empty();
 
     @Override
     public void replace(CatalogReader catalog) {
         Objects.requireNonNull(catalog, "catalog");
-        index = new CourseSearchIndex(catalog.allCourses());
+        index = new SearchIndex<>(catalog.allCourses(), Course::getCode, Course::getTitle);
         current = catalog;
     }
 
@@ -61,6 +61,6 @@ public final class LiveCatalogRepository implements CatalogReader, LiveCatalog, 
 
     @Override
     public List<Course> search(String query, SearchFilters filters) {
-        return index.search(query, filters);
+        return index.search(query, filters::accepts);
     }
 }
