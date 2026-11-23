@@ -127,15 +127,6 @@ class SearchCoursesInteractorTest {
     }
 
     @Test
-    void rankingOrdersByRankThenCode() {
-        List<Course> courses = new ArrayList<>(List.of(course("CSC148H1"), course("MAT148H1"), course("CSC108H1"),
-                course("BIO130H1")));
-        courses.sort(SearchCoursesInteractor.ranking("CSC1"));
-        assertEquals(List.of(course("CSC108H1"), course("CSC148H1"), course("BIO130H1"), course("MAT148H1")),
-                courses);
-    }
-
-    @Test
     void truncatesAtMax() {
         catalog.matches = codes(100, 150).stream().map(c -> course(c)).collect(Collectors.toList());
         search("csc");

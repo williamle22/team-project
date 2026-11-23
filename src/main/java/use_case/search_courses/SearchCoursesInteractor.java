@@ -2,11 +2,10 @@ package use_case.search_courses;
 
 import entity.catalog.BreadthCategory;
 import entity.catalog.Course;
+import use_case.CodeRanking;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +31,7 @@ public final class SearchCoursesInteractor implements SearchCoursesInputBoundary
         }
 
         List<Course> matches = new ArrayList<>(catalog.search(input.getQuery(), input.getFilters()));
-        matches.sort(ranking(input.getQuery()));
+        matches.sort(CodeRanking.by(input.getQuery(), Course::getCode));
 
         int totalMatches = matches.size();
         List<Course> results = matches.subList(0, Math.min(MAX_RESULTS, matches.size()));
@@ -40,26 +39,6 @@ public final class SearchCoursesInteractor implements SearchCoursesInputBoundary
                 .collect(Collectors.toList());
 
         presenter.prepareSuccessView(new SearchCoursesOutputData(items, totalMatches));
-    }
-
-    static Comparator<Course> ranking(String query) {
-        String q = query.replaceAll("\\s+", "").toUpperCase(Locale.ROOT);
-        return Comparator.comparingInt((Course c) -> rank(c.getCode(), q)).thenComparing(Course::getCode);
-    }
-
-    private static int rank(String code, String q) {
-        if (code.equals(q)) {
-            return 0;
-        }
-
-        if (code.startsWith(q)) {
-            return 1;
-        }
-
-        if (code.contains(q)) {
-            return 2;
-        }
-        return 3;
     }
 
     private static SearchResultItem toItem(Course course) {
