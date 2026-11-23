@@ -5,6 +5,10 @@ import entity.catalog.ProgramType;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * What the user typed and chose. It keeps the query exactly as the user typed it. An empty {@code types} means any
+ * program type.
+ */
 public final class SearchProgramsInputData {
     private final String query;
     private final Set<ProgramType> types;

@@ -7,6 +7,7 @@ import use_case.search_programs.SearchProgramsOutputData;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/** Turns the program search's results into rows and a message. */
 public final class SearchProgramsPresenter implements SearchProgramsOutputBoundary {
     private static final String NO_MATCHES = "No programs match. Try fewer words or types.";
 

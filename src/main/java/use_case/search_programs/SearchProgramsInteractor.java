@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Use Case 2: ranks the matching programs with {@link CodeRanking}. Unlike the course search, it keeps every match,
+ * because the catalog has few enough programs to list them all.
+ */
 public final class SearchProgramsInteractor implements SearchProgramsInputBoundary {
     private final SearchProgramsDataAccessInterface catalog;
     private final SearchProgramsOutputBoundary presenter;

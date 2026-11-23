@@ -2,6 +2,10 @@ package interface_adapter.search_programs;
 
 import java.util.Objects;
 
+/**
+ * One row of the program search results, formatted for display. {@code type} is the type's display name, such as
+ * {@code "Major"}.
+ */
 public final class ProgramResultRow {
     private final String code;
     private final String title;

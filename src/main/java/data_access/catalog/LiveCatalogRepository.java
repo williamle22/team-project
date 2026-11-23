@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * The shared {@link CatalogReader} that every use case reads. It forwards each call to the current catalog, which
  * starts empty. UC1 replaces it when it loads a catalog. You can read it from any thread. It also searches the
- * current catalog for UC2, using an index that it rebuilds each time UC1 replaces the catalog.
+ * current catalog's courses and programs for UC2, using indexes that it rebuilds each time UC1 replaces the catalog.
  */
 public final class LiveCatalogRepository implements CatalogReader, LiveCatalog,
         SearchCoursesDataAccessInterface, SearchProgramsDataAccessInterface {

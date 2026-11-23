@@ -4,6 +4,7 @@ import entity.catalog.ProgramType;
 
 import java.util.Objects;
 
+/** One program search result, as plain values for the presenter. */
 public final class ProgramResultItem {
     private final String code;
     private final String title;

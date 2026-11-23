@@ -3,6 +3,7 @@ package interface_adapter.search_programs;
 import java.util.List;
 import java.util.Objects;
 
+/** What the program picker shows. If {@code message} isn't empty, the picker shows it instead of the results. */
 public final class SearchProgramsState {
     private List<ProgramResultRow> results = List.of();
     private String message = "";

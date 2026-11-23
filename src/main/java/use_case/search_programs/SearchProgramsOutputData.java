@@ -3,6 +3,7 @@ package use_case.search_programs;
 import java.util.List;
 import java.util.Objects;
 
+/** The results of one program search: every matching program, best match first. */
 public final class SearchProgramsOutputData {
     private final List<ProgramResultItem> results;
 
