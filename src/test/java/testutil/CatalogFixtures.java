@@ -14,6 +14,9 @@ import entity.catalog.Requisite;
 import entity.catalog.RowKind;
 import entity.catalog.Section;
 import entity.catalog.Sessions;
+import entity.degree.Degree;
+import entity.degree.DegreeType;
+import entity.degree.ProgramCombinationRule;
 import entity.evaluation.CourseRecord;
 import entity.requirement.AndReq;
 import entity.requirement.ChooseReq;
@@ -28,6 +31,7 @@ import entity.requirement.TextKind;
 import entity.requirement.TextReq;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * One-line builders for catalog test data. Each course's designator, number, level, and weight come from its code,
@@ -216,5 +220,20 @@ public final class CatalogFixtures {
                 + "PHL357H1 may also be used to fulfill this requirement.";
 
         return new Completion(rows, List.of(), List.of(), notes, raw);
+    }
+
+    /** A small HBSC: 3.0 credits, at least 1.0 at the 300+ level, at most 1.0 at the 100 level, and 2 Majors. */
+    public static Degree testDegree() {
+        List<CompletionRow> rows = List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, credits(3, CourseFilter.any()), "3.0 credits"),
+                completionRow(2, RowKind.CONSTRAINT, null, 1,
+                        credits(1, CourseFilter.builder().levels(List.of(300, 400)).build()),
+                        "at least 1.0 credit at the 300+ level"),
+                completionRow(3, RowKind.LIMIT, null, 1,
+                        new CreditsReq(0, 1.0, null, CourseFilter.builder().levels(List.of(100)).build(), false),
+                        "at most 1.0 credit at the 100 level"));
+
+        return new Degree(DegreeType.HBSC, completion(rows),
+                new ProgramCombinationRule(List.of(Map.of(ProgramType.MAJOR, 2))));
     }
 }
