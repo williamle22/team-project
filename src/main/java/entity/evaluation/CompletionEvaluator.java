@@ -3,7 +3,7 @@ package entity.evaluation;
 import entity.catalog.Completion;
 import entity.catalog.CompletionRow;
 import entity.catalog.RowKind;
-import entity.requirement.CreditsReq;
+import entity.requirement.*;
 
 import java.util.*;
 
@@ -15,7 +15,7 @@ public final class CompletionEvaluator {
         for (CompletionRow row : completion.topLevelRows()) {
             RowResult r = walk.evaluate(row, null);
 
-            if (Walk.counts(r)) {
+            if (walk.counts(r)) {
                 statuses.add(r.getStatus());
             }
         }
@@ -28,11 +28,18 @@ public final class CompletionEvaluator {
         private final AcademicSnapshot snapshot;
         private final CompletionResolver resolver;
         private final List<RowResult> results = new ArrayList<>();
+        private final Set<Integer> options = new HashSet<>();
 
         Walk(Completion completion, AcademicSnapshot snapshot) {
             this.completion = completion;
             this.snapshot = snapshot;
             this.resolver = new CompletionResolver(completion, snapshot);
+
+            for (CompletionRow row : completion.getRequirements()) {
+                if (row.getKind() == RowKind.CHOICE) {
+                    collectRows(row.getReq().orElseThrow(), options);
+                }
+            }
         }
 
         RowResult evaluate(CompletionRow row, Set<String> pool) {
@@ -89,8 +96,26 @@ public final class CompletionEvaluator {
             return finish(new RowResult(row, true, Status.allOf(statuses), null, detail, new ArrayList<>(claimed)));
         }
 
-        private static boolean counts(RowResult r) {
-            return r.isApplicable();
+        private static void collectRows(Requirement req, Set<Integer> rows) {
+            List<Requirement> items = List.of();
+
+            if (req instanceof RowRefReq) {
+                rows.addAll(((RowRefReq) req).getRows());
+            } else if (req instanceof OrReq) {
+                items = ((OrReq) req).getItems();
+            } else if (req instanceof ChooseReq) {
+                items = ((ChooseReq) req).getItems();
+            } else if (req instanceof AndReq) {
+                items = ((AndReq) req).getItems();
+            }
+
+            for (Requirement item : items) {
+                collectRows(item, rows);
+            }
+        }
+
+        private boolean counts(RowResult r) {
+            return r.isApplicable() && !options.contains(r.getNumber());
         }
 
         private RowResult limit(CompletionRow row, Set<String> pool) {

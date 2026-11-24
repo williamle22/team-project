@@ -7,6 +7,7 @@ import entity.requirement.CourseFilter;
 import entity.requirement.CreditsReq;
 import entity.requirement.ProfileReq;
 import entity.requirement.Requirement;
+import entity.requirement.RowRefReq;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,8 +19,10 @@ import static entity.evaluation.Status.REVIEW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static testutil.CatalogFixtures.and;
 import static testutil.CatalogFixtures.asmin0667;
 import static testutil.CatalogFixtures.asmin1001;
+import static testutil.CatalogFixtures.choose;
 import static testutil.CatalogFixtures.completion;
 import static testutil.CatalogFixtures.completionRow;
 import static testutil.CatalogFixtures.credits;
@@ -164,6 +167,63 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void choiceRowOneOptionMet() {
+        CompletionResult r = evaluator.evaluate(languages(or(ref(2), ref(3))), taken("SLA105Y1", "SLA100H1"));
+
+        assertEquals(MET, status(r, 2));
+        assertEquals(NOT_MET, status(r, 3));
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, status(r, 5));
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void choiceRowNoOptionMet() {
+        CompletionResult r = evaluator.evaluate(languages(or(ref(2), ref(3))), taken("SLA100H1"));
+
+        assertEquals(MET, status(r, 1));
+        assertEquals(NOT_MET, status(r, 5));
+        assertEquals(NOT_MET, r.getOverall());
+    }
+
+    @Test
+    void chooseTwoOptions() {
+        Completion c = languages(choose(2, ref(2), ref(3)));
+
+        assertEquals(NOT_MET, evaluator.evaluate(c, taken("SLA100H1", "SLA105Y1")).getOverall());
+        assertEquals(MET, evaluator.evaluate(c, taken("SLA100H1", "SLA105Y1", "SLA106H1")).getOverall());
+    }
+
+    @Test
+    void nestedOptionIsCollected() {
+        CompletionResult r = evaluator.evaluate(languages(or(ref(2), and(ref(3), ref(4)))),
+                taken("SLA105Y1", "SLA100H1"));
+
+        assertEquals(NOT_MET, status(r, 3));
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void optionsStillShownAndClaim() {
+        CompletionResult r = evaluator.evaluate(languages(or(ref(2), ref(3))), taken("SLA105Y1", "SLA100H1"));
+
+        assertEquals(List.of("SLA105Y1"), r.row(2).orElseThrow().getClaimed());
+        assertTrue(r.row(1).orElseThrow().getClaimed().contains("SLA105Y1"));
+    }
+
+    @Test
+    void choiceWithOtherItemsIgnoresThem() {
+        CompletionResult r = evaluator.evaluate(languages(or(ref(2), text("another language area, with approval"))),
+                taken("SLA100H1", "SLA106H1"));
+
+        assertEquals(NOT_MET, status(r, 2));
+        assertEquals(MET, status(r, 3));
+        assertEquals(MET, status(r, 1));
+        assertEquals(REVIEW, status(r, 5));
+    }
+
+    @Test
     void limitWithinCapIsMet() {
         CompletionResult r = evaluator.evaluate(ASMIN0667, taken(
                 "HPS100H1", "HPS110H1", "HPS200H1", "HPS201H1", "HPS202H1", "HPS203H1", "HPS300H1", "HPS301H1"));
@@ -305,6 +365,19 @@ class CompletionEvaluatorTest {
 
         assertTrue(r.row(2).orElseThrow().isApplicable());
         assertEquals(NOT_MET, status(r, 1));
+    }
+
+    private static RowRefReq ref(int row) {
+        return new RowRefReq(List.of(row), false);
+    }
+
+    private static Completion languages(Requirement choice) {
+        return completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, "Czech and Slovak", 1, req("SLA105Y1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, "Polish", 1, req("SLA106H1"), "raw"),
+                completionRow(4, RowKind.ALLOCATION, null, 1, req("SLA100H1"), "raw"),
+                completionRow(5, RowKind.CHOICE, null, null, choice, "raw")));
     }
 
     private static CreditsReq hpsCap() {
