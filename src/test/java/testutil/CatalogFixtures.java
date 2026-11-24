@@ -191,4 +191,30 @@ public final class CatalogFixtures {
 
         return new Completion(rows, lists, List.of(), List.of(), raw);
     }
+
+    /** ASMIN0667 (History and Philosophy of Science and Technology Minor), copied by hand from {@code data/dgx.db}. */
+    public static Completion asmin0667() {
+        CourseFilter hps = CourseFilter.builder().designators(List.of("HPS"))
+                .courses(List.of("JHE353H1", "JHE355H1", "JPH311H1", "PHL245H1", "PHL356H1", "PHL357H1")).build();
+        List<CompletionRow> rows = List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, credits(4, hps),
+                        "(4.0 credits)\n3. Additional HPS courses to a total of 4.0 credits, with at least 1.0 credit "
+                                + "at the 300+level. JHE353H1, JHE355H1, JPH311H1, PHL245H1, PHL356H1, or PHL357H1 "
+                                + "may also be used to fulfill this requirement."),
+                completionRow(2, RowKind.LIMIT, null, 1, new CreditsReq(0, 1.0, null,
+                                CourseFilter.builder().designators(List.of("HPS")).levels(List.of(100)).build(), false),
+                        "Up to 1.0 credit in HPS courses at the 100-level will be counted towards the minor"),
+                completionRow(3, RowKind.CONSTRAINT, null, 1,
+                        credits(1, CourseFilter.builder().levels(List.of(300, 400)).build()),
+                        "with at least 1.0 credit at the 300+level"));
+        List<String> notes = List.of("Recommended: 0.5 credit from any HPS 100-level courses",
+                "Recommended: at least 0.5 credit from any HPS 200-level courses");
+        String raw = "(4.0 credits)\n1. Recommended: 0.5 credit from any HPS 100-level courses. Up to 1.0 credit in "
+                + "HPS courses at the 100-level will be counted towards the minor.\n2. Recommended: at least 0.5 "
+                + "credit from any HPS 200-level courses.\n3. Additional HPS courses to a total of 4.0 credits, with "
+                + "at least 1.0 credit at the 300+level. JHE353H1, JHE355H1, JPH311H1, PHL245H1, PHL356H1, or "
+                + "PHL357H1 may also be used to fulfill this requirement.";
+
+        return new Completion(rows, List.of(), List.of(), notes, raw);
+    }
 }

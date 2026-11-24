@@ -3,11 +3,9 @@ package entity.evaluation;
 import entity.catalog.Completion;
 import entity.catalog.CompletionRow;
 import entity.catalog.RowKind;
+import entity.requirement.CreditsReq;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public final class CompletionEvaluator {
     public CompletionResult evaluate(Completion completion, AcademicSnapshot snapshot) {
@@ -15,7 +13,11 @@ public final class CompletionEvaluator {
         List<Status> statuses = new ArrayList<>();
 
         for (CompletionRow row : completion.topLevelRows()) {
-            statuses.add(walk.evaluate(row, null).getStatus());
+            RowResult r = walk.evaluate(row, null);
+
+            if (Walk.counts(r)) {
+                statuses.add(r.getStatus());
+            }
         }
 
         return new CompletionResult(walk.results, Status.allOf(statuses), List.of());
@@ -34,6 +36,19 @@ public final class CompletionEvaluator {
         }
 
         RowResult evaluate(CompletionRow row, Set<String> pool) {
+            Optional<EvaluationNode> audience = row.getAudience()
+                    .map(a -> new RequisiteEvaluator(snapshot, true, resolver).evaluate(a));
+
+            if (audience.isPresent() && audience.get().getStatus() == Status.NOT_MET) {
+                EvaluationNode who = audience.get();
+
+                return finish(new RowResult(row, false, Status.NOT_MET, who.getReason().orElse(null), who, List.of()));
+            }
+
+            if (row.getKind() == RowKind.LIMIT) {
+                return finish(limit(row, pool));
+            }
+
             List<CompletionRow> children = completion.childrenOf(row.getNumber());
             List<Status> statuses = new ArrayList<>();
             Set<String> claimed = new LinkedHashSet<>();
@@ -41,7 +56,11 @@ public final class CompletionEvaluator {
             for (CompletionRow child : children) {
                 if (child.getKind() == RowKind.ALLOCATION) {
                     RowResult r = evaluate(child, null);
-                    statuses.add(r.getStatus());
+
+                    if (counts(r)) {
+                        statuses.add(r.getStatus());
+                    }
+
                     claimed.addAll(r.getClaimed());
                 }
             }
@@ -59,11 +78,53 @@ public final class CompletionEvaluator {
 
             for (CompletionRow child : children) {
                 if (child.getKind() != RowKind.ALLOCATION) {
-                    statuses.add(evaluate(child, claimed).getStatus());
+                    RowResult r = evaluate(child, claimed);
+
+                    if (counts(r)) {
+                        statuses.add(r.getStatus());
+                    }
                 }
             }
 
             return finish(new RowResult(row, true, Status.allOf(statuses), null, detail, new ArrayList<>(claimed)));
+        }
+
+        private static boolean counts(RowResult r) {
+            return r.isApplicable();
+        }
+
+        private RowResult limit(CompletionRow row, Set<String> pool) {
+            CreditsReq cap = (CreditsReq) row.getReq().orElseThrow();
+            double max = cap.getMaxAmount().orElseThrow();
+            Optional<CreditsReq> parent = row.getParent().flatMap(completion::row).flatMap(CompletionRow::getReq)
+                    .filter(r -> r instanceof CreditsReq).map(r -> (CreditsReq) r);
+            double matched = 0;
+
+            for (CourseRecord r : scope(row, pool).allRecords()) {
+                boolean counted = parent.isEmpty()
+                        || CourseMatcher.matches(parent.get().getFilter(), r, resolver) != Match.NO;
+
+                if (counted && CourseMatcher.matches(cap.getFilter(), r, resolver) != Match.NO) {
+                    matched += cap.getWeight().orElse(r.getCourse().getWeight());
+                }
+            }
+
+            if (matched <= max + 1e-9) {
+                return new RowResult(row, true, Status.MET, null, null, List.of());
+            }
+
+            String reason = matched + " credits fall under this limit; only " + max + " can count";
+
+            if (parent.isEmpty()) {
+                return new RowResult(row, true, Status.REVIEW, reason, null, List.of());
+            }
+
+            CreditsReq p = parent.get();
+            CreditsReq raised = new CreditsReq(p.getAmount() + matched - max, p.getMaxAmount().orElse(null),
+                    p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
+            Status status = new RequisiteEvaluator(snapshot, true, resolver).evaluate(raised).getStatus();
+
+            return new RowResult(row, true, status, reason, null, List.of());
         }
 
         private AcademicSnapshot scope(CompletionRow row, Set<String> pool) {

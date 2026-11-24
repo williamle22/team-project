@@ -132,6 +132,11 @@ class CatalogJsonMapperTest {
     }
 
     @Test
+    void asmin0667EqualsHandBuiltTree() {
+        assertEquals(CatalogFixtures.asmin0667(), mapper.parseCompletion(column("ASMIN0667.json", "completion")));
+    }
+
+    @Test
     void nullColumnsGiveNullOrEmpty() {
         assertNull(mapper.parseRequisite(null));
         assertNull(mapper.parseExclusions(null));

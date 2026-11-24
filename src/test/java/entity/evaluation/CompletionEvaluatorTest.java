@@ -4,6 +4,9 @@ import entity.catalog.Completion;
 import entity.catalog.CompletionRow;
 import entity.catalog.RowKind;
 import entity.requirement.CourseFilter;
+import entity.requirement.CreditsReq;
+import entity.requirement.ProfileReq;
+import entity.requirement.Requirement;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -11,20 +14,27 @@ import java.util.stream.Collectors;
 
 import static entity.evaluation.Status.MET;
 import static entity.evaluation.Status.NOT_MET;
+import static entity.evaluation.Status.REVIEW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static testutil.CatalogFixtures.asmin0667;
 import static testutil.CatalogFixtures.asmin1001;
 import static testutil.CatalogFixtures.completion;
 import static testutil.CatalogFixtures.completionRow;
 import static testutil.CatalogFixtures.credits;
 import static testutil.CatalogFixtures.creditsIn;
+import static testutil.CatalogFixtures.or;
 import static testutil.CatalogFixtures.record;
 import static testutil.CatalogFixtures.req;
+import static testutil.CatalogFixtures.text;
 
 class CompletionEvaluatorTest {
     private static final Completion ASMIN1001 = asmin1001();
     private static final String[] ASMIN1001_COMPLETE = {
             "PHL281H1", "PHL245H1", "PHL380H1", "PHL271H1", "PHL275H1", "PHL365H1", "PHL232H1", "PHL233H1"};
+    private static final Completion ASMIN0667 = asmin0667();
+    private static final String ARTS_AND_SCIENCE = "Visual Studies Minor students in the Faculty of Arts & Science";
 
     private final CompletionEvaluator evaluator = new CompletionEvaluator();
 
@@ -151,5 +161,179 @@ class CompletionEvaluatorTest {
     @Test
     void noRowsIsMet() {
         assertEquals(MET, evaluator.evaluate(completion(List.of()), taken()).getOverall());
+    }
+
+    @Test
+    void limitWithinCapIsMet() {
+        CompletionResult r = evaluator.evaluate(ASMIN0667, taken(
+                "HPS100H1", "HPS110H1", "HPS200H1", "HPS201H1", "HPS202H1", "HPS203H1", "HPS300H1", "HPS301H1"));
+
+        assertEquals(MET, status(r, 2));
+        assertTrue(r.row(2).orElseThrow().getReason().isEmpty());
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void limitOverCapStillMetWithEnoughCredits() {
+        CompletionResult r = evaluator.evaluate(ASMIN0667, taken("HPS100H1", "HPS110H1", "HPS120H1", "HPS200H1",
+                "HPS201H1", "HPS202H1", "HPS203H1", "HPS300H1", "HPS301H1"));
+
+        RowResult limit = r.row(2).orElseThrow();
+        assertEquals(MET, limit.getStatus());
+        assertEquals("1.5 credits fall under this limit; only 1.0 can count", limit.getReason().orElseThrow());
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void limitOverCapLeavesParentShort() {
+        CompletionResult r = evaluator.evaluate(ASMIN0667, taken(
+                "HPS100H1", "HPS110H1", "HPS120H1", "HPS200H1", "HPS201H1", "HPS202H1", "HPS300H1", "HPS301H1"));
+
+        RowResult limit = r.row(2).orElseThrow();
+        assertEquals(NOT_MET, limit.getStatus());
+        assertEquals("1.5 credits fall under this limit; only 1.0 can count", limit.getReason().orElseThrow());
+        assertEquals(MET, r.row(1).orElseThrow().getDetail().orElseThrow().getStatus());
+        assertEquals(NOT_MET, status(r, 1));
+        assertEquals(NOT_MET, r.getOverall());
+    }
+
+    @Test
+    void limitDoesntRescueNotMetParent() {
+        CompletionResult r = evaluator.evaluate(ASMIN0667, taken("HPS100H1", "HPS110H1", "HPS120H1"));
+
+        assertEquals(NOT_MET, status(r, 2));
+        assertEquals(NOT_MET, status(r, 1));
+    }
+
+    @Test
+    void limitUnderOrParentGivesReview() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, hpsOrPermission(), "raw"),
+                completionRow(2, RowKind.LIMIT, null, 1, hpsCap(), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("HPS100H1"));
+
+        assertEquals(REVIEW, status(r, 2));
+        assertEquals("0.5 credits fall under this limit; only 0.0 can count",
+                r.row(2).orElseThrow().getReason().orElseThrow());
+        assertEquals(REVIEW, status(r, 1));
+    }
+
+    @Test
+    void limitOnlyCountsParentPool() {
+        CompletionResult r = evaluator.evaluate(cscLimit(false, hpsOrPermission()),
+                taken("HPS100H1", "CSC108H1", "CSC148H1"));
+
+        assertEquals(MET, status(r, 2));
+    }
+
+    @Test
+    void transcriptScopeLimitCountsWholeTranscript() {
+        CompletionResult r = evaluator.evaluate(cscLimit(true, hpsOrPermission()),
+                taken("HPS100H1", "CSC108H1", "CSC148H1"));
+
+        assertEquals(REVIEW, status(r, 2));
+        assertEquals("1.0 credits fall under this limit; only 0.5 can count",
+                r.row(2).orElseThrow().getReason().orElseThrow());
+    }
+
+    @Test
+    void limitIgnoresCoursesCreditsParentDoesntCount() {
+        CompletionResult r = evaluator.evaluate(cscLimit(true, creditsIn(0.5, "HPS")),
+                taken("HPS100H1", "CSC108H1", "CSC148H1"));
+
+        assertEquals(MET, status(r, 2));
+        assertEquals(MET, status(r, 1));
+    }
+
+    @Test
+    void limitCountsMaybeMatches() {
+        CreditsReq cap = new CreditsReq(0, 0.0, null, CourseFilter.builder().lists(List.of("Unknown")).build(), false);
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, hpsOrPermission(), "raw"),
+                completionRow(2, RowKind.LIMIT, null, 1, cap, "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("HPS100H1"));
+
+        assertEquals(REVIEW, status(r, 2));
+    }
+
+    @Test
+    void audienceMismatchSkipsRow() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(0.5, "HPS"), "raw"),
+                withAudience(2, RowKind.LIMIT, 1, hpsCap()),
+                withAudience(3, RowKind.ALLOCATION, 1, req("HPS999H1")),
+                withAudience(4, RowKind.ALLOCATION, null, req("CSC108H1"))));
+
+        CompletionResult r = evaluator.evaluate(c, withFaculty("Engineering", "HPS100H1"));
+
+        for (int row = 2; row <= 4; row++) {
+            RowResult skipped = r.row(row).orElseThrow();
+            assertFalse(skipped.isApplicable(), "row " + row);
+            assertEquals(NOT_MET, skipped.getStatus());
+            assertEquals(ARTS_AND_SCIENCE, skipped.getReason().orElseThrow());
+            assertEquals(NOT_MET, skipped.getDetail().orElseThrow().getStatus());
+            assertEquals(List.of(), skipped.getClaimed());
+        }
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void audienceMatchApplies() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(0.5, "HPS"), "raw"),
+                withAudience(2, RowKind.LIMIT, 1, hpsCap())));
+
+        CompletionResult r = evaluator.evaluate(c, withFaculty("Arts & Science", "HPS100H1"));
+
+        assertTrue(r.row(2).orElseThrow().isApplicable());
+        assertEquals(NOT_MET, status(r, 2));
+        assertEquals(NOT_MET, status(r, 1));
+    }
+
+    @Test
+    void audienceUnknownStillApplies() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(0.5, "HPS"), "raw"),
+                withAudience(2, RowKind.LIMIT, 1, hpsCap())));
+
+        CompletionResult r = evaluator.evaluate(c, taken("HPS100H1"));
+
+        assertTrue(r.row(2).orElseThrow().isApplicable());
+        assertEquals(NOT_MET, status(r, 1));
+    }
+
+    private static CreditsReq hpsCap() {
+        return new CreditsReq(0, 0.0, null, CourseFilter.builder().designators(List.of("HPS")).build(), false);
+    }
+
+    private static Requirement hpsOrPermission() {
+        return or(creditsIn(0.5, "HPS"), text("or permission of the department"));
+    }
+
+    private static Completion cscLimit(boolean transcriptScope, Requirement parentReq) {
+        CreditsReq cap = new CreditsReq(0, 0.5, null, CourseFilter.builder().designators(List.of("CSC")).build(),
+                false);
+        return completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, parentReq, "raw"),
+                new CompletionRow(2, RowKind.LIMIT, null, null, 1, List.of(), cap, null, transcriptScope, List.of(),
+                        "raw")));
+    }
+
+    private static CompletionRow withAudience(int number, RowKind kind, Integer parent, Requirement req) {
+        ProfileReq audience = new ProfileReq("faculty", "Arts & Science", ARTS_AND_SCIENCE, false);
+        return new CompletionRow(number, kind, null, null, parent, List.of(), req, audience, false, List.of(), "raw");
+    }
+
+    private static AcademicSnapshot withFaculty(String faculty, String... codes) {
+        AcademicSnapshot.Builder b = AcademicSnapshot.builder().profileFact("faculty", faculty);
+        for (String code : codes) {
+            b.taken(record(code));
+        }
+        return b.build();
     }
 }
