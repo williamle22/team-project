@@ -224,6 +224,102 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void siblingsSharingACourseGiveReview() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+
+        assertEquals(MET, status(r, 1));
+        assertEquals(List.of("PHL281H1 may be counting toward both requirement 2 and requirement 3"),
+                r.getWarnings());
+        assertEquals(REVIEW, r.getOverall());
+    }
+
+    @Test
+    void doubleCountingKeepsNotMet() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw"),
+                completionRow(4, RowKind.ALLOCATION, null, 1, req("PHL999H1"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+
+        assertEquals(1, r.getWarnings().size());
+        assertEquals(NOT_MET, r.getOverall());
+    }
+
+    @Test
+    void ancestorsMayShare() {
+        CompletionResult r = evaluator.evaluate(ASMIN1001, taken(ASMIN1001_COMPLETE));
+
+        assertEquals(List.of(), r.getWarnings());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void overlapsAllowSharing() {
+        Completion firstListsSecond = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                overlapping(2, 1, List.of(3), req("PHL281H1")),
+                overlapping(3, 1, List.of(), req("PHL281H1"))));
+        Completion secondListsFirst = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                overlapping(2, 1, List.of(), req("PHL281H1")),
+                overlapping(3, 1, List.of(2), req("PHL281H1"))));
+        Completion ancestorListsRow = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                overlapping(2, 1, List.of(4), null),
+                overlapping(3, 2, List.of(), req("PHL281H1")),
+                overlapping(4, 1, List.of(), req("PHL281H1"))));
+
+        for (Completion c : List.of(firstListsSecond, secondListsFirst, ancestorListsRow)) {
+            CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+
+            assertEquals(List.of(), r.getWarnings());
+            assertEquals(MET, r.getOverall());
+        }
+    }
+
+    @Test
+    void differentOptionsMayShare() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(4, RowKind.ALLOCATION, null, 1, null, "raw"),
+                completionRow(5, RowKind.ALLOCATION, null, 4, req("PHL281H1"), "raw"),
+                completionRow(6, RowKind.ALLOCATION, null, 4, req("PHL281H1"), "raw"),
+                completionRow(7, RowKind.CHOICE, null, null, or(ref(3), ref(4)), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+
+        assertEquals(List.of(
+                "PHL281H1 may be counting toward both requirement 2 and requirement 3",
+                "PHL281H1 may be counting toward both requirement 2 and requirement 5",
+                "PHL281H1 may be counting toward both requirement 2 and requirement 6",
+                "PHL281H1 may be counting toward both requirement 5 and requirement 6"), r.getWarnings());
+    }
+
+    @Test
+    void skipsInapplicableConstraintsAndGroups() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.CONSTRAINT, null, 1, credits(0.5, CourseFilter.any()), "raw"),
+                completionRow(4, RowKind.ALLOCATION, null, null, req("PHL281H1"), "raw"),
+                withAudience(5, RowKind.ALLOCATION, null, req("PHL281H1"))));
+
+        CompletionResult r = evaluator.evaluate(c, withFaculty("Engineering", "PHL281H1"));
+
+        assertEquals(List.of("PHL281H1 may be counting toward both requirement 2 and requirement 4"),
+                r.getWarnings());
+    }
+
+    @Test
     void limitWithinCapIsMet() {
         CompletionResult r = evaluator.evaluate(ASMIN0667, taken(
                 "HPS100H1", "HPS110H1", "HPS200H1", "HPS201H1", "HPS202H1", "HPS203H1", "HPS300H1", "HPS301H1"));
@@ -365,6 +461,11 @@ class CompletionEvaluatorTest {
 
         assertTrue(r.row(2).orElseThrow().isApplicable());
         assertEquals(NOT_MET, status(r, 1));
+    }
+
+    private static CompletionRow overlapping(int number, int parent, List<Integer> overlaps, Requirement req) {
+        return new CompletionRow(number, RowKind.ALLOCATION, null, null, parent, overlaps, req, null, false, List.of(),
+                "raw");
     }
 
     private static RowRefReq ref(int row) {

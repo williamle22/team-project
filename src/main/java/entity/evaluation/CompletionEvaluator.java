@@ -20,7 +20,13 @@ public final class CompletionEvaluator {
             }
         }
 
-        return new CompletionResult(walk.results, Status.allOf(statuses), List.of());
+        List<String> warnings = walk.doubleCounting();
+
+        if (!warnings.isEmpty()) {
+            statuses.add(Status.REVIEW);
+        }
+
+        return new CompletionResult(walk.results, Status.allOf(statuses), warnings);
     }
 
     private static final class Walk {
@@ -96,6 +102,39 @@ public final class CompletionEvaluator {
             return finish(new RowResult(row, true, Status.allOf(statuses), null, detail, new ArrayList<>(claimed)));
         }
 
+        List<String> doubleCounting() {
+            List<RowResult> allocations = new ArrayList<>();
+
+            for (RowResult r : results) {
+                if (r.isApplicable() && r.getRow().getKind() == RowKind.ALLOCATION && r.getDetail().isPresent()) {
+                    allocations.add(r);
+                }
+            }
+
+            List<String> warnings = new ArrayList<>();
+
+            for (int i = 0; i < allocations.size(); i++) {
+                for (int j = i + 1; j < allocations.size(); j++) {
+                    RowResult a = allocations.get(i);
+                    RowResult b = allocations.get(j);
+
+                    if (mayShare(a.getRow(), b.getRow())) {
+                        continue;
+                    }
+
+                    Set<String> shared = a.getDetail().get().allCounted();
+                    shared.retainAll(b.getDetail().get().allCounted());
+
+                    for (String code : shared) {
+                        warnings.add(code + " may be counting toward both requirement " + a.getNumber()
+                                + " and requirement " + b.getNumber());
+                    }
+                }
+            }
+
+            return warnings;
+        }
+
         private static void collectRows(Requirement req, Set<Integer> rows) {
             List<Requirement> items = List.of();
 
@@ -112,6 +151,47 @@ public final class CompletionEvaluator {
             for (Requirement item : items) {
                 collectRows(item, rows);
             }
+        }
+
+        private boolean mayShare(CompletionRow a, CompletionRow b) {
+            Set<Integer> upA = lineage(a);
+            Set<Integer> upB = lineage(b);
+
+            return upA.contains(b.getNumber())
+                    || !Collections.disjoint(overlapsOf(upA), upB)
+                    || !Collections.disjoint(overlapsOf(upB), upA)
+                    || inDifferentOptions(upA, upB);
+        }
+
+        private Set<Integer> lineage(CompletionRow row) {
+            Set<Integer> numbers = new HashSet<>();
+            Optional<CompletionRow> current = Optional.of(row);
+
+            while (current.isPresent()) {
+                numbers.add(current.get().getNumber());
+                current = current.get().getParent().flatMap(completion::row);
+            }
+
+            return numbers;
+        }
+
+        private Set<Integer> overlapsOf(Set<Integer> rows) {
+            Set<Integer> overlaps = new HashSet<>();
+
+            for (int n : rows) {
+                overlaps.addAll(completion.row(n).orElseThrow().getOverlaps());
+            }
+
+            return overlaps;
+        }
+
+        private boolean inDifferentOptions(Set<Integer> upA, Set<Integer> upB) {
+            Set<Integer> optionsA = new HashSet<>(upA);
+            optionsA.retainAll(options);
+            Set<Integer> optionsB = new HashSet<>(upB);
+            optionsB.retainAll(options);
+
+            return !optionsA.isEmpty() && !optionsB.isEmpty() && Collections.disjoint(optionsA, optionsB);
         }
 
         private boolean counts(RowResult r) {
