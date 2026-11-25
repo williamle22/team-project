@@ -1,5 +1,6 @@
 package entity.evaluation;
 
+import entity.catalog.Course;
 import entity.requirement.*;
 
 import java.util.*;
@@ -119,7 +120,7 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
             maybe += w;
 
             if (m == Match.YES) {
-                yes += w;
+                yes += w * breadthShare(node.getFilter(), r.getCourse());
             }
 
             counted.add(r.getCode());
@@ -283,6 +284,15 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
     @Override
     public EvaluationNode visitText(TextReq node) {
         return EvaluationNode.leaf(node, Status.REVIEW, node.getText());
+    }
+
+    private static double breadthShare(CourseFilter f, Course c) {
+        if (f.getBreadth().isEmpty() || c.getBreadth().size() < 2) {
+            return 1;
+        }
+
+        long matching = c.getBreadth().stream().filter(b -> f.getBreadth().contains(b.getNumber())).count();
+        return (double) matching / c.getBreadth().size();
     }
 
     private Collection<CourseRecord> available() {

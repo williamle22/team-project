@@ -1,5 +1,6 @@
 package entity.evaluation;
 
+import entity.catalog.BreadthCategory;
 import entity.requirement.AverageReq;
 import entity.requirement.CourseFilter;
 import entity.requirement.CreditsReq;
@@ -32,11 +33,14 @@ import static testutil.CatalogFixtures.programReq;
 import static testutil.CatalogFixtures.record;
 import static testutil.CatalogFixtures.req;
 import static testutil.CatalogFixtures.text;
+import static testutil.CatalogFixtures.withBreadth;
 
 class RequisiteEvaluatorTest {
 
     private static final CourseFilter CSC = CourseFilter.builder().designators(List.of("CSC")).build();
     private static final CourseFilter GROUP_1 = CourseFilter.builder().lists(List.of("Group 1")).build();
+    private static final CourseRecord ANT100 = record(withBreadth("ANT100Y1",
+            BreadthCategory.SOCIETY_INSTITUTIONS, BreadthCategory.LIVING_THINGS), 75);
 
     private static EvaluationNode prereq(AcademicSnapshot s, Requirement r) {
         return new RequisiteEvaluator(s, false, MembershipResolver.NONE).evaluate(r);
@@ -71,6 +75,10 @@ class RequisiteEvaluatorTest {
                 return Optional.ofNullable(statuses.get(rowNumber));
             }
         };
+    }
+
+    private static CreditsReq breadth(double amount, Integer... categories) {
+        return new CreditsReq(amount, null, null, CourseFilter.builder().breadth(List.of(categories)).build(), false);
     }
 
     private static AverageReq average(int minGrade, Double amount) {
@@ -285,6 +293,32 @@ class RequisiteEvaluatorTest {
 
         assertEquals(NOT_MET, prereq(s, creditsIn(1.0, "CSC")).getStatus());
         assertEquals(MET, coreq(s, creditsIn(1.0, "CSC")).getStatus());
+    }
+
+    @Test
+    void twoCategoryCourseIsReviewForOneCategory() {
+        EvaluationNode n = prereq(taken(ANT100), breadth(1.0, 3));
+
+        assertEquals(REVIEW, n.getStatus());
+        assertEquals("0.5 of 1.0 credits", reason(n));
+        assertEquals(List.of("ANT100Y1"), n.getCounted());
+    }
+
+    @Test
+    void twoCategoryCourseHalfIsMet() {
+        assertEquals(MET, prereq(taken(ANT100), breadth(0.5, 4)).getStatus());
+    }
+
+    @Test
+    void filterCoveringBothCategoriesCountsFully() {
+        assertEquals(MET, prereq(taken(ANT100), breadth(1.0, 3, 4)).getStatus());
+    }
+
+    @Test
+    void singleCategoryCourseUnchanged() {
+        CourseRecord r = record(withBreadth("MAT137Y1", BreadthCategory.PHYSICAL_MATHEMATICAL), 75);
+
+        assertEquals(MET, prereq(taken(r), breadth(1.0, 5)).getStatus());
     }
 
     @Test
