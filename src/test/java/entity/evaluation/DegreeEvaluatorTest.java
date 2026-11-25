@@ -77,7 +77,8 @@ class DegreeEvaluatorTest {
 
     private static RowResult row(int number, RowKind kind, Integer parent, boolean applicable, Requirement req,
                                  String... claimed) {
-        return new RowResult(completionRow(number, kind, null, parent, req, "raw"), applicable, MET, null, null,
+        EvaluationNode detail = req == null ? null : EvaluationNode.leaf(req, MET, null, List.of(claimed));
+        return new RowResult(completionRow(number, kind, null, parent, req, "raw"), applicable, MET, null, detail,
                 List.of(claimed));
     }
 
@@ -92,6 +93,13 @@ class DegreeEvaluatorTest {
 
     private static ProgramProgress major(String code, double minimum, String... claimed) {
         return program(code, MAJOR, MET, credits(minimum, CourseFilter.any()), claimed);
+    }
+
+    private static ProgramProgress withTotal(String code, double childMinimum, String[] everything,
+                                             String[] specific) {
+        return program(code, MAJOR, MET, List.of(
+                row(1, RowKind.ALLOCATION, null, true, credits(6, CourseFilter.any()), everything),
+                row(2, RowKind.ALLOCATION, 1, true, credits(childMinimum, CourseFilter.any()), specific)));
     }
 
     private DegreeProgress evaluate(Degree degree, AcademicSnapshot snapshot, ProgramProgress... programs) {
@@ -282,6 +290,30 @@ class DegreeEvaluatorTest {
         DegreeProgress p = evaluate(HBSC, snapshot(join(a, b)), major1, major("MAJ2", 6, b));
 
         assertEquals(REVIEW, p.getProgramCombination());
+    }
+
+    @Test
+    void totalCoveredByChildrenUsesOnlyTheirCourses() {
+        String[] a = courses("AAA", 1, 6);
+        String[] b = courses("BBB", 1, 6);
+        String[] all = join(a, b);
+
+        DegreeProgress p = evaluate(HBSC, snapshot(all), withTotal("MAJ1", 6, all, a), withTotal("MAJ2", 6, all, b));
+
+        assertEquals(MET, p.getProgramCombination());
+    }
+
+    @Test
+    void totalNotCoveredKeepsItsOwnCourses() {
+        String[] a = courses("AAA", 1, 6);
+        String[] b = courses("BBB", 1, 6);
+        String[] all = join(a, b);
+
+        DegreeProgress p = evaluate(HBSC, snapshot(all), withTotal("MAJ1", 5.5, all, a),
+                withTotal("MAJ2", 5.5, all, b));
+
+        assertEquals(REVIEW, p.getProgramCombination());
+        assertEquals(SHARED, p.getProgramCombinationReason().orElseThrow());
     }
 
     @Test

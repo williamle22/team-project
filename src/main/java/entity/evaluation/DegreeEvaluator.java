@@ -96,18 +96,17 @@ public final class DegreeEvaluator {
 
     private static Optional<String> differentCredits(List<ProgramProgress> programs, AcademicSnapshot snapshot,
                                                      boolean certain) {
-        Map<String, Integer> matchedBy = new HashMap<>();
+        Set<String> claimed = new HashSet<>();
+        Map<String, Integer> neededBy = new HashMap<>();
         double least = 0;
 
         for (ProgramProgress p : programs) {
-            Set<String> codes = new HashSet<>();
-
             for (RowResult r : p.getCompletion().getRows()) {
-                codes.addAll(r.getClaimed());
+                claimed.addAll(r.getClaimed());
             }
 
-            for (String code : codes) {
-                matchedBy.merge(code, 1, Integer::sum);
+            for (String code : needed(p)) {
+                neededBy.merge(code, 1, Integer::sum);
             }
 
             least += programMinimum(p);
@@ -116,10 +115,13 @@ public final class DegreeEvaluator {
         double most = 0;
 
         for (CourseRecord r : snapshot.allRecords()) {
-            int n = matchedBy.getOrDefault(r.getCode(), 0);
+            int n = neededBy.getOrDefault(r.getCode(), 0);
 
-            if (n > 0) {
+            if (claimed.contains(r.getCode())) {
                 most += r.getCourse().getWeight();
+            }
+
+            if (n > 1) {
                 least -= r.getCourse().getWeight() * (n - 1);
             }
         }
@@ -135,6 +137,34 @@ public final class DegreeEvaluator {
         }
 
         return Optional.empty();
+    }
+
+    private static Set<String> needed(ProgramProgress p) {
+        List<RowResult> rows = p.getCompletion().getRows();
+        Set<String> codes = new HashSet<>();
+
+        for (RowResult r : rows) {
+            if (r.isApplicable() && r.getRow().getKind() == RowKind.ALLOCATION && !coveredByChildren(r, rows)) {
+                r.getDetail().ifPresent(d -> codes.addAll(d.allCounted()));
+            }
+        }
+
+        return codes;
+    }
+
+    private static boolean coveredByChildren(RowResult parent, List<RowResult> rows) {
+        Optional<Integer> number = Optional.of(parent.getNumber());
+        double children = 0;
+
+        for (RowResult r : rows) {
+            CompletionRow row = r.getRow();
+
+            if (r.isApplicable() && row.getKind() == RowKind.ALLOCATION && row.getParent().equals(number)) {
+                children += row.getReq().map(DegreeEvaluator::minimum).orElse(0.0);
+            }
+        }
+
+        return children >= parent.getRow().getReq().map(DegreeEvaluator::minimum).orElse(0.0) - 1e-9;
     }
 
     private static double programMinimum(ProgramProgress p) {
