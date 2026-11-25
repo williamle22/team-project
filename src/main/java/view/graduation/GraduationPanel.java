@@ -19,6 +19,10 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Shows a plan's graduation check: the overall status and summary, a toggle between completed courses only and the
+ * whole plan, the plan's notes, and a fully expanded tree with the degree, the program combination, and each program.
+ */
 public final class GraduationPanel extends JPanel implements PropertyChangeListener {
     private static final int ICON_SIZE = 10;
 
@@ -65,6 +69,7 @@ public final class GraduationPanel extends JPanel implements PropertyChangeListe
         show(viewModel.getState());
     }
 
+    /** Checks the plan, and checks it again whenever the student changes the toggle. */
     public void check(UUID planId) {
         this.planId = planId;
         recheck();

@@ -20,6 +20,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Reads degree rules from JSON files on the classpath. Each file holds one degree's completion rows, in the catalog's
+ * completion format, and its program combinations. The no-argument constructor loads HBA, HBSc, and BCom from
+ * {@code src/main/resources/degrees}.
+ */
 public final class ResourceDegreeRepository implements DegreeReader {
     private final Map<DegreeType, Degree> degrees = new EnumMap<>(DegreeType.class);
 
@@ -27,6 +32,11 @@ public final class ResourceDegreeRepository implements DegreeReader {
         this("/degrees/hba.json", "/degrees/hbsc.json", "/degrees/bcom.json");
     }
 
+    /**
+     * Loads each classpath resource in {@code resources}, such as {@code "/degrees/hba.json"}.
+     *
+     * @throws IllegalStateException if a resource doesn't exist
+     */
     public ResourceDegreeRepository(String... resources) {
         CatalogJsonMapper mapper = new CatalogJsonMapper();
 

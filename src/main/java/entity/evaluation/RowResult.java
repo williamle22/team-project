@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One evaluated completion row. {@code applicable} is false if the student isn't in the row's audience, and then the
+ * row doesn't count toward the overall status. {@code claimed} holds the course codes that an allocation row and its
+ * allocation children count. {@code detail} is {@code null} for a limit row or a row without a requirement, and
+ * {@code reason} is {@code null} if there's nothing to explain.
+ */
 public final class RowResult {
     private final CompletionRow row;
     private final boolean applicable;

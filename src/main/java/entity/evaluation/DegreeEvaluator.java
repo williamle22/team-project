@@ -10,6 +10,11 @@ import entity.requirement.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Checks a degree's completion rows, and whether the student's completed programs form one of its program combinations.
+ * A completed program the student isn't enrolled in gives {@code REVIEW}, because the student still needs to be
+ * admitted.
+ */
 public final class DegreeEvaluator {
     private static final double DIFFERENT_CREDITS = 12.0;
 
@@ -19,6 +24,12 @@ public final class DegreeEvaluator {
         this.completion = completion;
     }
 
+    /**
+     * {@code programs} holds the plan's programs that are in the catalog. A combination of more than one program, such
+     * as two Majors, also needs 12.0 different credits across those programs. The courses the programs claim give an
+     * upper bound on that count. Each program's minimum credits, minus the courses that two programs both need, give a
+     * lower bound. If the bounds don't decide it, the result is {@code REVIEW}.
+     */
     public DegreeProgress evaluate(Degree degree, AcademicSnapshot snapshot, List<ProgramProgress> programs) {
         CompletionResult rows = completion.evaluate(degree.getCompletion(), snapshot);
         List<ProgramProgress> complete = new ArrayList<>();

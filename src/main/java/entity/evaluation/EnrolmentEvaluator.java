@@ -7,7 +7,17 @@ import entity.requirement.ProgramReq;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Checks whether a student can enrol in a program: its enrolment requirements, and the programs it can't be combined
+ * with.
+ */
 public final class EnrolmentEvaluator {
+    /**
+     * Returns {@code REVIEW} if {@code enrolment} is {@code null}, because the calendar has no enrolment information. A
+     * program that isn't admitting students, or that can't be combined with a program the student is enrolled in, is
+     * {@code NOT_MET}. A limited-enrolment program whose requirements the student meets is {@code MET}, with a reason
+     * saying that admission isn't guaranteed.
+     */
     public EnrolmentResult evaluate(Enrolment enrolment, AcademicSnapshot snapshot) {
         if (enrolment == null) {
             return new EnrolmentResult(Status.REVIEW, "no enrolment information", null, List.of());

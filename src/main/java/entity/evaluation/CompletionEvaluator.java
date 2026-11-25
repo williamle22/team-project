@@ -7,6 +7,14 @@ import entity.requirement.*;
 
 import java.util.*;
 
+/**
+ * Checks a program's or degree's completion requirements against a snapshot. An allocation row claims the courses it
+ * counts, and its constraint and limit child rows check only those courses. A transcript-scoped row checks every course
+ * instead. A row applies only to students in its audience. An exceeded limit raises its parent's credit requirement by
+ * the excess, and a limit without a parent credit requirement gives {@code REVIEW}. Options of a choice row count only
+ * through the choice row. This is Level 1, which doesn't assign each course to one row. If two unrelated allocation
+ * rows count the same course, the result is {@code REVIEW}, with a warning.
+ */
 public final class CompletionEvaluator {
     public CompletionResult evaluate(Completion completion, AcademicSnapshot snapshot) {
         Walk walk = new Walk(completion, snapshot);

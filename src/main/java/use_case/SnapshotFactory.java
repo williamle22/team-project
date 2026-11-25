@@ -77,6 +77,10 @@ public final class SnapshotFactory {
         return builder(plan, taken(plan, notFailed), plan.getCourses(), gpa.cgpa(plan)).build();
     }
 
+    /**
+     * Returns a snapshot for checking graduation with completed courses only. It counts transfer credits and courses
+     * with a passing final grade.
+     */
     public AcademicSnapshot completedOnly(Plan plan) {
         List<PlannedCourse> passed = plan.getCourses().stream().filter(SnapshotFactory::passed)
                 .collect(Collectors.toList());

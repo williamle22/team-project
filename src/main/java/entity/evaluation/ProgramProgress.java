@@ -4,6 +4,7 @@ import entity.catalog.ProgramType;
 
 import java.util.Objects;
 
+/** One program's enrolment and completion results, for {@link DegreeEvaluator}. */
 public final class ProgramProgress {
     private final String programCode;
     private final ProgramType type;

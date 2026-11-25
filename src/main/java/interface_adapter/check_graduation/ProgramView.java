@@ -3,6 +3,10 @@ package interface_adapter.check_graduation;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * One program's result, formatted for display. {@code status} is the program's completion status, as in
+ * {@link GraduationLineView}.
+ */
 public final class ProgramView {
     private final String code;
     private final String title;

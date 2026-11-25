@@ -3,6 +3,11 @@ package interface_adapter.check_graduation;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * One line of the graduation tree, as plain strings. {@code status} is {@code "met"}, {@code "not met"}, or
+ * {@code "review"}. {@code reason} is empty if there's nothing to explain, and {@code claimed} is a comma-separated
+ * list of course codes, or empty.
+ */
 public final class GraduationLineView {
     private final String label;
     private final String text;

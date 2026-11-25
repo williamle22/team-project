@@ -15,6 +15,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Resolves course lists and row references inside one program's completion requirements. A course is on a list if it
+ * matches one of the list's filters, or if it's part of a group of courses that the student has all taken. A reference
+ * to a row that hasn't finished evaluating, or to a list that's missing or refers to itself, gives {@code MAYBE}.
+ */
 public final class CompletionResolver implements MembershipResolver {
     private final Completion completion;
     private final Set<String> snapshotCodes = new HashSet<>();

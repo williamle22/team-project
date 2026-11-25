@@ -37,6 +37,7 @@ Our version improves on the original in a number of ways:
 | 5 | As a user, I want to be able to import and export my course plans. | William |
 | 6 | As a user, I want to be able to see whether or not I am eligible to take a given course in a given semester. | Kameel |
 | 7 | As a user, I want to be able to record my achieved grade for a given course and see my CGPA automatically calculated. | William |
+| 8 | As a user, I want to be able to see whether my plan meets all the program and degree requirements I need to graduate. | Kameel |
 
 ---
 
@@ -158,6 +159,28 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - The student enters an invalid grade: the app rejects it with a message.
 - The course was taken Credit/No Credit: it counts toward credits but not toward the CGPA.
 
+### Use Case 10: Check Graduation Eligibility (User Story 8)
+**Actor:** Student
+
+**Main flow:**
+1. The student opens the graduation check for a plan, and chooses whether to count every course in the plan or only completed courses, which are courses with a passing final grade.
+2. The app checks the degree's requirements: total credits, credits by level, CGPA, and breadth.
+3. The app checks each program in the plan: whether the student can enrol in it, and each of its completion requirements.
+4. The app checks that the student's completed programs form a valid combination, such as one Specialist, two Majors, or one Major and two Minors. A combination of more than one program must include 12.0 different credits.
+5. The app shows each requirement as Met, Not Met, or Review, with a reason and the courses it counts, and an overall result. The overall result is Met when the degree requirements and the program combination are met.
+
+**Alternative flows:**
+- The plan has no degree: the app asks the student to choose one.
+- A program in the plan isn't in the current calendar: Review, and it doesn't count toward the combination.
+- The student has completed a program they intend to enter but aren't enrolled in: Review, because they still need to be admitted.
+- The plan's degree is a BCom: only the Specialists in Accounting, Finance and Economics, and Management count toward the combination.
+- A limited-enrolment program whose requirements the student meets: Met, with a reason saying that admission isn't guaranteed.
+- A requirement needs human judgement, or a course might count toward two requirements: Review, with a note.
+- The programs share courses, so they might not include 12.0 different credits: Review.
+- The degree's CGPA requirement, when the plan has no final grades: Review, until the student enters final grades.
+- A course in the plan isn't in the current calendar: it doesn't count toward any requirement, and the app notes it.
+- The plan has an unspecified transfer credit, like `MAT1**`: it doesn't count toward any requirement, and the app notes that it counts only with the department's permission.
+
 ---
 
 ## Minimal Viable Product (MVP)
@@ -190,9 +213,9 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`Completion`** and **`CompletionRow`**: a program's numbered completion requirements.
 - Variables: each row has a `number`, `kind` (allocation, constraint, limit, or choice), optional `label` and `parent`, a `Requirement`, and the calendar's `raw` text. `Completion` also holds the program's named course lists (`CourseList`).
 
-**`Degree`**: the hardcoded rules for one degree, in the same format as a program's completion requirements.
-- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `completion`, `programCombinations` (a `ProgramCombinationRule`: the allowed counts of each program type, like 2 Majors)
-- Methods: getters. `getTitle()` returns the type's title.
+**`Degree`**: the rules for one degree, in the same format as a program's completion requirements. The app loads them from JSON files in `src/main/resources/degrees`.
+- Variables: `type` (`HBA`, `HBSC`, `BCOM`), `completion`, `programCombinations` (a `ProgramCombinationRule`: the allowed counts of each program type, like 2 Majors), `eligiblePrograms` (if it isn't empty, only these programs count toward a combination, like BCom's three Specialists)
+- Methods: getters, `countsTowardCombination(code)`. `getTitle()` returns the type's title.
 
 ### Requirements
 
@@ -213,6 +236,17 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`EvaluationNode`**: the result of checking one requirement node: a `status`, a `reason`, `children` in the same shape as the requirement tree, and the course codes it `counted`.
 
 **`EligibilityResult`**: one course's full check: `prerequisites` and `corequisites` (`EvaluationNode`s), `exclusions` (an `ExclusionOutcome`), `offering` (`OfferingStatus`), and `warnings`.
+- Methods: getters, `getOverall()`
+
+**`EnrolmentResult`**: whether the student can enrol in one program: a `status`, a `reason`, the evaluated enrolment requirement as `detail`, and the calendar's `notes`.
+
+**`RowResult`**: one evaluated completion row: its `status`, whether it's `applicable` to the student, a `reason`, the evaluated requirement as `detail`, and the course codes it `claimed`.
+
+**`CompletionResult`**: a program's or degree's evaluated completion requirements: a `RowResult` for every row, an `overall` status, and `warnings` about courses that might count toward two requirements.
+
+**`ProgramProgress`**: one program's `EnrolmentResult` and `CompletionResult`.
+
+**`DegreeProgress`**: a degree's `CompletionResult`, and the status and reason of its program combination.
 - Methods: getters, `getOverall()`
 
 ### Plans
@@ -330,6 +364,11 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 To see eligibility checking without the planner, run the demo from the repo root. It needs the catalog at `data/dgx.db`, and it shows two sample plans with each course's status and requirement tree:
 ```sh
 mvn -q test-compile exec:java -Dexec.mainClass=demo.EligibilityDemo -Dexec.classpathScope=test
+```
+
+To see graduation checking without the planner, run its demo the same way. It shows four sample plans, including one that's ready to graduate:
+```sh
+mvn -q test-compile exec:java -Dexec.mainClass=demo.GraduationDemo -Dexec.classpathScope=test
 ```
 
 The first launch needs an internet connection to download the catalog, which is saved to `data/dgx.db` in the folder the app runs from (the repo root when run from IntelliJ). The `data/` folder is in `.gitignore`. After that, the app works offline, except for course evaluations.

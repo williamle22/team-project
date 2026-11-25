@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A degree's evaluated completion rows and program combination. {@code programCombinationReason} is {@code null} if the
+ * combination is met.
+ */
 public final class DegreeProgress {
     private final DegreeType type;
     private final CompletionResult completion;
@@ -36,6 +40,10 @@ public final class DegreeProgress {
         return Optional.ofNullable(programCombinationReason);
     }
 
+    /**
+     * Returns {@code NOT_MET} if the completion rows or the program combination are {@code NOT_MET}, otherwise
+     * {@code REVIEW} if either is {@code REVIEW}, otherwise {@code MET}.
+     */
     public Status getOverall() {
         return Status.allOf(List.of(completion.getOverall(), programCombination));
     }

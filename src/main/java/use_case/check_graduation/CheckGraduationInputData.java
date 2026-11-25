@@ -3,6 +3,10 @@ package use_case.check_graduation;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The plan to check. If {@code projected} is true, every course in the plan counts except failed ones. Otherwise, only
+ * courses with a passing final grade count.
+ */
 public final class CheckGraduationInputData {
     private final UUID planId;
     private final boolean projected;

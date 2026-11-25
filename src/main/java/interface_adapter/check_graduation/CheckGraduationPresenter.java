@@ -9,6 +9,10 @@ import use_case.check_graduation.RowLine;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+/**
+ * Turns Use Case 10's results into view lines and a one-line summary. It drops a reason that repeats its line's text,
+ * and explains that a CGPA requirement stays unknown until the student enters final grades.
+ */
 public final class CheckGraduationPresenter implements CheckGraduationOutputBoundary {
     private static final String CGPA_UNKNOWN = "CGPA unknown";
 

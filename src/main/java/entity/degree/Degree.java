@@ -7,7 +7,8 @@ import java.util.Objects;
 
 /**
  * A degree's completion rules, in the same row format as a program's {@code Completion}, and the program combinations
- * it accepts. Degrees with the same {@code type} are equal.
+ * it accepts. If {@code eligiblePrograms} isn't empty, only those programs count toward a combination, as with BCom's
+ * three Specialists. Degrees with the same {@code type} are equal.
  */
 public final class Degree {
     private final DegreeType type;

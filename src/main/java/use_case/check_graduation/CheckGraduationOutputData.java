@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * The result of checking one plan. {@code degree} is the degree's line, with its rows as children, and
+ * {@code combination} is the program combination's line. {@code programs} is in the plan's program order, and
+ * {@code notes} apply to the whole plan.
+ */
 public final class CheckGraduationOutputData {
     private final UUID planId;
     private final boolean projected;

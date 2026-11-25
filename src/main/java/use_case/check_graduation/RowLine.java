@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * One line of the graduation tree, ready for display. {@code reason} is {@code null} if there's nothing to explain, and
+ * {@code claimed} lists the course codes the requirement counts.
+ */
 public final class RowLine {
     private final String label;
     private final String text;

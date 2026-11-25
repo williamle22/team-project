@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * What the graduation panel shows for one plan. If {@code error} isn't empty, the check failed and the other fields are
+ * empty.
+ */
 public final class GraduationState {
     private UUID planId;
     private boolean projected;

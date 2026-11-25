@@ -18,6 +18,13 @@ import use_case.SnapshotFactory;
 
 import java.util.*;
 
+/**
+ * Use Case 10: checks the plan's degree with a {@link DegreeEvaluator}, and each of its programs with an
+ * {@link EnrolmentEvaluator} and a {@link CompletionEvaluator}. It turns the results into display lines. The overall
+ * status is the degree's: its rows and its program combination. A program missing from the catalog gets {@code REVIEW}
+ * lines and doesn't count toward the combination. The interactor leaves out rows that don't apply to the student. Notes
+ * flag courses that aren't in the current calendar, unspecified transfer credits, and courses that might count twice.
+ */
 public final class CheckGraduationInteractor implements CheckGraduationInputBoundary {
     private final PlanReader plans;
     private final CatalogReader catalog;

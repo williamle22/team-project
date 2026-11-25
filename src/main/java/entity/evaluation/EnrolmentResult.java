@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Whether a student can enrol in one program. {@code detail} is the evaluated enrolment requirement, or {@code null} if
+ * there's none to evaluate. {@code notes} holds the calendar's enrolment notes.
+ */
 public final class EnrolmentResult {
     private final Status status;
     private final String reason;
