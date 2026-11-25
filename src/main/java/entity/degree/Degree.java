@@ -2,6 +2,7 @@ package entity.degree;
 
 import entity.catalog.Completion;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -12,11 +13,14 @@ public final class Degree {
     private final DegreeType type;
     private final Completion completion;
     private final ProgramCombinationRule programCombinations;
+    private final List<String> eligiblePrograms;
 
-    public Degree(DegreeType type, Completion completion, ProgramCombinationRule programCombinations) {
+    public Degree(DegreeType type, Completion completion, ProgramCombinationRule programCombinations,
+                  List<String> eligiblePrograms) {
         this.type = Objects.requireNonNull(type, "type");
         this.completion = Objects.requireNonNull(completion, "completion");
         this.programCombinations = Objects.requireNonNull(programCombinations, "programCombinations");
+        this.eligiblePrograms = List.copyOf(Objects.requireNonNull(eligiblePrograms, "eligiblePrograms"));
     }
 
     public DegreeType getType() {
@@ -33,6 +37,14 @@ public final class Degree {
 
     public ProgramCombinationRule getProgramCombinations() {
         return programCombinations;
+    }
+
+    public List<String> getEligiblePrograms() {
+        return eligiblePrograms;
+    }
+
+    public boolean countsTowardCombination(String programCode) {
+        return eligiblePrograms.isEmpty() || eligiblePrograms.contains(programCode);
     }
 
     @Override

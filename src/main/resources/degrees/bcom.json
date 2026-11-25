@@ -368,5 +368,10 @@
     {
       "Specialist": 1
     }
+  ],
+  "eligible_programs": [
+    "ASSPE2038",
+    "ASSPE2431",
+    "ASSPE2676"
   ]
 }

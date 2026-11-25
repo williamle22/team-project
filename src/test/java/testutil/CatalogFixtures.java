@@ -234,6 +234,6 @@ public final class CatalogFixtures {
                         "at most 1.0 credit at the 100 level"));
 
         return new Degree(DegreeType.HBSC, completion(rows),
-                new ProgramCombinationRule(List.of(Map.of(ProgramType.MAJOR, 2))));
+                new ProgramCombinationRule(List.of(Map.of(ProgramType.MAJOR, 2))), List.of());
     }
 }

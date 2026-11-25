@@ -63,6 +63,14 @@ public final class ResourceDegreeRepository implements DegreeReader {
         Completion completion = mapper.parseCompletion(obj.getJSONObject("completion").toString());
         List<Map<ProgramType, Integer>> combinations = new ArrayList<>();
         JSONArray array = obj.getJSONArray("program_combinations");
+        List<String> eligible = new ArrayList<>();
+        JSONArray codes = obj.optJSONArray("eligible_programs");
+
+        if (codes != null) {
+            for (int i = 0; i < codes.length(); i++) {
+                eligible.add(codes.getString(i));
+            }
+        }
 
         for (int i = 0; i < array.length(); i++) {
             JSONObject combination = array.getJSONObject(i);
@@ -75,6 +83,6 @@ public final class ResourceDegreeRepository implements DegreeReader {
             combinations.add(counts);
         }
 
-        return new Degree(type, completion, new ProgramCombinationRule(combinations));
+        return new Degree(type, completion, new ProgramCombinationRule(combinations), eligible);
     }
 }

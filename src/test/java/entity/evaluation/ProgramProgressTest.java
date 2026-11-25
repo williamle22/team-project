@@ -1,5 +1,6 @@
 package entity.evaluation;
 
+import entity.catalog.ProgramType;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -14,9 +15,10 @@ class ProgramProgressTest {
 
     @Test
     void gettersReturnFields() {
-        ProgramProgress p = new ProgramProgress("ASMAJ1689", ENROLMENT, COMPLETION);
+        ProgramProgress p = new ProgramProgress("ASMAJ1689", ProgramType.MAJOR, ENROLMENT, COMPLETION);
 
         assertEquals("ASMAJ1689", p.getProgramCode());
+        assertEquals(ProgramType.MAJOR, p.getType());
         assertSame(ENROLMENT, p.getEnrolment());
         assertSame(COMPLETION, p.getCompletion());
     }
@@ -28,14 +30,14 @@ class ProgramProgressTest {
                         new EnrolmentResult(Status.REVIEW, "review", null, List.of()))
                 .withPrefabValues(CompletionResult.class, COMPLETION,
                         new CompletionResult(List.of(), Status.MET, List.of()))
-                .withNonnullFields("programCode", "enrolment", "completion")
+                .withNonnullFields("programCode", "type", "enrolment", "completion")
                 .verify();
     }
 
     @Test
     void toStringShowsCodeAndStatuses() {
-        ProgramProgress p = new ProgramProgress("ASMAJ1689", ENROLMENT, COMPLETION);
+        ProgramProgress p = new ProgramProgress("ASMAJ1689", ProgramType.MAJOR, ENROLMENT, COMPLETION);
 
-        assertEquals("ProgramProgress{ASMAJ1689, enrolment=MET, completion=NOT_MET}", p.toString());
+        assertEquals("ProgramProgress{ASMAJ1689 MAJOR, enrolment=MET, completion=NOT_MET}", p.toString());
     }
 }

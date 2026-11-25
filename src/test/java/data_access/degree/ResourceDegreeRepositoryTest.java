@@ -58,6 +58,7 @@ class ResourceDegreeRepositoryTest {
         assertEquals(List.of(Map.of(ProgramType.SPECIALIST, 1), Map.of(ProgramType.MAJOR, 2),
                 Map.of(ProgramType.MAJOR, 1, ProgramType.MINOR, 2)), hba.getProgramCombinations().getCombinations());
         assertEquals(16, hba.getCompletion().getRequirements().size());
+        assertTrue(hba.getEligiblePrograms().isEmpty());
     }
 
     @Test
@@ -66,6 +67,7 @@ class ResourceDegreeRepositoryTest {
 
         assertEquals(List.of(Map.of(ProgramType.SPECIALIST, 1)), bcom.getProgramCombinations().getCombinations());
         assertEquals(19, bcom.getCompletion().getRequirements().size());
+        assertEquals(List.of("ASSPE2038", "ASSPE2431", "ASSPE2676"), bcom.getEligiblePrograms());
     }
 
     @Test
