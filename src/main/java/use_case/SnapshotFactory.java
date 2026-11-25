@@ -13,6 +13,7 @@ import entity.term.AcademicTerm;
 import entity.term.Placement;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Builds the {@link AcademicSnapshot} for checking one planned course, or for the whole plan. Failed courses never
@@ -74,6 +75,13 @@ public final class SnapshotFactory {
         }
 
         return builder(plan, taken(plan, notFailed), plan.getCourses(), gpa.cgpa(plan)).build();
+    }
+
+    public AcademicSnapshot completedOnly(Plan plan) {
+        List<PlannedCourse> passed = plan.getCourses().stream().filter(SnapshotFactory::passed)
+                .collect(Collectors.toList());
+
+        return builder(plan, taken(plan, passed), passed, gpa.cgpa(plan)).build();
     }
 
     private Map<String, CourseRecord> taken(Plan plan, List<PlannedCourse> courses) {

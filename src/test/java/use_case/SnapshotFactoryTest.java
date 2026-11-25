@@ -297,6 +297,66 @@ class SnapshotFactoryTest {
     }
 
     @Test
+    void completedOnlySkipsUngradedCourses() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 80);
+        add(p, "CSC148H1", WINTER_2026);
+
+        assertEquals(Set.of("CSC108H1"), factory.completedOnly(p).getTaken().keySet());
+        assertEquals(Set.of("CSC108H1", "CSC148H1"), factory.wholePlan(p).getTaken().keySet());
+    }
+
+    @Test
+    void completedOnlySkipsFailedCourses() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 49);
+        add(p, "CSC148H1", WINTER_2026, 50);
+
+        assertEquals(Set.of("CSC148H1"), factory.completedOnly(p).getTaken().keySet());
+    }
+
+    @Test
+    void completedOnlyKeepsTransferCredits() {
+        Plan p = plan();
+        p.addTransferCredit(new TransferCredit("STA130H1", 0.5));
+
+        CourseRecord r = factory.completedOnly(p).getTaken().get("STA130H1");
+
+        assertTrue(r.isTransfer());
+    }
+
+    @Test
+    void completedOnlyKeepsBestRetake() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 40);
+        add(p, "CSC108H1", WINTER_2026, 75);
+        add(p, "CSC108H1", FALL_2026, 60);
+        add(p, "CSC108H1", WINTER_2027);
+
+        assertEquals(Optional.of(75), factory.completedOnly(p).getTaken().get("CSC108H1").getGrade());
+    }
+
+    @Test
+    void completedOnlyHasCgpaYearAndPrograms() {
+        Plan p = plan();
+        p.addProgram("ASMAJ1689", ProgramStatus.ENROLLED);
+        p.addProgram("ASSPE1689", ProgramStatus.INTENDED);
+        add(p, "MAT137Y1", FULL_YEAR_2025, 80);
+        add(p, "CSC108H1", FALL_2025, 70);
+        add(p, "CSC148H1", WINTER_2026);
+        p.addTransferCredit(new TransferCredit("ABC1**", 2.5));
+
+        AcademicSnapshot s = factory.completedOnly(p);
+
+        assertEquals(Set.of("ASMAJ1689"), s.getEnrolledPrograms());
+        assertEquals(Set.of("ASSPE1689"), s.getIntendedPrograms());
+        assertEquals(new GpaCalculator(CreditWeights.FROM_CODE).cgpa(p), s.getCgpa());
+        assertTrue(s.getCgpa().isPresent());
+        assertEquals(Optional.of(2), yearOfStudy(s));
+        assertEquals(Optional.empty(), s.getAsOf());
+    }
+
+    @Test
     void rejectsNulls() {
         GpaCalculator gpa = new GpaCalculator(CreditWeights.FROM_CODE);
 
