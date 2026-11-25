@@ -1,0 +1,49 @@
+{
+  "degree": "HBSC",
+  "completion": {
+    "requirements": [
+      {
+        "number": 1,
+        "kind": "allocation",
+        "req": {
+          "type": "credits",
+          "amount": 3
+        },
+        "raw": "3.0 credits"
+      },
+      {
+        "number": 2,
+        "kind": "constraint",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "levels": [
+            300,
+            400
+          ]
+        },
+        "raw": "at least 1.0 credit at the 300+ level"
+      },
+      {
+        "number": 3,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "levels": [
+            100
+          ],
+          "max_amount": 1
+        },
+        "raw": "at most 1.0 credit at the 100 level"
+      }
+    ],
+    "raw": "raw"
+  },
+  "program_combinations": [
+    {
+      "Major": 2
+    }
+  ]
+}
