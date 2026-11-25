@@ -1,0 +1,340 @@
+{
+  "degree": "HBSC",
+  "completion": {
+    "requirements": [
+      {
+        "number": 1,
+        "kind": "allocation",
+        "label": "a",
+        "req": {
+          "type": "credits",
+          "amount": 20
+        },
+        "raw": "a) Obtain standing (i.e., complete with a mark of 50% or higher/P/CR) in at least 20.0 credits that meet the following criteria:"
+      },
+      {
+        "number": 2,
+        "kind": "constraint",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 13,
+          "levels": [
+            200,
+            300,
+            400
+          ]
+        },
+        "raw": "Minimum of 13.0 at the 200/300/400-level"
+      },
+      {
+        "number": 3,
+        "kind": "constraint",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "amount": 6,
+          "levels": [
+            300,
+            400
+          ]
+        },
+        "raw": "At least 6.0 at the 300/400-level"
+      },
+      {
+        "number": 4,
+        "kind": "limit",
+        "parent": 3,
+        "scope": "transcript",
+        "req": {
+          "type": "credits",
+          "levels": [
+            300,
+            400
+          ],
+          "transfer": true,
+          "max_amount": 1
+        },
+        "raw": "No more than 1.0 credit at the 300+ level in transfer credits may be counted towards the minimum number of 300- and 400-level credits, except transfer credits attained through a University of Toronto exchange program."
+      },
+      {
+        "number": 5,
+        "kind": "constraint",
+        "label": "d",
+        "req": {
+          "type": "gpa",
+          "min_gpa": 1.85
+        },
+        "raw": "d) Obtain a Cumulative GPA of 1.85 or more by the time of graduation."
+      },
+      {
+        "number": 6,
+        "kind": "constraint",
+        "label": "Creative and Cultural Representations (1.0)",
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "breadth": [
+            1
+          ]
+        },
+        "raw": "Creative and Cultural Representations"
+      },
+      {
+        "number": 7,
+        "kind": "constraint",
+        "label": "Thought, Belief, and Behaviour (1.0)",
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "breadth": [
+            2
+          ]
+        },
+        "raw": "Thought, Belief, and Behaviour"
+      },
+      {
+        "number": 8,
+        "kind": "constraint",
+        "label": "Society and Its Institutions (1.0)",
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "breadth": [
+            3
+          ]
+        },
+        "raw": "Society and Its Institutions"
+      },
+      {
+        "number": 9,
+        "kind": "constraint",
+        "label": "Living Things and Their Environment (1.0)",
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "breadth": [
+            4
+          ]
+        },
+        "raw": "Living Things and Their Environment"
+      },
+      {
+        "number": 10,
+        "kind": "constraint",
+        "label": "The Physical and Mathematical Universes (1.0)",
+        "req": {
+          "type": "credits",
+          "amount": 1,
+          "breadth": [
+            5
+          ]
+        },
+        "raw": "The Physical and Mathematical Universes"
+      },
+      {
+        "number": 11,
+        "kind": "constraint",
+        "label": "Creative and Cultural Representations (0.5)",
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "breadth": [
+            1
+          ]
+        },
+        "raw": "Creative and Cultural Representations"
+      },
+      {
+        "number": 12,
+        "kind": "constraint",
+        "label": "Thought, Belief, and Behaviour (0.5)",
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "breadth": [
+            2
+          ]
+        },
+        "raw": "Thought, Belief, and Behaviour"
+      },
+      {
+        "number": 13,
+        "kind": "constraint",
+        "label": "Society and Its Institutions (0.5)",
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "breadth": [
+            3
+          ]
+        },
+        "raw": "Society and Its Institutions"
+      },
+      {
+        "number": 14,
+        "kind": "constraint",
+        "label": "Living Things and Their Environment (0.5)",
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "breadth": [
+            4
+          ]
+        },
+        "raw": "Living Things and Their Environment"
+      },
+      {
+        "number": 15,
+        "kind": "constraint",
+        "label": "The Physical and Mathematical Universes (0.5)",
+        "req": {
+          "type": "credits",
+          "amount": 0.5,
+          "breadth": [
+            5
+          ]
+        },
+        "raw": "The Physical and Mathematical Universes"
+      },
+      {
+        "number": 16,
+        "kind": "choice",
+        "label": "Breadth Requirement",
+        "req": {
+          "type": "or",
+          "items": [
+            {
+              "type": "choose",
+              "count": 4,
+              "items": [
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    6
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    7
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    8
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    9
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    10
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "and",
+              "items": [
+                {
+                  "type": "choose",
+                  "count": 3,
+                  "items": [
+                    {
+                      "type": "requirement",
+                      "requirements": [
+                        6
+                      ]
+                    },
+                    {
+                      "type": "requirement",
+                      "requirements": [
+                        7
+                      ]
+                    },
+                    {
+                      "type": "requirement",
+                      "requirements": [
+                        8
+                      ]
+                    },
+                    {
+                      "type": "requirement",
+                      "requirements": [
+                        9
+                      ]
+                    },
+                    {
+                      "type": "requirement",
+                      "requirements": [
+                        10
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    11
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    12
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    13
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    14
+                  ]
+                },
+                {
+                  "type": "requirement",
+                  "requirements": [
+                    15
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "raw": "The Breadth Requirement can be completed in one of two ways: (a) at least 1.0 credit in each of 4 of the 5 categories below, or (b) at least 1.0 credit in each of any 3 of the 5 categories, and at least 0.5 credit in each of the other 2 categories."
+      }
+    ],
+    "notes": [
+      "At least 10.0 credits from Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum.",
+      "No more than 15.0 credits may have the same three-letter designator (“AST\", “ENG”, etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects.",
+      "Students enrolled in either two Majors or one Major and two Minors must ensure they have a minimum of 12.0 different credits between the programs.",
+      "Whether a student receives an HBA or HBSc depends on the programs that are completed; see Program Requirements.",
+      "Students who meet all the requirements for the HBA/HBSc except for the GPA requirement may elect to graduate with a Bachelor of Arts/Bachelor of Science degree provided that their final Cumulative GPA is between 1.5 and 1.84."
+    ],
+    "raw": "To qualify for an Honours Bachelor of Arts (HBA) or Honours Bachelor of Science (HBSc), a student must:\na) Obtain standing (i.e., complete with a mark of 50% or higher/P/CR) in at least 20.0 credits that meet the following criteria:\n- At least 13.0 credits at the 200+ level, including a minimum of 6.0 credits at the 300+ level. No more than 1.0 credit at the 300+ level in transfer credits may be counted towards the minimum number of 300- and 400-level credits, except transfer credits attained through a University of Toronto exchange program.\n- At least 10.0 credits from Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum.\n- No more than 15.0 credits may have the same three-letter designator (“AST\", “ENG”, etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects.\nb) Complete one of the following:\n- One Specialist program (which includes at least 1.0 credit at the 400-level), or\n- Two Major programs, which must include at least 12.0 different credits, or\n- One Major and two Minor programs, which must include at least 12.0 different credits\nWhether a student receives an HBA or HBSc depends on the programs that are completed; see Program Requirements.\nc) Complete the Arts & Science Breadth Requirement.\nd) Obtain a Cumulative GPA of 1.85 or more by the time of graduation. Students who meet all the requirements for the HBA/HBSc except for the GPA requirement may elect to graduate with a Bachelor of Arts/Bachelor of Science degree provided that their final Cumulative GPA is between 1.5 and 1.84."
+  },
+  "program_combinations": [
+    {
+      "Specialist": 1
+    },
+    {
+      "Major": 2
+    },
+    {
+      "Major": 1,
+      "Minor": 2
+    }
+  ]
+}
