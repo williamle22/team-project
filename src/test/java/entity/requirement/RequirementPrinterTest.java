@@ -64,11 +64,24 @@ class RequirementPrinterTest {
                 .breadth(List.of(4, 5))
                 .lists(List.of("Group A", "Group B"))
                 .exclude(List.of("HPS390H1"))
+                .excludeDesignators(List.of("RSM", "MGT"))
+                .transfer(true)
                 .minGrade(70)
                 .build();
         assertEquals("2.0 credits from HPS100H1, HPS110H1 in HPS/PHL at the 300/400 level in breadth 4/5"
-                        + " from Group A, Group B excluding HPS390H1 with at least 70%",
+                        + " from Group A, Group B excluding HPS390H1 outside RSM/MGT in transfer credits"
+                        + " with at least 70%",
                 PRINTER.print(new CreditsReq(2.0, null, null, f, false)));
+    }
+
+    @Test
+    void printsDegreeFilters() {
+        CourseFilter transfer = CourseFilter.builder().levels(List.of(300, 400)).transfer(true).build();
+        CourseFilter outside = CourseFilter.builder().excludeDesignators(List.of("RSM", "MGT")).build();
+
+        assertEquals("at most 1.0 credits at the 300/400 level in transfer credits",
+                PRINTER.print(new CreditsReq(0, 1.0, null, transfer, false)));
+        assertEquals("8.0 credits outside RSM/MGT", PRINTER.print(new CreditsReq(8.0, null, null, outside, false)));
     }
 
     @Test
