@@ -17,6 +17,7 @@ import entity.plan.CreditWeights;
 import entity.plan.GpaCalculator;
 import entity.plan.Plan;
 import entity.plan.ProgramStatus;
+import entity.plan.TransferCredit;
 import entity.requirement.CourseFilter;
 import entity.requirement.ProfileReq;
 import entity.requirement.RequirementPrinter;
@@ -346,6 +347,24 @@ class CheckGraduationInteractorTest {
 
         assertEquals(real.findDegree(DegreeType.HBSC).orElseThrow().getCompletion().getNotes(), data.getNotes());
         assertFalse(data.getNotes().isEmpty());
+    }
+
+    @Test
+    void creditsOutsideTheCalendarAreNoted() {
+        Plan p = plan("ASMAJ0001");
+        passed(p, "XYZ101H1");
+        planned(p, "XYZ101H1", "CSC108H1");
+        p.addTransferCredit(new TransferCredit("ABC123H1", 0.5));
+        p.addTransferCredit(new TransferCredit("MAT1**", 0.5));
+        p.addTransferCredit(new TransferCredit("USP***", 3.5));
+        p.addTransferCredit(new TransferCredit("CSC148H1", 0.5));
+
+        assertEquals(List.of(
+                "MAT1** is an unspecified transfer credit; it counts toward a requirement only with the "
+                        + "department's permission",
+                "XYZ101H1 isn't in the current calendar, so it doesn't count toward any requirement",
+                "ABC123H1 isn't in the current calendar, so it doesn't count toward any requirement"),
+                run(p, true).getNotes());
     }
 
     @Test

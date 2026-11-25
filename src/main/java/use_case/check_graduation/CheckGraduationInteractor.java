@@ -7,16 +7,16 @@ import entity.catalog.Program;
 import entity.degree.Degree;
 import entity.evaluation.*;
 import entity.plan.Plan;
+import entity.plan.PlannedCourse;
 import entity.plan.ProgramSelection;
+import entity.plan.TransferCredit;
 import entity.requirement.RequirementPrinter;
 import use_case.CatalogReader;
 import use_case.DegreeReader;
 import use_case.PlanReader;
 import use_case.SnapshotFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public final class CheckGraduationInteractor implements CheckGraduationInputBoundary {
     private final PlanReader plans;
@@ -83,7 +83,9 @@ public final class CheckGraduationInteractor implements CheckGraduationInputBoun
                 List.of(), lines(rules, d.getCompletion(), rules.topLevelRows()));
         RowLine combination = new RowLine("Programs", degree.getProgramCombinations().describe(),
                 d.getProgramCombination(), d.getProgramCombinationReason().orElse(null), List.of(), List.of());
-        List<String> notes = new ArrayList<>(rules.getNotes());
+
+        List<String> notes = new ArrayList<>(unplacedCredits(plan));
+        notes.addAll(rules.getNotes());
         notes.addAll(d.getCompletion().getWarnings());
 
         presenter.prepareSuccessView(new CheckGraduationOutputData(plan.getId(), input.isProjected(),
@@ -146,5 +148,31 @@ public final class CheckGraduationInteractor implements CheckGraduationInputBoun
 
         return new RowLine("Requirement " + row.getNumber(), text, r.getStatus(), reason, r.getClaimed(),
                 lines(rules, result, rules.childrenOf(row.getNumber())));
+    }
+
+    private List<String> unplacedCredits(Plan plan) {
+        Set<String> codes = new LinkedHashSet<>();
+        List<String> notes = new ArrayList<>();
+
+        for (PlannedCourse c : plan.getCourses()) {
+            codes.add(c.getCode());
+        }
+
+        for (TransferCredit t : plan.getTransferCredits()) {
+            if (!t.getCode().contains("*")) {
+                codes.add(t.getCode());
+            } else if (!t.getCode().startsWith("USP")) {
+                notes.add(t.getCode() + " is an unspecified transfer credit; it counts toward a requirement "
+                        + "only with the department's permission");
+            }
+        }
+
+        for (String code : codes) {
+            if (catalog.findCourse(code).isEmpty()) {
+                notes.add(code + " isn't in the current calendar, so it doesn't count toward any requirement");
+            }
+        }
+
+        return notes;
     }
 }
