@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/** Shows warnings, one per line, each with a warning sign. It hides itself when there are no warnings. */
+/** Shows warnings, one per line, each with a bullet. It hides itself when there are no warnings. */
 public final class WarningList extends JLabel {
     private static final Color WARNING_COLOUR = new Color(0xB26A00);
 
@@ -22,7 +22,7 @@ public final class WarningList extends JLabel {
         StringBuilder sb = new StringBuilder("<html>");
 
         for (String w : warnings) {
-            sb.append("&#9888; ").append(escape(w)).append("<br>");
+            sb.append("&#8226; ").append(escape(w)).append("<br>");
         }
 
         return sb.append("</html>").toString();

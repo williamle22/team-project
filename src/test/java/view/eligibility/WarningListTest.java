@@ -17,7 +17,7 @@ class WarningListTest {
 
     @Test
     void showsOneLinePerWarning() {
-        assertEquals("<html>&#9888; a<br>&#9888; b &lt; c<br></html>", WarningList.html(List.of("a", "b < c")));
+        assertEquals("<html>&#8226; a<br>&#8226; b &lt; c<br></html>", WarningList.html(List.of("a", "b < c")));
     }
 
     @Test
