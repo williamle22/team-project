@@ -59,7 +59,7 @@ public final class CheckGraduationPresenter implements CheckGraduationOutputBoun
     }
 
     private static String reason(RowLine line) {
-        String reason = line.getReason().orElse("");
+        String reason = line.getReason().filter(r -> !r.equalsIgnoreCase(line.getText())).orElse("");
 
         if (reason.endsWith(CGPA_UNKNOWN)) {
             return reason + " until you enter final grades";

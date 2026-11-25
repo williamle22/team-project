@@ -90,6 +90,17 @@ class CheckGraduationPresenterTest {
     }
 
     @Test
+    void dropsReasonThatRepeatsText() {
+        RowLine degree = line("Degree", REVIEW, null, List.of(),
+                new RowLine("Requirement 17", "Transfer credits only", REVIEW, "transfer credits only", List.of(),
+                        List.of()));
+
+        GraduationLineView row = present(REVIEW, true, degree, List.of()).getDegree().getChildren().get(0);
+
+        assertEquals("", row.getReason());
+    }
+
+    @Test
     void programsConvertInOrder() {
         ProgramSummary a = new ProgramSummary("ASMAJ0001", "A Major", leaf("Enrolment", MET),
                 leaf("Completion", REVIEW), List.of("a note"));
