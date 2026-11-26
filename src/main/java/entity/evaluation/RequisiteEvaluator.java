@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
  */
 public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNode> {
     private final AcademicSnapshot snapshot;
+    private final AcademicSnapshot transcript;
     private final boolean concurrentAllowed;
     private final MembershipResolver lists;
 
@@ -21,7 +22,13 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
      * them, for itself and every node under it.
      */
     public RequisiteEvaluator(AcademicSnapshot snapshot, boolean concurrentAllowed, MembershipResolver lists) {
+        this(snapshot, snapshot, concurrentAllowed, lists);
+    }
+
+    public RequisiteEvaluator(AcademicSnapshot snapshot, AcademicSnapshot transcript, boolean concurrentAllowed,
+                              MembershipResolver lists) {
         this.snapshot = Objects.requireNonNull(snapshot, "snapshot");
+        this.transcript = Objects.requireNonNull(transcript, "transcript");
         this.concurrentAllowed = concurrentAllowed;
         this.lists = Objects.requireNonNull(lists, "lists");
     }
@@ -29,7 +36,7 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
     /** Evaluates {@code r} and returns a node tree with the same shape. */
     public EvaluationNode evaluate(Requirement r) {
         if (r.isConcurrent() && !concurrentAllowed) {
-            return r.accept(new RequisiteEvaluator(snapshot, true, lists));
+            return r.accept(new RequisiteEvaluator(snapshot, transcript, true, lists));
         }
 
         return r.accept(this);
@@ -61,7 +68,8 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
 
     @Override
     public EvaluationNode visitNot(NotReq node) {
-        EvaluationNode child = evaluate(node.getItem());
+        EvaluationNode child = new RequisiteEvaluator(transcript, transcript, concurrentAllowed, lists)
+                .evaluate(node.getItem());
         Status s = child.getStatus().negate();
 
         if (s == Status.NOT_MET) {

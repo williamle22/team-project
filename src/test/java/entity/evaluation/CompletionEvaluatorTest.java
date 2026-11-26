@@ -27,6 +27,7 @@ import static testutil.CatalogFixtures.completion;
 import static testutil.CatalogFixtures.completionRow;
 import static testutil.CatalogFixtures.credits;
 import static testutil.CatalogFixtures.creditsIn;
+import static testutil.CatalogFixtures.not;
 import static testutil.CatalogFixtures.or;
 import static testutil.CatalogFixtures.record;
 import static testutil.CatalogFixtures.req;
@@ -153,12 +154,12 @@ class CompletionEvaluatorTest {
     }
 
     @Test
-    void resultsInEvaluationOrder() {
+    void resultsInDocumentOrder() {
         CompletionResult r = evaluator.evaluate(ASMIN1001, taken());
 
         List<Integer> order = r.getRows().stream().map(RowResult::getNumber).collect(Collectors.toList());
 
-        assertEquals(List.of(3, 4, 5, 6, 2, 1), order);
+        assertEquals(List.of(1, 2, 3, 4, 5, 6), order);
     }
 
     @Test
@@ -224,32 +225,129 @@ class CompletionEvaluatorTest {
     }
 
     @Test
-    void siblingsSharingACourseGiveReview() {
-        Completion c = completion(List.of(
-                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
-                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
-                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw")));
+    void level2AvoidsDoubleCounting() {
+        CompletionResult r = evaluator.evaluate(twoSiblings(), taken("PHL281H1", "PHL245H1"));
 
-        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+        assertEquals(List.of("PHL281H1"), r.row(2).orElseThrow().getClaimed());
+        assertEquals(List.of("PHL245H1"), r.row(3).orElseThrow().getClaimed());
+        assertEquals(List.of(), r.getWarnings());
+        assertEquals(MET, r.getOverall());
+    }
 
-        assertEquals(MET, status(r, 1));
-        assertEquals(List.of("PHL281H1 may be counting toward both requirement 2 and requirement 3"),
-                r.getWarnings());
+    @Test
+    void greedyMissReportsReview() {
+        CompletionResult r = evaluator.evaluate(twoSiblings(), taken("PHL281H1"));
+
+        RowResult missed = r.row(3).orElseThrow();
+        assertEquals(REVIEW, missed.getStatus());
+        assertEquals("may be satisfiable with a different allocation", missed.getReason().orElseThrow());
         assertEquals(REVIEW, r.getOverall());
     }
 
     @Test
-    void doubleCountingKeepsNotMet() {
+    void specificRowClaimsFirst() {
         Completion c = completion(List.of(
-                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(1, RowKind.ALLOCATION, null, null, or(req("PHL281H1"), req("PHL245H1")), "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, null, req("PHL281H1"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1", "PHL245H1"));
+
+        assertEquals(List.of("PHL245H1"), r.row(1).orElseThrow().getClaimed());
+        assertEquals(List.of("PHL281H1"), r.row(2).orElseThrow().getClaimed());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void metRowClaimsOnlyWhatItNeeds() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(0.5, "PHL"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1", "PHL245H1"));
+
+        assertEquals(1, r.row(1).orElseThrow().getClaimed().size());
+    }
+
+    @Test
+    void unmetRowClaimsEverythingItMatched() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(2.0, "PHL"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1", "PHL245H1"));
+
+        assertEquals(List.of("PHL281H1", "PHL245H1"), r.row(1).orElseThrow().getClaimed());
+    }
+
+    @Test
+    void trimKeepsWhatConstraintsNeed() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(1.0, "PHL"), "raw"),
+                completionRow(2, RowKind.CONSTRAINT, null, 1,
+                        credits(0.5, CourseFilter.builder().levels(List.of(300)).build()), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL380H1", "PHL281H1", "PHL245H1"));
+
+        assertEquals(List.of("PHL380H1", "PHL245H1"), r.row(1).orElseThrow().getClaimed());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void reviewRowStillClaimsOnlyWhatItNeeds() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(0.5, "PHL"), "raw"),
+                completionRow(2, RowKind.CONSTRAINT, null, 1, text("check with the department"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1", "PHL245H1"));
+
+        assertEquals(REVIEW, status(r, 1));
+        assertEquals(1, r.row(1).orElseThrow().getClaimed().size());
+    }
+
+    @Test
+    void parentTopsUpWithCoursesItsRowsCouldUse() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, credits(1.0, CourseFilter.any()), "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, or(req("CSC108H1"), req("CSC148H1")), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("CSC108H1", "POL107H1", "CSC148H1"));
+
+        assertEquals(List.of("CSC148H1", "CSC108H1"), r.row(1).orElseThrow().getClaimed());
+    }
+
+    @Test
+    void trimDoesntHideCoursesFromNot() {
+        Requirement eightOrSevenAndAHalfWithout108 = or(creditsIn(1.0, "CSC"),
+                and(creditsIn(0.5, "CSC"), not(req("CSC108H1"))));
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, eightOrSevenAndAHalfWithout108, "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("CSC108H1", "CSC148H1", "CSC207H1"));
+
+        assertEquals(2, r.row(1).orElseThrow().getClaimed().size());
+    }
+
+    @Test
+    void trimKeepsChildCoursesAndSkipsInapplicableChecks() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(1.0, "PHL"), "raw"),
                 completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
-                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw"),
-                completionRow(4, RowKind.ALLOCATION, null, 1, req("PHL999H1"), "raw")));
+                withAudience(3, RowKind.CONSTRAINT, 1, credits(2.0, CourseFilter.any()))));
+
+        CompletionResult r = evaluator.evaluate(c, withFaculty("Engineering", "PHL281H1", "PHL245H1", "PHL380H1"));
+
+        assertEquals(List.of("PHL281H1", "PHL380H1"), r.row(1).orElseThrow().getClaimed());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void rowReferencingSiblingGoesLast() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, ref(2), "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, null, req("PHL281H1"), "raw")));
 
         CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
 
-        assertEquals(1, r.getWarnings().size());
-        assertEquals(NOT_MET, r.getOverall());
+        assertEquals(MET, status(r, 1));
+        assertEquals(MET, r.getOverall());
     }
 
     @Test
@@ -285,38 +383,31 @@ class CompletionEvaluatorTest {
     }
 
     @Test
-    void differentOptionsMayShare() {
+    void optionsMayShare() {
         Completion c = completion(List.of(
                 completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
                 completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
                 completionRow(3, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
-                completionRow(4, RowKind.ALLOCATION, null, 1, null, "raw"),
-                completionRow(5, RowKind.ALLOCATION, null, 4, req("PHL281H1"), "raw"),
-                completionRow(6, RowKind.ALLOCATION, null, 4, req("PHL281H1"), "raw"),
-                completionRow(7, RowKind.CHOICE, null, null, or(ref(3), ref(4)), "raw")));
+                completionRow(4, RowKind.CHOICE, null, null, or(ref(2), ref(3)), "raw")));
 
         CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
 
-        assertEquals(List.of(
-                "PHL281H1 may be counting toward both requirement 2 and requirement 3",
-                "PHL281H1 may be counting toward both requirement 2 and requirement 5",
-                "PHL281H1 may be counting toward both requirement 2 and requirement 6",
-                "PHL281H1 may be counting toward both requirement 5 and requirement 6"), r.getWarnings());
+        assertEquals(MET, status(r, 2));
+        assertEquals(MET, status(r, 3));
+        assertEquals(MET, r.getOverall());
     }
 
     @Test
-    void skipsInapplicableConstraintsAndGroups() {
+    void inapplicableRowClaimsNothing() {
         Completion c = completion(List.of(
-                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
-                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
-                completionRow(3, RowKind.CONSTRAINT, null, 1, credits(0.5, CourseFilter.any()), "raw"),
-                completionRow(4, RowKind.ALLOCATION, null, null, req("PHL281H1"), "raw"),
-                withAudience(5, RowKind.ALLOCATION, null, req("PHL281H1"))));
+                withAudience(1, RowKind.ALLOCATION, null, req("PHL281H1")),
+                completionRow(2, RowKind.ALLOCATION, null, null, req("PHL281H1"), "raw")));
 
         CompletionResult r = evaluator.evaluate(c, withFaculty("Engineering", "PHL281H1"));
 
-        assertEquals(List.of("PHL281H1 may be counting toward both requirement 2 and requirement 4"),
-                r.getWarnings());
+        assertEquals(List.of(), r.row(1).orElseThrow().getClaimed());
+        assertEquals(MET, status(r, 2));
+        assertEquals(MET, r.getOverall());
     }
 
     @Test
@@ -378,6 +469,36 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void limitUnderOrParentDropsExcess() {
+        CreditsReq noFirstYear = new CreditsReq(0, 0.0, null,
+                CourseFilter.builder().designators(List.of("HPS")).levels(List.of(100)).build(), false);
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, hpsOrPermission(), "raw"),
+                completionRow(2, RowKind.LIMIT, null, 1, noFirstYear, "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("HPS100H1", "HPS200H1"));
+
+        assertEquals(MET, status(r, 2));
+        assertEquals("0.5 credits fall under this limit; only 0.0 can count",
+                r.row(2).orElseThrow().getReason().orElseThrow());
+        assertEquals(List.of("HPS200H1"), r.row(1).orElseThrow().getClaimed());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
+    void limitUnderGroupWithoutRequirementGivesReview() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("HPS100H1"), "raw"),
+                completionRow(3, RowKind.LIMIT, null, 1, hpsCap(), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("HPS100H1"));
+
+        assertEquals(REVIEW, status(r, 3));
+        assertEquals(REVIEW, status(r, 1));
+    }
+
+    @Test
     void limitOnlyCountsParentPool() {
         CompletionResult r = evaluator.evaluate(cscLimit(false, hpsOrPermission()),
                 taken("HPS100H1", "CSC108H1", "CSC148H1"));
@@ -390,7 +511,7 @@ class CompletionEvaluatorTest {
         CompletionResult r = evaluator.evaluate(cscLimit(true, hpsOrPermission()),
                 taken("HPS100H1", "CSC108H1", "CSC148H1"));
 
-        assertEquals(REVIEW, status(r, 2));
+        assertEquals(MET, status(r, 2));
         assertEquals("1.0 credits fall under this limit; only 0.5 can count",
                 r.row(2).orElseThrow().getReason().orElseThrow());
     }
@@ -466,6 +587,13 @@ class CompletionEvaluatorTest {
     private static CompletionRow overlapping(int number, int parent, List<Integer> overlaps, Requirement req) {
         return new CompletionRow(number, RowKind.ALLOCATION, null, null, parent, overlaps, req, null, false, List.of(),
                 "raw");
+    }
+
+    private static Completion twoSiblings() {
+        return completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw")));
     }
 
     private static RowRefReq ref(int row) {

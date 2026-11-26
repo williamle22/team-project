@@ -333,10 +333,7 @@ class CheckGraduationInteractorTest {
 
         List<String> notes = summary(run(p, true), "ASMIN0005").getNotes();
 
-        assertEquals(8, notes.size());
-        assertEquals("enrolment note", notes.get(0));
-        assertEquals("AAA301Y1 may be counting toward both requirement 1 and requirement 2", notes.get(1));
-        assertEquals("completion note", notes.get(7));
+        assertEquals(List.of("enrolment note", "completion note"), notes);
     }
 
     @Test

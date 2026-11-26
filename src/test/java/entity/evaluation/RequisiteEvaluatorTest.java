@@ -137,6 +137,14 @@ class RequisiteEvaluatorTest {
     }
 
     @Test
+    void notChecksWholeTranscript() {
+        EvaluationNode n = new RequisiteEvaluator(taken(), taken(record("CSC108H1")), false, MembershipResolver.NONE)
+                .evaluate(not(req("CSC108H1")));
+
+        assertEquals(NOT_MET, n.getStatus());
+    }
+
+    @Test
     void notNegates() {
         Requirement r = not(req("CSC148H1"));
 
