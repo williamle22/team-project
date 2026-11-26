@@ -78,6 +78,15 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
         Optional<CourseRecord> r = find(code);
 
         if (r.isEmpty()) {
+            Optional<CourseRecord> transfer = available().stream().filter(t -> t.couldBe(code)).findFirst();
+
+            if (transfer.isPresent()) {
+                String t = transfer.get().getCode();
+
+                return EvaluationNode.leaf(node, Status.REVIEW,
+                        t + " may count as " + code + " with the department's permission", List.of(t));
+            }
+
             return EvaluationNode.leaf(node, Status.NOT_MET, notTakenReason(code));
         }
 
@@ -116,7 +125,7 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
                 continue;
             }
 
-            double w = node.getWeight().orElse(r.getCourse().getWeight());
+            double w = node.getWeight().orElse(r.getWeight());
             maybe += w;
 
             if (m == Match.YES) {
@@ -310,8 +319,7 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
                     break;
                 }
 
-                double w = top ? Math.min(r.getCourse().getWeight(), part.getAmount() - partWeight)
-                        : r.getCourse().getWeight();
+                double w = top ? Math.min(r.getWeight(), part.getAmount() - partWeight) : r.getWeight();
                 partWeight += w;
                 points += w * r.getGrade().get();
                 used.add(r.getCode());

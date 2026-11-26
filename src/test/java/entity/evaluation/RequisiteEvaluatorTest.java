@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static testutil.CatalogFixtures.and;
 import static testutil.CatalogFixtures.choose;
 import static testutil.CatalogFixtures.concurrentReq;
+import static testutil.CatalogFixtures.credits;
 import static testutil.CatalogFixtures.creditsIn;
 import static testutil.CatalogFixtures.not;
 import static testutil.CatalogFixtures.or;
@@ -41,6 +42,7 @@ class RequisiteEvaluatorTest {
     private static final CourseFilter GROUP_1 = CourseFilter.builder().lists(List.of("Group 1")).build();
     private static final CourseRecord ANT100 = record(withBreadth("ANT100Y1",
             BreadthCategory.SOCIETY_INSTITUTIONS, BreadthCategory.LIVING_THINGS), 75);
+    private static final CourseRecord MAT1 = CourseRecord.unspecifiedTransfer("MAT1**", 2.0).orElseThrow();
 
     private static EvaluationNode prereq(AcademicSnapshot s, Requirement r) {
         return new RequisiteEvaluator(s, false, MembershipResolver.NONE).evaluate(r);
@@ -347,6 +349,21 @@ class RequisiteEvaluatorTest {
         AcademicSnapshot s = taken(record("CSC148H1", 80), record("CSC207H1", 60), record("CSC236H1", 65));
 
         assertEquals("average 68.3%, needs 70%", reason(prereq(s, average(70, null))));
+    }
+
+    @Test
+    void unspecifiedTransferMayCountAsCourse() {
+        EvaluationNode n = prereq(taken(MAT1), req("MAT135H1"));
+
+        assertEquals(REVIEW, n.getStatus());
+        assertEquals("MAT1** may count as MAT135H1 with the department's permission", reason(n));
+        assertEquals(List.of("MAT1**"), n.getCounted());
+    }
+
+    @Test
+    void unspecifiedTransferCreditsUseItsWeight() {
+        assertEquals(REVIEW, prereq(taken(MAT1), creditsIn(2.0, "MAT")).getStatus());
+        assertEquals(MET, prereq(taken(MAT1), credits(2.0, CourseFilter.any())).getStatus());
     }
 
     @Test

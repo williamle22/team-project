@@ -209,7 +209,7 @@ class SnapshotFactoryTest {
     }
 
     @Test
-    void unspecifiedTransferCreditSkipped() {
+    void unspecifiedTransferCreditIsTaken() {
         Plan p = plan();
         p.addTransferCredit(new TransferCredit("MAT1**", 0.5));
         p.addTransferCredit(new TransferCredit("USP***", 3.5));
@@ -217,7 +217,8 @@ class SnapshotFactoryTest {
 
         AcademicSnapshot s = factory.forCourse(p, target);
 
-        assertTrue(s.getTaken().isEmpty());
+        assertEquals(Set.of("MAT1**"), s.getTaken().keySet());
+        assertEquals(0.5, s.getTaken().get("MAT1**").getWeight());
         assertEquals(Optional.of(2), yearOfStudy(s));
         assertEquals(Optional.of(true), s.profileFact("has_transfer_credits"));
     }

@@ -218,7 +218,7 @@ public final class CompletionEvaluator {
                         || CourseMatcher.matches(parent.get().getFilter(), r, resolver) != Match.NO;
 
                 if (counted && CourseMatcher.matches(cap.getFilter(), r, resolver) != Match.NO) {
-                    matched += cap.getWeight().orElse(r.getCourse().getWeight());
+                    matched += cap.getWeight().orElse(r.getWeight());
                 }
             }
 

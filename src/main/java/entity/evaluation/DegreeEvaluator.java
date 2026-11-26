@@ -129,11 +129,11 @@ public final class DegreeEvaluator {
             int n = neededBy.getOrDefault(r.getCode(), 0);
 
             if (claimed.contains(r.getCode())) {
-                most += r.getCourse().getWeight();
+                most += r.getWeight();
             }
 
             if (n > 1) {
-                least -= r.getCourse().getWeight() * (n - 1);
+                least -= r.getWeight() * (n - 1);
             }
         }
 

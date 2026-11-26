@@ -94,8 +94,13 @@ public final class SnapshotFactory {
         Map<String, CourseRecord> taken = records(courses);
 
         for (TransferCredit t : plan.getTransferCredits()) {
-            catalog.findCourse(t.getCode())
-                    .ifPresent(course -> keepBest(taken, new CourseRecord(course, null, true, false)));
+            Optional<Course> course = catalog.findCourse(t.getCode());
+
+            if (course.isPresent()) {
+                keepBest(taken, new CourseRecord(course.get(), null, true, false));
+            } else {
+                CourseRecord.unspecifiedTransfer(t.getCode(), t.getWeight()).ifPresent(r -> keepBest(taken, r));
+            }
         }
 
         return taken;

@@ -20,7 +20,8 @@ public final class CourseMatcher {
         List<Match> checks = new ArrayList<>();
 
         if (!f.matchesAnyCourse()
-                && !(f.getCourses().contains(c.getCode()) || f.getDesignators().contains(c.getDesignator()))) {
+                && !(f.getCourses().contains(c.getCode()) || f.getCourses().stream().anyMatch(r::couldBe)
+                || f.getDesignators().contains(c.getDesignator()))) {
             checks.add(Match.NO);
         } else {
             checks.add(Match.YES);
@@ -32,7 +33,7 @@ public final class CourseMatcher {
             checks.add(Match.YES);
         }
 
-        if (!f.getBreadth().isEmpty()
+        if (!f.getBreadth().isEmpty() && !r.isUnspecified()
                 && c.getBreadth().stream().noneMatch(b -> f.getBreadth().contains(b.getNumber()))) {
             checks.add(Match.NO);
         } else {
@@ -51,7 +52,7 @@ public final class CourseMatcher {
             checks.add(Match.YES);
         }
 
-        if (f.getMaxCourseAmount().isPresent() && c.getWeight() > f.getMaxCourseAmount().get()) {
+        if (f.getMaxCourseAmount().isPresent() && r.getWeight() > f.getMaxCourseAmount().get()) {
             checks.add(Match.NO);
         } else {
             checks.add(Match.YES);
@@ -97,6 +98,9 @@ public final class CourseMatcher {
             checks.add(Match.anyOf(inAny));
         }
 
-        return Match.allOf(checks);
+        Match m = Match.allOf(checks);
+        boolean specific = !f.matchesAnyCourse() || !f.getBreadth().isEmpty();
+
+        return m == Match.YES && r.isUnspecified() && specific ? Match.MAYBE : m;
     }
 }
