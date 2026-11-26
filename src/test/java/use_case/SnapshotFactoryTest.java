@@ -35,6 +35,8 @@ class SnapshotFactoryTest {
     private static final Placement WINTER_2026 = Placement.fallWinter(2025, Section.S);
     private static final Placement FULL_YEAR_2025 = Placement.fallWinter(2025, Section.Y);
     private static final Placement SUMMER_2026 = Placement.summer(2026, Section.F);
+    private static final Placement SUMMER_2026_S = Placement.summer(2026, Section.S);
+    private static final Placement SUMMER_2026_Y = Placement.summer(2026, Section.Y);
     private static final Placement FALL_2026 = Placement.fallWinter(2026, Section.F);
     private static final Placement WINTER_2027 = Placement.fallWinter(2026, Section.S);
 
@@ -118,6 +120,40 @@ class SnapshotFactoryTest {
 
         assertEquals(Set.of("MAT137Y1"), s.getTaken().keySet());
         assertTrue(s.getConcurrent().isEmpty());
+    }
+
+    @Test
+    void summerFirstHalfTakenBySecondHalf() {
+        Plan p = plan();
+        add(p, "CSC108H1", SUMMER_2026, 80);
+        PlannedCourse target = add(p, "CSC148H1", SUMMER_2026_S);
+
+        AcademicSnapshot s = factory.forCourse(p, target);
+
+        assertEquals(Set.of("CSC108H1"), s.getTaken().keySet());
+        assertTrue(s.getConcurrent().isEmpty());
+    }
+
+    @Test
+    void summerSecondHalfNotConcurrentWithFirstHalf() {
+        Plan p = plan();
+        add(p, "CSC148H1", SUMMER_2026_S);
+        PlannedCourse target = add(p, "CSC108H1", SUMMER_2026);
+
+        AcademicSnapshot s = factory.forCourse(p, target);
+
+        assertTrue(s.getTaken().isEmpty());
+        assertTrue(s.getConcurrent().isEmpty());
+    }
+
+    @Test
+    void summerSameHalfOrFullSummerIsConcurrent() {
+        Plan p = plan();
+        add(p, "CSC165H1", SUMMER_2026_S);
+        add(p, "MAT137Y1", SUMMER_2026_Y);
+        PlannedCourse target = add(p, "CSC148H1", SUMMER_2026_S);
+
+        assertEquals(Set.of("CSC165H1", "MAT137Y1"), factory.forCourse(p, target).getConcurrent().keySet());
     }
 
     @Test

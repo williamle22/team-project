@@ -1,6 +1,7 @@
 package use_case;
 
 import entity.catalog.Course;
+import entity.catalog.Section;
 import entity.evaluation.AcademicSnapshot;
 import entity.evaluation.CourseRecord;
 import entity.grades.LetterGrade;
@@ -44,9 +45,10 @@ public final class SnapshotFactory {
                 continue;
             }
 
-            if (c.getPlacement().endTerm().isBefore(start)) {
+            if (c.getPlacement().endTerm().isBefore(start) || firstHalfOfSummer(c.getPlacement(), placement)) {
                 earlier.add(c);
-            } else if (!Collections.disjoint(c.getPlacement().terms(), placement.terms())) {
+            } else if (!Collections.disjoint(c.getPlacement().terms(), placement.terms())
+                    && !firstHalfOfSummer(placement, c.getPlacement())) {
                 sameTime.add(c);
             }
         }
@@ -174,6 +176,12 @@ public final class SnapshotFactory {
         }
 
         return 4;
+    }
+
+    private static boolean firstHalfOfSummer(Placement first, Placement second) {
+        int year = second.getYear();
+
+        return first.equals(Placement.summer(year, Section.F)) && second.equals(Placement.summer(year, Section.S));
     }
 
     private static boolean passed(PlannedCourse c) {
