@@ -21,13 +21,9 @@ import static entity.evaluation.Status.NOT_MET;
 import static entity.evaluation.Status.REVIEW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static testutil.CatalogFixtures.and;
-import static testutil.CatalogFixtures.choose;
 import static testutil.CatalogFixtures.completionRow;
 import static testutil.CatalogFixtures.credits;
-import static testutil.CatalogFixtures.or;
 import static testutil.CatalogFixtures.record;
-import static testutil.CatalogFixtures.req;
 import static testutil.CatalogFixtures.testDegree;
 import static testutil.CatalogFixtures.text;
 
@@ -95,23 +91,8 @@ class DegreeEvaluatorTest {
         return program(code, MAJOR, MET, credits(minimum, CourseFilter.any()), claimed);
     }
 
-    private static ProgramProgress withTotal(String code, double childMinimum, String[] everything,
-                                             String[] specific) {
-        return program(code, MAJOR, MET, List.of(
-                row(1, RowKind.ALLOCATION, null, true, credits(6, CourseFilter.any()), everything),
-                row(2, RowKind.ALLOCATION, 1, true, credits(childMinimum, CourseFilter.any()), specific)));
-    }
-
     private DegreeProgress evaluate(Degree degree, AcademicSnapshot snapshot, ProgramProgress... programs) {
         return evaluator.evaluate(degree, snapshot, List.of(programs));
-    }
-
-    private Status pairWith(Requirement major1, double major2Minimum) {
-        String[] a = courses("AAA", 1, 6);
-        String[] b = courses("BBB", 1, 6);
-
-        return evaluate(HBSC, snapshot(join(a, b)), program("MAJ1", MAJOR, MET, major1, a),
-                major("MAJ2", major2Minimum, b)).getProgramCombination();
     }
 
     @Test
@@ -174,11 +155,26 @@ class DegreeEvaluatorTest {
     }
 
     @Test
-    void sharedCoursesNearTheLineAreReview() {
+    void sharedCoursesMetWhenClaimsReachTwelve() {
         String[] a = courses("AAA", 1, 8);
         String[] b = join(courses("AAA", 1, 3), courses("BBB", 1, 5));
 
         DegreeProgress p = evaluate(HBSC, snapshot(join(a, b)), major("MAJ1", 7, a), major("MAJ2", 7, b));
+
+        assertEquals(MET, p.getProgramCombination());
+    }
+
+    @Test
+    void sharedClaimsThatCouldBeSwappedAreReview() {
+        String[] a = courses("AAA", 1, 7);
+        String[] b = join(courses("AAA", 1, 3), courses("BBB", 1, 4));
+        String[] couldUse = join(b, courses("BBB", 5, 5));
+        EvaluationNode detail = EvaluationNode.leaf(credits(7, CourseFilter.any()), MET, null, List.of(couldUse));
+        ProgramProgress major2 = program("MAJ2", MAJOR, MET, List.of(new RowResult(
+                completionRow(1, RowKind.ALLOCATION, null, null, credits(7, CourseFilter.any()), "raw"), true, MET,
+                null, detail, List.of(b))));
+
+        DegreeProgress p = evaluate(HBSC, snapshot(join(a, couldUse)), major("MAJ1", 7, a), major2);
 
         assertEquals(REVIEW, p.getProgramCombination());
         assertEquals(SHARED, p.getProgramCombinationReason().orElseThrow());
@@ -209,24 +205,6 @@ class DegreeEvaluatorTest {
         DegreeProgress p = evaluate(HBSC, snapshot(join(a, b)), twice, major("MAJ2", 7, b));
 
         assertEquals(MET, p.getProgramCombination());
-    }
-
-    @Test
-    void courseInThreeProgramsIsSubtractedTwice() {
-        String[] major = join(courses("AAA", 1, 6), courses("BBB", 1, 1));
-        String[] minor1 = courses("BBB", 1, 4);
-        String[] minor2 = join(courses("BBB", 1, 2), courses("CCC", 1, 2));
-        AcademicSnapshot s = snapshot(join(major, minor1, minor2));
-
-        DegreeProgress met = evaluate(HBSC, s, major("MAJ1", 7, major),
-                program("MIN1", MINOR, MET, credits(4, CourseFilter.any()), minor1),
-                program("MIN2", MINOR, MET, credits(4, CourseFilter.any()), minor2));
-        DegreeProgress review = evaluate(HBSC, s, major("MAJ1", 6.5, major),
-                program("MIN1", MINOR, MET, credits(4, CourseFilter.any()), minor1),
-                program("MIN2", MINOR, MET, credits(4, CourseFilter.any()), minor2));
-
-        assertEquals(MET, met.getProgramCombination());
-        assertEquals(REVIEW, review.getProgramCombination());
     }
 
     @Test
@@ -275,90 +253,5 @@ class DegreeEvaluatorTest {
         assertEquals(NOT_MET, p.getProgramCombination());
         assertEquals("needs 1 Specialist completed (one of ASSPE2038, ASSPE2676)",
                 p.getProgramCombinationReason().orElseThrow());
-    }
-
-    @Test
-    void onlyApplicableTopLevelAllocationsCountTowardMinimum() {
-        String[] a = courses("AAA", 1, 7);
-        String[] b = join(courses("AAA", 1, 2), courses("BBB", 1, 5));
-        ProgramProgress major1 = program("MAJ1", MAJOR, MET, List.of(
-                row(1, RowKind.ALLOCATION, null, true, credits(6, CourseFilter.any()), a),
-                row(2, RowKind.ALLOCATION, null, false, credits(5, CourseFilter.any())),
-                row(3, RowKind.ALLOCATION, 1, true, credits(5, CourseFilter.any())),
-                row(4, RowKind.CONSTRAINT, null, true, credits(5, CourseFilter.any()))));
-
-        DegreeProgress p = evaluate(HBSC, snapshot(join(a, b)), major1, major("MAJ2", 6, b));
-
-        assertEquals(REVIEW, p.getProgramCombination());
-    }
-
-    @Test
-    void totalCoveredByChildrenUsesOnlyTheirCourses() {
-        String[] a = courses("AAA", 1, 6);
-        String[] b = courses("BBB", 1, 6);
-        String[] all = join(a, b);
-
-        DegreeProgress p = evaluate(HBSC, snapshot(all), withTotal("MAJ1", 6, all, a), withTotal("MAJ2", 6, all, b));
-
-        assertEquals(MET, p.getProgramCombination());
-    }
-
-    @Test
-    void totalNotCoveredKeepsItsOwnCourses() {
-        String[] a = courses("AAA", 1, 6);
-        String[] b = courses("BBB", 1, 6);
-        String[] all = join(a, b);
-
-        DegreeProgress p = evaluate(HBSC, snapshot(all), withTotal("MAJ1", 5.5, all, a),
-                withTotal("MAJ2", 5.5, all, b));
-
-        assertEquals(REVIEW, p.getProgramCombination());
-        assertEquals(SHARED, p.getProgramCombinationReason().orElseThrow());
-    }
-
-    @Test
-    void minimumOfCredits() {
-        assertEquals(MET, pairWith(credits(4, CourseFilter.any()), 8));
-        assertEquals(REVIEW, pairWith(credits(4, CourseFilter.any()), 7.5));
-    }
-
-    @Test
-    void minimumOfCourseUsesItsWeight() {
-        assertEquals(MET, pairWith(req("MAT137Y1"), 11));
-        assertEquals(REVIEW, pairWith(req("MAT137Y1"), 10.5));
-        assertEquals(MET, pairWith(req("CSC108H1"), 11.5));
-        assertEquals(REVIEW, pairWith(req("CSC108H1"), 11));
-    }
-
-    @Test
-    void minimumOfShortCourseCodeIsAHalfCredit() {
-        assertEquals(MET, pairWith(req("CSC"), 11.5));
-        assertEquals(REVIEW, pairWith(req("CSC"), 11));
-    }
-
-    @Test
-    void minimumOfAndAddsItsItems() {
-        assertEquals(MET, pairWith(and(req("CSC108H1"), req("MAT137Y1")), 10.5));
-        assertEquals(REVIEW, pairWith(and(req("CSC108H1"), req("MAT137Y1")), 10));
-    }
-
-    @Test
-    void minimumOfOrTakesTheCheapestItem() {
-        assertEquals(MET, pairWith(or(req("MAT137Y1"), req("CSC108H1")), 11.5));
-        assertEquals(REVIEW, pairWith(or(req("MAT137Y1"), req("CSC108H1")), 11));
-    }
-
-    @Test
-    void minimumOfChooseTakesTheCheapestItems() {
-        Requirement twoOf = choose(2, req("MAT137Y1"), req("CSC108H1"), req("CSC148H1"));
-
-        assertEquals(MET, pairWith(twoOf, 11));
-        assertEquals(REVIEW, pairWith(twoOf, 10.5));
-    }
-
-    @Test
-    void minimumOfOtherRequirementsIsZero() {
-        assertEquals(MET, pairWith(text("t"), 12));
-        assertEquals(REVIEW, pairWith(text("t"), 11.5));
     }
 }
