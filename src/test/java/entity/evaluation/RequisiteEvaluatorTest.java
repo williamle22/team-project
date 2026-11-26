@@ -350,20 +350,129 @@ class RequisiteEvaluatorTest {
     }
 
     @Test
-    void averageBestIsReview() {
-        AverageReq r = new AverageReq(70, null, true, CSC, List.of(), false);
+    void averageBestTakesHighestGrades() {
+        AverageReq r = new AverageReq(85, 1.0, true, CSC, List.of(), false);
+        AcademicSnapshot s = taken(record("CSC236H1", 50), record("CSC148H1", 90), record("CSC207H1", 80));
 
-        EvaluationNode n = prereq(taken(record("CSC148H1", 90)), r);
+        EvaluationNode n = prereq(s, r);
 
-        assertEquals(REVIEW, n.getStatus());
-        assertEquals("average over best credits; check manually", reason(n));
+        assertEquals(MET, n.getStatus());
+        assertEquals(List.of("CSC148H1", "CSC207H1"), n.getCounted());
     }
 
     @Test
-    void averageItemsIsReview() {
-        AverageReq r = new AverageReq(70, null, false, CourseFilter.any(), List.of(req("CSC148H1")), false);
+    void averageBestCountsPartOfLastCourse() {
+        AverageReq r = new AverageReq(76, 1.0, true, CSC, List.of(), false);
+        AcademicSnapshot s = taken(record("CSC148H1", 90), record("CSC199Y1", 60));
 
-        assertEquals(REVIEW, prereq(taken(record("CSC148H1", 90)), r).getStatus());
+        assertEquals("average 75.0%, needs 76%", reason(prereq(s, r)));
+    }
+
+    @Test
+    void averageBestMetDespiteUnknownGrade() {
+        AverageReq r = new AverageReq(85, 0.5, true, CSC, List.of(), false);
+
+        assertEquals(MET, prereq(taken(record("CSC148H1", 90), record("CSC207H1")), r).getStatus());
+    }
+
+    @Test
+    void averageBestShortWithUnknownGradeIsReview() {
+        AverageReq r = new AverageReq(85, 1.0, true, CSC, List.of(), false);
+
+        EvaluationNode n = prereq(taken(record("CSC148H1", 90), record("CSC207H1")), r);
+
+        assertEquals(REVIEW, n.getStatus());
+        assertEquals("no final grade yet for CSC207H1", reason(n));
+    }
+
+    @Test
+    void averageBestWithoutAmountAveragesAll() {
+        AverageReq r = new AverageReq(80, null, true, CSC, List.of(), false);
+
+        AcademicSnapshot s = taken(record("CSC148H1", 90), record("CSC207H1", 60));
+
+        assertEquals("average 75.0%, needs 80%", reason(prereq(s, r)));
+    }
+
+    @Test
+    void averageUnknownGradeCanLowerPlainAverage() {
+        EvaluationNode n = prereq(taken(record("CSC148H1", 90), record("CSC207H1")), average(70, null));
+
+        assertEquals(REVIEW, n.getStatus());
+        assertEquals("no final grade yet for CSC207H1", reason(n));
+    }
+
+    @Test
+    void averageItemsCoverEachItem() {
+        AverageReq r = new AverageReq(70, 1.0, false, CourseFilter.any(),
+                List.of(creditsIn(0.5, "CSC"), creditsIn(0.5, "MAT")), false);
+
+        EvaluationNode n = prereq(taken(record("CSC148H1", 80), record("MAT135H1", 60)), r);
+
+        assertEquals(MET, n.getStatus());
+        assertEquals(List.of("CSC148H1", "MAT135H1"), n.getCounted());
+    }
+
+    @Test
+    void averageItemsNeedEveryItem() {
+        AverageReq r = new AverageReq(70, 1.0, false, CourseFilter.any(),
+                List.of(creditsIn(0.5, "CSC"), creditsIn(0.5, "MAT")), false);
+
+        EvaluationNode n = prereq(taken(record("CSC148H1", 80)), r);
+
+        assertEquals(NOT_MET, n.getStatus());
+        assertEquals("0.0 of 0.5 credits for average", reason(n));
+    }
+
+    @Test
+    void averageItemsDontShareCourses() {
+        AverageReq r = new AverageReq(70, 1.0, true, CourseFilter.any(),
+                List.of(creditsIn(0.5, "CSC"), creditsIn(0.5, "CSC")), false);
+
+        assertEquals(NOT_MET, prereq(taken(record("CSC148H1", 90)), r).getStatus());
+    }
+
+    @Test
+    void averageItemsPickBestOption() {
+        AverageReq r = new AverageReq(80, 0.5, false, CourseFilter.any(),
+                List.of(or(creditsIn(0.5, "CSC"), creditsIn(0.5, "MAT"))), false);
+
+        EvaluationNode n = prereq(taken(record("CSC148H1", 50), record("MAT135H1", 90)), r);
+
+        assertEquals(MET, n.getStatus());
+        assertEquals(List.of("MAT135H1"), n.getCounted());
+    }
+
+    @Test
+    void averageItemsPickBestCombination() {
+        AverageReq r = new AverageReq(85, 1.0, true, CourseFilter.any(),
+                List.of(choose(2, creditsIn(0.5, "CSC"), creditsIn(0.5, "MAT"), creditsIn(0.5, "PHY"))), false);
+        AcademicSnapshot s = taken(record("CSC148H1", 60), record("MAT135H1", 90), record("PHY131H1", 80));
+
+        EvaluationNode n = prereq(s, r);
+
+        assertEquals(MET, n.getStatus());
+        assertEquals(List.of("MAT135H1", "PHY131H1"), n.getCounted());
+    }
+
+    @Test
+    void averageItemsChoosingTooManyIsNotMet() {
+        AverageReq r = new AverageReq(70, 1.0, false, CourseFilter.any(),
+                List.of(choose(2, creditsIn(0.5, "CSC"))), false);
+
+        assertEquals(NOT_MET, prereq(taken(record("CSC148H1", 90)), r).getStatus());
+    }
+
+    @Test
+    void averageOverOtherItemsIsReview() {
+        for (Requirement item : List.of(req("CSC148H1"), or(req("CSC148H1")), choose(1, req("CSC148H1")))) {
+            AverageReq r = new AverageReq(70, null, false, CourseFilter.any(), List.of(item), false);
+
+            EvaluationNode n = prereq(taken(record("CSC148H1", 90)), r);
+
+            assertEquals(REVIEW, n.getStatus());
+            assertEquals("average over these courses; check manually", reason(n));
+        }
     }
 
     @Test

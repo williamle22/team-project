@@ -147,52 +147,30 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
 
     @Override
     public EvaluationNode visitAverage(AverageReq node) {
-        double weight = 0;
-        double points = 0;
-        List<String> counted = new ArrayList<>();
+        List<List<CreditsReq>> choices;
+        boolean top;
 
-        if (!node.getItems().isEmpty() || node.isBest()) {
-            return EvaluationNode.leaf(node, Status.REVIEW, "average over best credits; check manually", counted);
+        if (node.getItems().isEmpty()) {
+            CreditsReq all = new CreditsReq(node.getAmount().orElse(0.0), null, null, node.getFilter(), false);
+            choices = List.of(List.of(all));
+            top = node.isBest() && node.getAmount().isPresent();
+        } else if (node.getItems().stream().allMatch(RequisiteEvaluator::averageable)) {
+            choices = product(node.getItems());
+            top = node.isBest();
+        } else {
+            return EvaluationNode.leaf(node, Status.REVIEW, "average over these courses; check manually");
         }
 
-        for (CourseRecord r : available()) {
-            Match m = CourseMatcher.matches(node.getFilter(), r, lists);
+        List<EvaluationNode> results = new ArrayList<>();
 
-            if (m == Match.NO) {
-                continue;
-            }
-
-            if (m == Match.MAYBE) {
-                return EvaluationNode.leaf(node, Status.REVIEW, "can't tell if " + r.getCode() + " counts", counted);
-            }
-
-            if (r.getGrade().isEmpty()) {
-                return EvaluationNode.leaf(node, Status.REVIEW, "no final grade yet for " + r.getCode(), counted);
-            }
-
-            double w = r.getCourse().getWeight();
-            weight += w;
-            points += w * r.getGrade().get();
-            counted.add(r.getCode());
+        for (List<CreditsReq> parts : choices) {
+            results.add(average(node, parts, top));
         }
 
-        if (weight == 0) {
-            return EvaluationNode.leaf(node, Status.NOT_MET, "no matching courses", counted);
-        }
+        Status s = Status.anyOf(statuses(results));
 
-        if (node.getAmount().isPresent() && weight < node.getAmount().get() - 1e-9) {
-            return EvaluationNode.leaf(node, Status.NOT_MET,
-                    weight + " of " + node.getAmount().get() + " credits for average", counted);
-        }
-
-        double avg = points / weight;
-
-        if (avg >= node.getMinGrade()) {
-            return EvaluationNode.leaf(node, Status.MET, null, counted);
-        }
-
-        return EvaluationNode.leaf(node, Status.NOT_MET,
-                "average " + String.format(Locale.ROOT, "%.1f", avg) + "%, needs " + node.getMinGrade() + "%", counted);
+        return results.stream().filter(n -> n.getStatus() == s).findFirst()
+                .orElse(EvaluationNode.leaf(node, Status.NOT_MET, "no matching courses"));
     }
 
     @Override
@@ -293,6 +271,152 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
 
         long matching = c.getBreadth().stream().filter(b -> f.getBreadth().contains(b.getNumber())).count();
         return (double) matching / c.getBreadth().size();
+    }
+
+    private EvaluationNode average(AverageReq node, List<CreditsReq> parts, boolean top) {
+        Set<String> used = new HashSet<>();
+        List<String> counted = new ArrayList<>();
+        double weight = 0;
+        double points = 0;
+        String unknown = null;
+        String shortfall = null;
+
+        for (CreditsReq part : parts) {
+            List<CourseRecord> graded = new ArrayList<>();
+
+            for (CourseRecord r : available()) {
+                Match m = CourseMatcher.matches(part.getFilter(), r, lists);
+
+                if (m == Match.NO || used.contains(r.getCode())) {
+                    continue;
+                }
+
+                if (m == Match.YES && r.getGrade().isPresent()) {
+                    graded.add(r);
+                } else if (unknown == null) {
+                    unknown = m == Match.MAYBE ? "can't tell if " + r.getCode() + " counts"
+                            : "no final grade yet for " + r.getCode();
+                }
+            }
+
+            if (top) {
+                graded.sort(Comparator.comparing((CourseRecord r) -> r.getGrade().get()).reversed());
+            }
+
+            double partWeight = 0;
+
+            for (CourseRecord r : graded) {
+                if (top && partWeight >= part.getAmount() - 1e-9) {
+                    break;
+                }
+
+                double w = top ? Math.min(r.getCourse().getWeight(), part.getAmount() - partWeight)
+                        : r.getCourse().getWeight();
+                partWeight += w;
+                points += w * r.getGrade().get();
+                used.add(r.getCode());
+                counted.add(r.getCode());
+            }
+
+            weight += partWeight;
+
+            if (shortfall == null && partWeight < part.getAmount() - 1e-9) {
+                shortfall = partWeight + " of " + part.getAmount() + " credits for average";
+            }
+        }
+
+        double avg = points / weight;
+
+        if (shortfall == null && weight > 0 && avg >= node.getMinGrade() && (top || unknown == null)) {
+            return EvaluationNode.leaf(node, Status.MET, null, counted);
+        }
+
+        if (unknown != null) {
+            return EvaluationNode.leaf(node, Status.REVIEW, unknown, counted);
+        }
+
+        if (weight == 0) {
+            return EvaluationNode.leaf(node, Status.NOT_MET, "no matching courses", counted);
+        }
+
+        if (shortfall != null) {
+            return EvaluationNode.leaf(node, Status.NOT_MET, shortfall, counted);
+        }
+
+        return EvaluationNode.leaf(node, Status.NOT_MET,
+                "average " + String.format(Locale.ROOT, "%.1f", avg) + "%, needs " + node.getMinGrade() + "%", counted);
+    }
+
+    private static boolean averageable(Requirement r) {
+        if (r instanceof OrReq) {
+            return allCredits(((OrReq) r).getItems());
+        }
+
+        if (r instanceof ChooseReq) {
+            return allCredits(((ChooseReq) r).getItems());
+        }
+
+        return r instanceof CreditsReq;
+    }
+
+    private static boolean allCredits(List<Requirement> items) {
+        return items.stream().allMatch(i -> i instanceof CreditsReq);
+    }
+
+    private static List<List<CreditsReq>> product(List<Requirement> items) {
+        List<List<CreditsReq>> result = List.of(List.of());
+
+        for (Requirement item : items) {
+            List<List<CreditsReq>> next = new ArrayList<>();
+
+            for (List<CreditsReq> prefix : result) {
+                for (List<CreditsReq> option : options(item)) {
+                    List<CreditsReq> joined = new ArrayList<>(prefix);
+                    joined.addAll(option);
+                    next.add(joined);
+                }
+            }
+
+            result = next;
+        }
+
+        return result;
+    }
+
+    private static List<List<CreditsReq>> options(Requirement item) {
+        if (item instanceof OrReq) {
+            return combinations(((OrReq) item).getItems(), 1);
+        }
+
+        if (item instanceof ChooseReq) {
+            return combinations(((ChooseReq) item).getItems(), ((ChooseReq) item).getCount());
+        }
+
+        return List.of(List.of((CreditsReq) item));
+    }
+
+    private static List<List<CreditsReq>> combinations(List<Requirement> items, int count) {
+        if (count == 0) {
+            return List.of(List.of());
+        }
+
+        if (items.size() < count) {
+            return List.of();
+        }
+
+        List<Requirement> rest = items.subList(1, items.size());
+        List<List<CreditsReq>> result = new ArrayList<>();
+
+        for (List<CreditsReq> c : combinations(rest, count - 1)) {
+            List<CreditsReq> with = new ArrayList<>();
+            with.add((CreditsReq) items.get(0));
+            with.addAll(c);
+            result.add(with);
+        }
+
+        result.addAll(combinations(rest, count));
+
+        return result;
     }
 
     private Collection<CourseRecord> available() {
