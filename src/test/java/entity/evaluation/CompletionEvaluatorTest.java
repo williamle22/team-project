@@ -225,6 +225,36 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void level3FindsAllocationGreedyMisses() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL380H1")), "raw"),
+                completionRow(4, RowKind.ALLOCATION, null, 1, or(req("PHL245H1"), req("PHL380H1")), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1", "PHL245H1", "PHL380H1"));
+
+        for (int row = 1; row <= 4; row++) {
+            assertEquals(MET, status(r, row), "row " + row);
+        }
+        assertEquals(4, r.getRows().size());
+    }
+
+    @Test
+    void level3SkipsTooManyAssignments() {
+        String[] nine = {"PHL201H1", "PHL202H1", "PHL203H1", "PHL204H1", "PHL205H1", "PHL206H1", "PHL207H1",
+                "PHL208H1", "PHL209H1"};
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, creditsIn(2.5, "PHL"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, creditsIn(2.5, "PHL"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken(nine));
+
+        assertEquals(REVIEW, status(r, 3));
+    }
+
+    @Test
     void level2AvoidsDoubleCounting() {
         CompletionResult r = evaluator.evaluate(twoSiblings(), taken("PHL281H1", "PHL245H1"));
 

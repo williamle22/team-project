@@ -17,7 +17,7 @@ import java.util.*;
  */
 public final class CompletionEvaluator {
     public CompletionResult evaluate(Completion completion, AcademicSnapshot snapshot) {
-        Walk walk = new Walk(completion, snapshot);
+        Walk walk = new Walk(completion, snapshot, true);
         List<CompletionRow> top = completion.topLevelRows();
         List<Status> statuses = new ArrayList<>();
 
@@ -56,17 +56,22 @@ public final class CompletionEvaluator {
     }
 
     private static final class Walk {
+        private static final int MAX_ASSIGNMENTS = 256;
+        private static final String DIFFERENT_ALLOCATION = "may be satisfiable with a different allocation";
+
         private final Completion completion;
         private final AcademicSnapshot snapshot;
+        private final boolean search;
         private final CompletionResolver resolver;
         private final Set<String> all = new LinkedHashSet<>();
         private final List<RowResult> results = new ArrayList<>();
         private final Map<Integer, RowResult> finished = new HashMap<>();
         private final Set<Integer> options = new HashSet<>();
 
-        Walk(Completion completion, AcademicSnapshot snapshot) {
+        Walk(Completion completion, AcademicSnapshot snapshot, boolean search) {
             this.completion = completion;
             this.snapshot = snapshot;
+            this.search = search;
             this.resolver = new CompletionResolver(completion, snapshot);
 
             for (CourseRecord r : snapshot.allRecords()) {
@@ -95,6 +100,46 @@ public final class CompletionEvaluator {
             List<CompletionRow> order = new ArrayList<>(siblings);
             order.sort(Comparator.comparing(this::goesLast)
                     .thenComparingInt(row -> wants.get(row).size()));
+            int start = results.size();
+            List<RowResult> done = greedy(order, available, demand);
+            Map<String, List<CompletionRow>> contested = new TreeMap<>();
+
+            for (CompletionRow row : order) {
+                for (String code : wants.get(row)) {
+                    if (demand.get(code) > 1) {
+                        contested.computeIfAbsent(code, c -> new ArrayList<>()).add(row);
+                    }
+                }
+            }
+
+            if (!search || noAllocationMisses(results.subList(start, results.size()))
+                    || count(contested) > MAX_ASSIGNMENTS) {
+                return done;
+            }
+
+            Map<String, CompletionRow> best = null;
+            int fewest = missing(done);
+
+            for (Map<String, CompletionRow> owners : assignments(contested)) {
+                int m = missing(fork().assigned(order, available, demand, owners));
+
+                if (m < fewest) {
+                    best = owners;
+                    fewest = m;
+                }
+            }
+
+            if (best == null) {
+                return done;
+            }
+
+            results.subList(start, results.size()).clear();
+
+            return assigned(order, available, demand, best);
+        }
+
+        private List<RowResult> greedy(List<CompletionRow> order, Set<String> available,
+                                       Map<String, Integer> demand) {
             List<RowResult> done = new ArrayList<>();
 
             for (CompletionRow row : order) {
@@ -110,6 +155,79 @@ public final class CompletionEvaluator {
             }
 
             return done;
+        }
+
+        private List<RowResult> assigned(List<CompletionRow> order, Set<String> available,
+                                         Map<String, Integer> demand, Map<String, CompletionRow> owners) {
+            List<RowResult> done = new ArrayList<>();
+
+            for (CompletionRow row : order) {
+                Set<String> mine = new LinkedHashSet<>(available);
+
+                owners.forEach((code, owner) -> {
+                    if (owner != row && !mayShare(owner, row)) {
+                        mine.remove(code);
+                    }
+                });
+
+                done.add(evaluate(row, mine, demand));
+            }
+
+            return done;
+        }
+
+        private int missing(List<RowResult> done) {
+            int n = 0;
+
+            for (RowResult r : done) {
+                if (counts(r) && r.getStatus() != Status.MET) {
+                    n++;
+                }
+            }
+
+            return n;
+        }
+
+        private static boolean noAllocationMisses(List<RowResult> rows) {
+            return rows.stream().noneMatch(r -> r.getReason().filter(DIFFERENT_ALLOCATION::equals).isPresent());
+        }
+
+        private static long count(Map<String, List<CompletionRow>> contested) {
+            long n = 1;
+
+            for (List<CompletionRow> rows : contested.values()) {
+                n = Math.min(n * rows.size(), MAX_ASSIGNMENTS + 1);
+            }
+
+            return n;
+        }
+
+        private static List<Map<String, CompletionRow>> assignments(Map<String, List<CompletionRow>> contested) {
+            List<Map<String, CompletionRow>> all = List.of(Map.of());
+
+            for (Map.Entry<String, List<CompletionRow>> e : contested.entrySet()) {
+                List<Map<String, CompletionRow>> next = new ArrayList<>();
+
+                for (Map<String, CompletionRow> partial : all) {
+                    for (CompletionRow row : e.getValue()) {
+                        Map<String, CompletionRow> owners = new HashMap<>(partial);
+                        owners.put(e.getKey(), row);
+                        next.add(owners);
+                    }
+                }
+
+                all = next;
+            }
+
+            return all;
+        }
+
+        private Walk fork() {
+            Walk w = new Walk(completion, snapshot, false);
+            finished.values().forEach(w::finish);
+            w.results.clear();
+
+            return w;
         }
 
         RowResult evaluate(CompletionRow row, Set<String> pool, Map<String, Integer> demand) {
@@ -152,7 +270,7 @@ public final class CompletionEvaluator {
 
                     if (own == Status.NOT_MET && check(snapshot, req).getStatus() != Status.NOT_MET) {
                         own = Status.REVIEW;
-                        reason = "may be satisfiable with a different allocation";
+                        reason = DIFFERENT_ALLOCATION;
                     }
                 }
 
