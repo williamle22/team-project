@@ -254,6 +254,35 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void level3KeepsCoursesForRowsThatMayShare() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw"),
+                overlapping(4, 1, List.of(2), req("PHL281H1"))));
+
+        CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
+
+        assertEquals(MET, status(r, 2));
+        assertEquals(REVIEW, status(r, 3));
+        assertEquals(MET, status(r, 4));
+    }
+
+    @Test
+    void level3SkipsRowsThatDontApply() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, 1, req("PHL281H1"), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, 1, or(req("PHL281H1"), req("PHL245H1")), "raw"),
+                withAudience(4, RowKind.ALLOCATION, 1, req("PHL380H1"))));
+
+        CompletionResult r = evaluator.evaluate(c, withFaculty("Engineering", "PHL281H1"));
+
+        assertFalse(r.row(4).orElseThrow().isApplicable());
+        assertEquals(REVIEW, status(r, 3));
+    }
+
+    @Test
     void level2AvoidsDoubleCounting() {
         CompletionResult r = evaluator.evaluate(twoSiblings(), taken("PHL281H1", "PHL245H1"));
 

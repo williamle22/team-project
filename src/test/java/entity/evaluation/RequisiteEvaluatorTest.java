@@ -450,6 +450,17 @@ class RequisiteEvaluatorTest {
     }
 
     @Test
+    void averageItemsReportFirstShortItem() {
+        AverageReq r = new AverageReq(70, 1.5, false, CourseFilter.any(),
+                List.of(creditsIn(0.5, "CSC"), creditsIn(1.0, "MAT")), false);
+
+        EvaluationNode n = prereq(taken(record("MAT135H1", 80)), r);
+
+        assertEquals(NOT_MET, n.getStatus());
+        assertEquals("0.0 of 0.5 credits for average", reason(n));
+    }
+
+    @Test
     void averageItemsDontShareCourses() {
         AverageReq r = new AverageReq(70, 1.0, true, CourseFilter.any(),
                 List.of(creditsIn(0.5, "CSC"), creditsIn(0.5, "CSC")), false);
@@ -503,6 +514,14 @@ class RequisiteEvaluatorTest {
     @Test
     void averageUnknownGradeIsReview() {
         EvaluationNode n = prereq(taken(record("CSC148H1")), average(70, null));
+
+        assertEquals(REVIEW, n.getStatus());
+        assertEquals("no final grade yet for CSC148H1", reason(n));
+    }
+
+    @Test
+    void averageReasonNamesFirstUnknownGrade() {
+        EvaluationNode n = prereq(taken(record("CSC148H1"), record("CSC207H1")), average(70, null));
 
         assertEquals(REVIEW, n.getStatus());
         assertEquals("no final grade yet for CSC148H1", reason(n));
