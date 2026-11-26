@@ -79,7 +79,7 @@ class DegreeEvaluatorTest {
     }
 
     private static ProgramProgress program(String code, ProgramType type, Status status, List<RowResult> rows) {
-        return new ProgramProgress(code, type, ENROLMENT, new CompletionResult(rows, status, List.of()));
+        return new ProgramProgress(code, type, ENROLMENT, new CompletionResult(rows, status));
     }
 
     private static ProgramProgress program(String code, ProgramType type, Status status, Requirement req,

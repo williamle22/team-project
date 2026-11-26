@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DegreeProgressTest {
     private static CompletionResult rows(Status overall) {
-        return new CompletionResult(List.of(), overall, List.of());
+        return new CompletionResult(List.of(), overall);
     }
 
     @Test

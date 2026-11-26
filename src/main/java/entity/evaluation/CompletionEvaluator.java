@@ -40,7 +40,7 @@ public final class CompletionEvaluator {
         List<CompletionRow> order = completion.getRequirements();
         walk.results.sort(Comparator.comparingInt(r -> order.indexOf(r.getRow())));
 
-        return new CompletionResult(walk.results, Status.allOf(statuses), List.of());
+        return new CompletionResult(walk.results, Status.allOf(statuses));
     }
 
     private static List<CompletionRow> allocations(List<CompletionRow> rows) {
@@ -85,7 +85,7 @@ public final class CompletionEvaluator {
             }
         }
 
-        List<RowResult> evaluateSiblings(List<CompletionRow> siblings, Set<String> available) {
+        private List<RowResult> evaluateSiblings(List<CompletionRow> siblings, Set<String> available) {
             Map<CompletionRow, Set<String>> wants = new HashMap<>();
             Map<String, Integer> demand = new HashMap<>();
 
@@ -102,6 +102,11 @@ public final class CompletionEvaluator {
                     .thenComparingInt(row -> wants.get(row).size()));
             int start = results.size();
             List<RowResult> done = greedy(order, available, demand);
+
+            if (!search || noDifferentAllocation(results.subList(start, results.size()))) {
+                return done;
+            }
+
             Map<String, List<CompletionRow>> contested = new TreeMap<>();
 
             for (CompletionRow row : order) {
@@ -112,8 +117,7 @@ public final class CompletionEvaluator {
                 }
             }
 
-            if (!search || noAllocationMisses(results.subList(start, results.size()))
-                    || count(contested) > MAX_ASSIGNMENTS) {
+            if (count(contested) > MAX_ASSIGNMENTS) {
                 return done;
             }
 
@@ -188,7 +192,7 @@ public final class CompletionEvaluator {
             return n;
         }
 
-        private static boolean noAllocationMisses(List<RowResult> rows) {
+        private static boolean noDifferentAllocation(List<RowResult> rows) {
             return rows.stream().noneMatch(r -> r.getReason().filter(DIFFERENT_ALLOCATION::equals).isPresent());
         }
 
@@ -230,7 +234,7 @@ public final class CompletionEvaluator {
             return w;
         }
 
-        RowResult evaluate(CompletionRow row, Set<String> pool, Map<String, Integer> demand) {
+        private RowResult evaluate(CompletionRow row, Set<String> pool, Map<String, Integer> demand) {
             Optional<EvaluationNode> audience = row.getAudience()
                     .map(a -> check(snapshot, a));
 
@@ -298,7 +302,7 @@ public final class CompletionEvaluator {
             return finish(new RowResult(row, true, status, reason, detail, claimed));
         }
 
-        boolean counts(RowResult r) {
+        private boolean counts(RowResult r) {
             return r.isApplicable() && !options.contains(r.getNumber());
         }
 
@@ -413,18 +417,20 @@ public final class CompletionEvaluator {
                 }
             }
 
-            if (excess(under, cap, max) <= 1e-9) {
+            double over = excess(under, cap, max);
+
+            if (over <= 1e-9) {
                 return new RowResult(row, true, Status.MET, null, null, List.of());
             }
 
             String reason = cap.getFilter().isPerDesignator()
-                    ? excess(under, cap, max) + " credits go past " + max + " in one designator"
+                    ? over + " credits go past " + max + " in one designator"
                     : matched + " credits fall under this limit; only " + max + " can count";
 
             if (parent.isPresent()) {
                 CreditsReq p = parent.get();
-                CreditsReq raised = new CreditsReq(p.getAmount() + excess(under, cap, max),
-                        p.getMaxAmount().orElse(null), p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
+                CreditsReq raised = new CreditsReq(p.getAmount() + over, p.getMaxAmount().orElse(null),
+                        p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
                 Status status = check(snapshot, raised).getStatus();
 
                 return new RowResult(row, true, status, reason, null, List.of());

@@ -68,7 +68,6 @@ class CompletionEvaluatorTest {
         for (int row = 1; row <= 6; row++) {
             assertEquals(NOT_MET, status(r, row), "row " + row);
         }
-        assertEquals(List.of(), r.getWarnings());
     }
 
     @Test
@@ -260,7 +259,6 @@ class CompletionEvaluatorTest {
 
         assertEquals(List.of("PHL281H1"), r.row(2).orElseThrow().getClaimed());
         assertEquals(List.of("PHL245H1"), r.row(3).orElseThrow().getClaimed());
-        assertEquals(List.of(), r.getWarnings());
         assertEquals(MET, r.getOverall());
     }
 
@@ -384,7 +382,6 @@ class CompletionEvaluatorTest {
     void ancestorsMayShare() {
         CompletionResult r = evaluator.evaluate(ASMIN1001, taken(ASMIN1001_COMPLETE));
 
-        assertEquals(List.of(), r.getWarnings());
         assertEquals(MET, r.getOverall());
     }
 
@@ -407,7 +404,6 @@ class CompletionEvaluatorTest {
         for (Completion c : List.of(firstListsSecond, secondListsFirst, ancestorListsRow)) {
             CompletionResult r = evaluator.evaluate(c, taken("PHL281H1"));
 
-            assertEquals(List.of(), r.getWarnings());
             assertEquals(MET, r.getOverall());
         }
     }

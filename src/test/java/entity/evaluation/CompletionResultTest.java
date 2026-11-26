@@ -17,16 +17,15 @@ class CompletionResultTest {
 
     @Test
     void gettersReturnFields() {
-        CompletionResult r = new CompletionResult(List.of(ROW_2, ROW_1), Status.NOT_MET, List.of("warning"));
+        CompletionResult r = new CompletionResult(List.of(ROW_2, ROW_1), Status.NOT_MET);
 
         assertEquals(List.of(ROW_2, ROW_1), r.getRows());
         assertEquals(Status.NOT_MET, r.getOverall());
-        assertEquals(List.of("warning"), r.getWarnings());
     }
 
     @Test
     void rowFindsByNumber() {
-        CompletionResult r = new CompletionResult(List.of(ROW_2, ROW_1), Status.NOT_MET, List.of());
+        CompletionResult r = new CompletionResult(List.of(ROW_2, ROW_1), Status.NOT_MET);
 
         assertSame(ROW_1, r.row(1).orElseThrow());
         assertSame(ROW_2, r.row(2).orElseThrow());
@@ -34,36 +33,33 @@ class CompletionResultTest {
 
     @Test
     void rowMissingIsEmpty() {
-        CompletionResult r = new CompletionResult(List.of(ROW_1), Status.MET, List.of());
+        CompletionResult r = new CompletionResult(List.of(ROW_1), Status.MET);
 
         assertTrue(r.row(7).isEmpty());
     }
 
     @Test
-    void listsAreCopied() {
+    void rowsAreCopied() {
         List<RowResult> rows = new ArrayList<>(List.of(ROW_1));
-        List<String> warnings = new ArrayList<>(List.of("warning"));
-        CompletionResult r = new CompletionResult(rows, Status.MET, warnings);
+        CompletionResult r = new CompletionResult(rows, Status.MET);
 
         rows.add(ROW_2);
-        warnings.add("later");
 
         assertEquals(List.of(ROW_1), r.getRows());
-        assertEquals(List.of("warning"), r.getWarnings());
     }
 
     @Test
     void equalsAndHashCode() {
         EqualsVerifier.forClass(CompletionResult.class)
                 .withPrefabValues(RowResult.class, ROW_1, ROW_2)
-                .withNonnullFields("rows", "overall", "warnings")
+                .withNonnullFields("rows", "overall")
                 .verify();
     }
 
     @Test
-    void toStringShowsOverallRowsAndWarnings() {
-        CompletionResult r = new CompletionResult(List.of(ROW_1), Status.MET, List.of("warning"));
+    void toStringShowsOverallAndRows() {
+        CompletionResult r = new CompletionResult(List.of(ROW_1), Status.MET);
 
-        assertEquals("CompletionResult{MET, rows=[" + ROW_1 + "], warnings=[warning]}", r.toString());
+        assertEquals("CompletionResult{MET, rows=[" + ROW_1 + "]}", r.toString());
     }
 }

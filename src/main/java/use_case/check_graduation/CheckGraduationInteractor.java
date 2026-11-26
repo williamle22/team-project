@@ -93,7 +93,6 @@ public final class CheckGraduationInteractor implements CheckGraduationInputBoun
 
         List<String> notes = new ArrayList<>(unplacedCredits(plan));
         notes.addAll(rules.getNotes());
-        notes.addAll(d.getCompletion().getWarnings());
 
         presenter.prepareSuccessView(new CheckGraduationOutputData(plan.getId(), input.isProjected(),
                 d.getOverall(), degreeLine, combination, notes, summaries));
@@ -111,7 +110,7 @@ public final class CheckGraduationInteractor implements CheckGraduationInputBoun
         EnrolmentResult e = enrolment.evaluate(program.getEnrolment().orElse(null), snapshot);
         CompletionResult c = program.getCompletion()
                 .map(rules -> completion.evaluate(rules, snapshot))
-                .orElse(new CompletionResult(List.of(), Status.REVIEW, List.of()));
+                .orElse(new CompletionResult(List.of(), Status.REVIEW));
 
         return new ProgramProgress(program.getCode(), program.getType(), e, c);
     }
@@ -119,17 +118,15 @@ public final class CheckGraduationInteractor implements CheckGraduationInputBoun
     private ProgramSummary summary(Program program, ProgramProgress p) {
         EnrolmentResult e = p.getEnrolment();
         CompletionResult c = p.getCompletion();
+        Optional<Completion> rules = program.getCompletion();
         RowLine enrolmentLine = new RowLine("Enrolment",
                 program.getEnrolment().map(Enrolment::getRaw).orElse("Enrolment requirements"), e.getStatus(),
                 e.getReason(), List.of(), List.of());
-        RowLine completionLine = program.getCompletion()
-                .map(rules -> new RowLine("Completion", "Completion requirements", c.getOverall(), null, List.of(),
-                        lines(rules, c, rules.topLevelRows())))
-                .orElse(new RowLine("Completion", "Completion requirements", Status.REVIEW,
-                        "no completion information", List.of(), List.of()));
+        RowLine completionLine = new RowLine("Completion", "Completion requirements", c.getOverall(),
+                rules.isPresent() ? null : "no completion information", List.of(),
+                rules.map(r -> lines(r, c, r.topLevelRows())).orElse(List.of()));
         List<String> notes = new ArrayList<>(e.getNotes());
-        notes.addAll(c.getWarnings());
-        program.getCompletion().ifPresent(rules -> notes.addAll(rules.getNotes()));
+        rules.ifPresent(r -> notes.addAll(r.getNotes()));
 
         return new ProgramSummary(program.getCode(), program.getTitle(), enrolmentLine, completionLine, notes);
     }
