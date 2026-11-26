@@ -24,6 +24,7 @@ public final class CourseFilter {
     private final Integer minGrade;
     private final boolean transfer;
     private final boolean crNcr;
+    private final boolean perDesignator;
 
     private CourseFilter(Builder b) {
         this.courses = List.copyOf(b.courses);
@@ -38,6 +39,7 @@ public final class CourseFilter {
         this.minGrade = b.minGrade;
         this.transfer = b.transfer;
         this.crNcr = b.crNcr;
+        this.perDesignator = b.perDesignator;
     }
 
     public static Builder builder() {
@@ -74,6 +76,7 @@ public final class CourseFilter {
     public boolean isTransfer() { return transfer; }
     /** Returns whether only courses taken Credit/No Credit match. */
     public boolean isCrNcr() { return crNcr; }
+    public boolean isPerDesignator() { return perDesignator; }
 
     @Override
     public boolean equals(Object o) {
@@ -86,6 +89,7 @@ public final class CourseFilter {
         CourseFilter that = (CourseFilter) o;
         return transfer == that.transfer
                 && crNcr == that.crNcr
+                && perDesignator == that.perDesignator
                 && courses.equals(that.courses)
                 && designators.equals(that.designators)
                 && levels.equals(that.levels)
@@ -101,7 +105,7 @@ public final class CourseFilter {
     @Override
     public int hashCode() {
         return Objects.hash(courses, designators, levels, breadth, lists, requirements,
-                exclude, excludeDesignators, maxCourseAmount, minGrade, transfer, crNcr);
+                exclude, excludeDesignators, maxCourseAmount, minGrade, transfer, crNcr, perDesignator);
     }
 
     @Override
@@ -126,6 +130,9 @@ public final class CourseFilter {
         }
         if (crNcr) {
             appendField(sb, "crNcr", true);
+        }
+        if (perDesignator) {
+            appendField(sb, "perDesignator", true);
         }
         return sb.append('}').toString();
     }
@@ -156,6 +163,7 @@ public final class CourseFilter {
         private Integer minGrade = null;
         private boolean transfer = false;
         private boolean crNcr = false;
+        private boolean perDesignator = false;
 
         private Builder() {}
 
@@ -171,6 +179,7 @@ public final class CourseFilter {
         public Builder minGrade(Integer v) { this.minGrade = Objects.requireNonNull(v); return this; };
         public Builder transfer(boolean v) { this.transfer = v; return this; };
         public Builder crNcr(boolean v) { this.crNcr = v; return this; };
+        public Builder perDesignator(boolean v) { this.perDesignator = v; return this; };
 
         /**
          * @throws IllegalArgumentException if {@code maxCourseAmount} is negative or not finite, or {@code minGrade} is

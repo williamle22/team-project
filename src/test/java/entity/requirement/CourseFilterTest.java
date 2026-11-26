@@ -24,6 +24,7 @@ class CourseFilterTest {
         assertTrue(f.getExcludeDesignators().isEmpty());
         assertTrue(f.getMaxCourseAmount().isEmpty());
         assertTrue(f.getMinGrade().isEmpty());
+        assertFalse(f.isPerDesignator());
         assertFalse(f.isTransfer());
         assertFalse(f.isCrNcr());
     }
@@ -43,6 +44,7 @@ class CourseFilterTest {
                 .minGrade(70)
                 .transfer(true)
                 .crNcr(true)
+                .perDesignator(true)
                 .build();
         assertEquals(List.of("HPS100H1"), f.getCourses());
         assertEquals(List.of("HPS"), f.getDesignators());
@@ -56,6 +58,7 @@ class CourseFilterTest {
         assertEquals(70, f.getMinGrade().orElseThrow());
         assertTrue(f.isTransfer());
         assertTrue(f.isCrNcr());
+        assertTrue(f.isPerDesignator());
     }
 
     @Test
@@ -138,6 +141,7 @@ class CourseFilterTest {
                 .minGrade(70)
                 .transfer(true)
                 .crNcr(true)
+                .perDesignator(true)
                 .build()
                 .toString();
         assertTrue(s.contains("courses=[HPS100H1]"));
@@ -146,6 +150,7 @@ class CourseFilterTest {
         assertTrue(s.contains("minGrade=70"));
         assertTrue(s.contains("transfer=true"));
         assertTrue(s.contains("crNcr=true"));
+        assertTrue(s.contains("perDesignator=true"));
     }
 
     @Test
@@ -155,6 +160,7 @@ class CourseFilterTest {
         assertFalse(s.contains("courses"));
         assertFalse(s.contains("minGrade"));
         assertFalse(s.contains("crNcr"));
+        assertFalse(s.contains("perDesignator"));
     }
 
     @Test

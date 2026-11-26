@@ -82,6 +82,8 @@ class RequirementPrinterTest {
         assertEquals("at most 1.0 credits at the 300/400 level in transfer credits",
                 PRINTER.print(new CreditsReq(0, 1.0, null, transfer, false)));
         assertEquals("8.0 credits outside RSM/MGT", PRINTER.print(new CreditsReq(8.0, null, null, outside, false)));
+        assertEquals("at most 15.0 credits with the same designator", PRINTER.print(
+                new CreditsReq(0, 15.0, null, CourseFilter.builder().perDesignator(true).build(), false)));
     }
 
     @Test

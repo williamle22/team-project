@@ -413,16 +413,18 @@ public final class CompletionEvaluator {
                 }
             }
 
-            if (matched <= max + 1e-9) {
+            if (excess(under, cap, max) <= 1e-9) {
                 return new RowResult(row, true, Status.MET, null, null, List.of());
             }
 
-            String reason = matched + " credits fall under this limit; only " + max + " can count";
+            String reason = cap.getFilter().isPerDesignator()
+                    ? excess(under, cap, max) + " credits go past " + max + " in one designator"
+                    : matched + " credits fall under this limit; only " + max + " can count";
 
             if (parent.isPresent()) {
                 CreditsReq p = parent.get();
-                CreditsReq raised = new CreditsReq(p.getAmount() + matched - max, p.getMaxAmount().orElse(null),
-                        p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
+                CreditsReq raised = new CreditsReq(p.getAmount() + excess(under, cap, max),
+                        p.getMaxAmount().orElse(null), p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
                 Status status = check(snapshot, raised).getStatus();
 
                 return new RowResult(row, true, status, reason, null, List.of());
@@ -438,15 +440,31 @@ public final class CompletionEvaluator {
                 kept.add(r.getCode());
             }
 
-            for (int i = under.size() - 1; i >= 0 && matched > max + 1e-9; i--) {
-                kept.remove(under.get(i).getCode());
-                matched -= cap.getWeight().orElse(under.get(i).getWeight());
+            for (int n = under.size(); n > 0 && excess(under.subList(0, n), cap, max) > 1e-9; n--) {
+                kept.remove(under.get(n - 1).getCode());
             }
 
             Status status = check(snapshot.restrictedTo(kept), parentReq.get()).getStatus();
 
             return new RowResult(row, true, status == Status.MET ? Status.MET : Status.REVIEW, reason, null,
                     List.of());
+        }
+
+        private static double excess(List<CourseRecord> under, CreditsReq cap, double max) {
+            Map<String, Double> credits = new HashMap<>();
+
+            for (CourseRecord r : under) {
+                String group = cap.getFilter().isPerDesignator() ? r.getCourse().getDesignator() : "";
+                credits.merge(group, cap.getWeight().orElse(r.getWeight()), Double::sum);
+            }
+
+            double excess = 0;
+
+            for (double c : credits.values()) {
+                excess += Math.max(0, c - max);
+            }
+
+            return excess;
         }
 
         private EvaluationNode check(AcademicSnapshot scope, Requirement req) {

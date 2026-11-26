@@ -1,15 +1,20 @@
 package data_access.degree;
 
+import entity.catalog.CompletionRow;
 import entity.catalog.ProgramType;
+import entity.catalog.RowKind;
 import entity.degree.Degree;
 import entity.degree.DegreeType;
 import entity.evaluation.AcademicSnapshot;
 import entity.evaluation.CompletionEvaluator;
 import entity.evaluation.Status;
+import entity.requirement.CourseFilter;
+import entity.requirement.CreditsReq;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +62,7 @@ class ResourceDegreeRepositoryTest {
         assertEquals(hba.getCompletion(), hbsc.getCompletion());
         assertEquals(List.of(Map.of(ProgramType.SPECIALIST, 1), Map.of(ProgramType.MAJOR, 2),
                 Map.of(ProgramType.MAJOR, 1, ProgramType.MINOR, 2)), hba.getProgramCombinations().getCombinations());
-        assertEquals(16, hba.getCompletion().getRequirements().size());
+        assertEquals(18, hba.getCompletion().getRequirements().size());
         assertTrue(hba.getEligiblePrograms().isEmpty());
     }
 
@@ -66,8 +71,25 @@ class ResourceDegreeRepositoryTest {
         Degree bcom = REAL.findDegree(DegreeType.BCOM).orElseThrow();
 
         assertEquals(List.of(Map.of(ProgramType.SPECIALIST, 1)), bcom.getProgramCombinations().getCombinations());
-        assertEquals(19, bcom.getCompletion().getRequirements().size());
+        assertEquals(21, bcom.getCompletion().getRequirements().size());
         assertEquals(List.of("ASSPE2038", "ASSPE2431", "ASSPE2676"), bcom.getEligiblePrograms());
+    }
+
+    @Test
+    void degreesCapTransferAndDesignatorCredits() {
+        for (Degree d : REAL.allDegrees()) {
+            List<CompletionRow> rows = d.getCompletion().getRequirements();
+            CompletionRow transfer = rows.get(rows.size() - 2);
+            CompletionRow designator = rows.get(rows.size() - 1);
+
+            assertEquals(new CreditsReq(0, 10.0, null, CourseFilter.builder().transfer(true).build(), false),
+                    transfer.getReq().orElseThrow());
+            assertEquals(new CreditsReq(0, 15.0, null, CourseFilter.builder().perDesignator(true).build(), false),
+                    designator.getReq().orElseThrow());
+            assertEquals(List.of(RowKind.LIMIT, RowKind.LIMIT), List.of(transfer.getKind(), designator.getKind()));
+            assertEquals(Optional.of(1), designator.getParent());
+            assertTrue(d.getCompletion().getNotes().stream().noneMatch(n -> n.startsWith("No more than 15.0")));
+        }
     }
 
     @Test

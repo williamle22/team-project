@@ -314,11 +314,32 @@
           ]
         },
         "raw": "The Breadth Requirement can be completed in one of two ways: (a) at least 1.0 credit in each of 4 of the 5 categories below, or (b) at least 1.0 credit in each of any 3 of the 5 categories, and at least 0.5 credit in each of the other 2 categories."
+      },
+      {
+        "number": 17,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "transfer": true,
+          "max_amount": 10
+        },
+        "raw": "At least 10.0 credits from Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum."
+      },
+      {
+        "number": 18,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "per_designator": true,
+          "max_amount": 15
+        },
+        "raw": "No more than 15.0 credits may have the same three-letter designator (“AST\", “ENG”, etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects."
       }
     ],
     "notes": [
       "At least 10.0 credits from Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum.",
-      "No more than 15.0 credits may have the same three-letter designator (“AST\", “ENG”, etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects.",
       "Students enrolled in either two Majors or one Major and two Minors must ensure they have a minimum of 12.0 different credits between the programs.",
       "Whether a student receives an HBA or HBSc depends on the programs that are completed; see Program Requirements.",
       "Students who meet all the requirements for the HBA/HBSc except for the GPA requirement may elect to graduate with a Bachelor of Arts/Bachelor of Science degree provided that their final Cumulative GPA is between 1.5 and 1.84."

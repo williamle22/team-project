@@ -516,6 +516,25 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void perDesignatorLimitRaisesParentByExcess() {
+        CreditsReq onePerDesignator = new CreditsReq(0, 1.0, null, CourseFilter.builder().perDesignator(true).build(),
+                false);
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, credits(2.0, CourseFilter.any()), "raw"),
+                completionRow(2, RowKind.LIMIT, null, 1, onePerDesignator, "raw")));
+
+        CompletionResult short1 = evaluator.evaluate(c, taken("CSC108H1", "CSC148H1", "CSC165H1", "MAT135H1"));
+        CompletionResult enough = evaluator.evaluate(c,
+                taken("CSC108H1", "CSC148H1", "CSC165H1", "MAT135H1", "MAT136H1"));
+
+        assertEquals(NOT_MET, status(short1, 2));
+        assertEquals("0.5 credits go past 1.0 in one designator",
+                short1.row(2).orElseThrow().getReason().orElseThrow());
+        assertEquals(MET, status(enough, 2));
+        assertEquals(MET, enough.getOverall());
+    }
+
+    @Test
     void limitUnderGroupWithoutRequirementGivesReview() {
         Completion c = completion(List.of(
                 completionRow(1, RowKind.ALLOCATION, null, null, null, "raw"),

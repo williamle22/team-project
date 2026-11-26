@@ -355,11 +355,32 @@
           ]
         },
         "raw": "The Breadth Requirement can be completed in one of two ways: (a) at least 1.0 credit in each of 4 of the 5 categories below, or (b) at least 1.0 credit in each of any 3 of the 5 categories, and at least one 0.5 credit in each of the other 2 categories."
+      },
+      {
+        "number": 20,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "transfer": true,
+          "max_amount": 10
+        },
+        "raw": "At least 10.0 credits in Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum."
+      },
+      {
+        "number": 21,
+        "kind": "limit",
+        "parent": 1,
+        "req": {
+          "type": "credits",
+          "per_designator": true,
+          "max_amount": 15
+        },
+        "raw": "No more than 15.0 credits may have the same three-letter designator (“AST,” “ENG,” etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects."
       }
     ],
     "notes": [
       "At least 10.0 credits in Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum.",
-      "No more than 15.0 credits may have the same three-letter designator (“AST,” “ENG,” etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects.",
       "b) Complete one of the following program requirements: Specialist in Accounting, Specialist in Finance and Economics, or Specialist in Management"
     ],
     "raw": "To qualify for a Bachelor of Commerce (BCom) degree, a student must:\na) Obtain standing (i.e., complete with a mark of 50% or higher/P/CR) in at least 20.0 credits that meet the following criteria:\n- At least 13.0 credits at the 200+ level, including a minimum of 6.0 credits at the 300+ level. No more than 1.0 credit at the 300+ level in transfer credit may be counted towards the minimum number of 300- and 400-level credits, except transfer credits attained through a University of Toronto exchange program.\n- At least 10.0 credits in Faculty of Arts & Science courses. Note that transfer credits attained through a University of Toronto exchange program contribute to this 10.0 credits minimum.\n- No more than 15.0 credits may have the same three-letter designator (“AST,” “ENG,” etc.). Courses beyond this limit will not be included in the 20.0 credits required for the degree, but will be counted in all other respects.\nb) Complete one of the following program requirements: Specialist in Accounting, Specialist in Finance and Economics, or Specialist in Management\nc) Complete the Arts & Science Breadth Requirement;\nd) Achieve a cumulative GPA of 1.85 or more by the time of graduation."
