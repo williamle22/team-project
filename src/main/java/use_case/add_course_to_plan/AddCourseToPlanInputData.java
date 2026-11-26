@@ -14,7 +14,7 @@ public final class AddCourseToPlanInputData {
     public AddCourseToPlanInputData(UUID planId, String courseCode, AcademicTerm targetTerm) {
         this.planId = Objects.requireNonNull(planId, "planId");
         this.courseCode = Objects.requireNonNull(courseCode, "courseCode");
-        this.targetTerm = targetTerm;
+        this.targetTerm = Objects.requireNonNull(targetTerm, "targetTerm");
     }
 
     public UUID getPlanId() {
