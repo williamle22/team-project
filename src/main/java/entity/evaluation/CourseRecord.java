@@ -30,6 +30,10 @@ public final class CourseRecord {
         this.weight = weight;
     }
 
+    /**
+     * Returns a record for an unspecified transfer credit such as {@code MAT1**}, or empty if {@code code} isn't in
+     * that form. Its course is a placeholder with the code's designator and level.
+     */
     public static Optional<CourseRecord> unspecifiedTransfer(String code, double weight) {
         if (!code.matches("[A-Z]{3}[1-4]\\*+")) {
             return Optional.empty();
@@ -61,6 +65,10 @@ public final class CourseRecord {
         return crNcr;
     }
 
+    /**
+     * Returns the credit weight. For an unspecified transfer credit, this is the plan's weight, not the placeholder
+     * course's.
+     */
     public double getWeight() {
         return weight;
     }
@@ -69,6 +77,7 @@ public final class CourseRecord {
         return getCode().contains("*");
     }
 
+    /** Returns whether this unspecified credit could be {@code code}, as {@code MAT1**} could be {@code MAT135H1}. */
     public boolean couldBe(String code) {
         return isUnspecified() && code.startsWith(getCode().substring(0, getCode().indexOf('*')));
     }

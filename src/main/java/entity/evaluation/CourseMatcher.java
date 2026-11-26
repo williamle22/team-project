@@ -11,9 +11,10 @@ public final class CourseMatcher {
     private CourseMatcher() {}
 
     /**
-     * Returns {@code YES} if {@code r} passes every part of {@code f}, {@code NO} if it fails any part, and {@code
-     * MAYBE} otherwise. A minimum grade with no final grade yet gives {@code MAYBE}. {@code lists} answers the course
-     * list and completion row parts.
+     * Returns {@code YES} if {@code r} passes every part of {@code f}, {@code NO} if it fails any part, and
+     * {@code MAYBE} otherwise. A minimum grade with no final grade yet gives {@code MAYBE}. {@code lists} answers the
+     * course list and completion row parts. An unspecified transfer credit gives {@code MAYBE} instead of {@code YES}
+     * if {@code f} names courses, designators, or breadth categories.
      */
     public static Match matches(CourseFilter f, CourseRecord r, MembershipResolver lists) {
         Course c = r.getCourse();

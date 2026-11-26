@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 /**
  * Evaluates a requisite against an {@link AcademicSnapshot}. Each node that isn't {@code MET} says what's missing, such
  * as "needs at least 60% in CSC148H1; you have 55%". Requirements that the app can't check, such as free text or a GPA
- * in a named subject, give {@code REVIEW}.
+ * in a named subject, give {@code REVIEW}. An unspecified transfer credit that could be a required course, such as
+ * {@code MAT1**} for {@code MAT135H1}, gives {@code REVIEW}.
  */
 public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNode> {
     private final AcademicSnapshot snapshot;
@@ -25,6 +26,11 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
         this(snapshot, snapshot, concurrentAllowed, lists);
     }
 
+    /**
+     * Like the other constructor, but a {@code not} node checks {@code transcript} instead of {@code snapshot}. Use it
+     * when {@code snapshot} holds only some of the student's courses, so that a course outside it still makes a
+     * {@code not} fail.
+     */
     public RequisiteEvaluator(AcademicSnapshot snapshot, AcademicSnapshot transcript, boolean concurrentAllowed,
                               MembershipResolver lists) {
         this.snapshot = Objects.requireNonNull(snapshot, "snapshot");
@@ -162,6 +168,11 @@ public final class RequisiteEvaluator implements RequirementVisitor<EvaluationNo
                 s == Status.MET ? null : yes + " of " + node.getAmount() + " credits", counted);
     }
 
+    /**
+     * Averages the courses that match the filter, or each way of choosing the listed items, and keeps the best result.
+     * With {@code best}, only the highest grades up to {@code amount} count. The result is then {@code MET} once enough
+     * graded courses meet the minimum, even if other courses are missing a final grade.
+     */
     @Override
     public EvaluationNode visitAverage(AverageReq node) {
         List<List<CreditsReq>> choices;

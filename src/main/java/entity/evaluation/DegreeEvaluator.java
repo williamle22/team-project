@@ -23,9 +23,8 @@ public final class DegreeEvaluator {
 
     /**
      * {@code programs} holds the plan's programs that are in the catalog. A combination of more than one program, such
-     * as two Majors, also needs 12.0 different credits across those programs. The courses the programs claim give an
-     * upper bound on that count. Each program's minimum credits, minus the courses that two programs both need, give a
-     * lower bound. If the bounds don't decide it, the result is {@code REVIEW}.
+     * as two Majors, also needs 12.0 different credits among the courses those programs claim. If the claims fall
+     * short, but the courses the programs could count reach 12.0, the result is {@code REVIEW}.
      */
     public DegreeProgress evaluate(Degree degree, AcademicSnapshot snapshot, List<ProgramProgress> programs) {
         CompletionResult rows = completion.evaluate(degree.getCompletion(), snapshot);

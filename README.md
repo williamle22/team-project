@@ -131,7 +131,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **Actor:** Student (runs automatically whenever the plan changes)
 
 **Main flow:**
-1. For each course in the plan, the app builds a snapshot of the student's record as of that course's term. Courses that ended before it count as taken, and courses running at the same time count as concurrent. Failed courses don't count, a retaken course counts once with its best grade, and transfer credits count as taken.
+1. For each course in the plan, the app builds a snapshot of the student's record as of that course's term. Courses that ended before it count as taken, and courses running at the same time count as concurrent. A Summer F course counts as taken for a Summer S course in the same year. Failed courses don't count, a retaken course counts once with its best grade, and transfer credits count as taken.
 2. The app checks the course's prerequisites against taken courses, and its corequisites against taken and concurrent courses. It checks exclusions against taken courses, and against concurrent courses for exclusions that say "not concurrently with".
 3. For courses in the current academic year, the app checks that the course is offered in the chosen term and section.
 4. Each course shows Met, Not Met, or Review, with a reason for every requirement that isn't met.
@@ -145,7 +145,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - The course isn't offered in the chosen term and section: Not Met.
 - The course is outside the current academic year: the app skips the offering check.
 - The course isn't in the current calendar: Review, plus a plan warning.
-- The plan has an unspecified transfer credit, like `MAT1**`: it doesn't count toward any requirement, and the app warns that it counts only with the department's permission.
+- The plan has an unspecified transfer credit, like `MAT1**`: a requirement it could meet, like `MAT135H1`, is Review, and the app warns that it counts only with the department's permission.
 
 ### Use Case 9: Record Grades and Calculate CGPA (User Story 7)
 **Actor:** Student
@@ -175,11 +175,14 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - The student has completed a program they intend to enter but aren't enrolled in: Review, because they still need to be admitted.
 - The plan's degree is a BCom: only the Specialists in Accounting, Finance and Economics, and Management count toward the combination.
 - A limited-enrolment program whose requirements the student meets: Met, with a reason saying that admission isn't guaranteed.
-- A requirement needs human judgement, or a course might count toward two requirements: Review, with a note.
+- A requirement needs human judgement: Review, with a note.
+- Two requirements could use the same course: the app counts the course toward only one of them, unless the calendar lets them share it. If a different choice of courses might meet a requirement, Review.
+- The plan has more than 10.0 transfer credits, or more than 15.0 credits with one designator: the extra credits don't count toward the degree's 20.0 credits.
+- The plan has transfer credits from a University of Toronto exchange program: the app treats them like other transfer credits, and shows the calendar's note that they count toward the 10.0 Faculty of Arts & Science credits.
 - The programs share courses, so they might not include 12.0 different credits: Review.
 - The degree's CGPA requirement, when the plan has no final grades: Review, until the student enters final grades.
 - A course in the plan isn't in the current calendar: it doesn't count toward any requirement, and the app notes it.
-- The plan has an unspecified transfer credit, like `MAT1**`: it doesn't count toward any requirement, and the app notes that it counts only with the department's permission.
+- The plan has an unspecified transfer credit, like `MAT1**`: a requirement it could meet, like `MAT135H1`, is Review, and the app notes that it counts only with the department's permission.
 
 ---
 
@@ -229,7 +232,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 - Variables: `taken` and `concurrent` (course code to `CourseRecord`), `enrolledPrograms`, `intendedPrograms`, `cgpa`, `profileFacts` (like `min_year_of_study`), `asOf`
 - Methods: getters, `builder()`, `restrictedTo(codes)`
 
-**`CourseRecord`**: one course as it counts toward requirements: the `Course`, its final `grade` if there is one, and whether it's a transfer credit or CR/NCR.
+**`CourseRecord`**: one course as it counts toward requirements: the `Course`, its `weight`, its final `grade` if there is one, and whether it's a transfer credit or CR/NCR. An unspecified transfer credit, like `MAT1**`, gets a placeholder course.
 
 **`Status`**: the result of evaluating a requirement: `MET`, `NOT_MET`, or `REVIEW`.
 
@@ -242,7 +245,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 
 **`RowResult`**: one evaluated completion row: its `status`, whether it's `applicable` to the student, a `reason`, the evaluated requirement as `detail`, and the course codes it `claimed`.
 
-**`CompletionResult`**: a program's or degree's evaluated completion requirements: a `RowResult` for every row, an `overall` status, and `warnings` about courses that might count toward two requirements.
+**`CompletionResult`**: a program's or degree's evaluated completion requirements: a `RowResult` for every row, and an `overall` status.
 
 **`ProgramProgress`**: one program's `EnrolmentResult` and `CompletionResult`.
 
@@ -261,7 +264,7 @@ _The data source is still to be decided; see [API Usage](#api-usage)._
 **`ProgramSelection`**: a program on a plan.
 - Variables: `code`, `status` (`ENROLLED` or `INTENDED`)
 
-**`TransferCredit`**: credit from another institution. A specific credit, like `MAT135H1`, counts as taken. An unspecified one, like `MAT1**`, counts toward total credits but not toward requirements, because UofT counts it only with the department's permission.
+**`TransferCredit`**: credit from another institution. A specific credit, like `MAT135H1`, counts as taken. An unspecified one, like `MAT1**`, counts toward total credits. A requirement it could meet is Review, because UofT counts it only with the department's permission.
 - Variables: `code`, `weight`
 
 **`Placement`**: where a course sits in the plan.

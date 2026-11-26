@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Builds the {@link AcademicSnapshot} for checking one planned course, or for the whole plan. Failed courses never
  * count, a retaken course keeps its best grade, and the factory skips codes missing from the catalog. Transfer credits
- * count as taken. Unspecified ones, such as {@code MAT1**}, count only toward the year of study.
+ * count as taken. Unspecified ones, such as {@code MAT1**}, count as {@link CourseRecord#unspecifiedTransfer} records.
  */
 public final class SnapshotFactory {
     private final CatalogReader catalog;
@@ -32,7 +32,8 @@ public final class SnapshotFactory {
 
     /**
      * Returns the snapshot for {@code target}. Courses that end before it starts are taken, and other courses in any of
-     * its terms are concurrent. The CGPA and year of study count only courses that end before it starts.
+     * its terms are concurrent. The CGPA and year of study count only courses that end before it starts. A Summer F
+     * course counts as taken for a Summer S course in the same year.
      */
     public AcademicSnapshot forCourse(Plan plan, PlannedCourse target) {
         Placement placement = target.getPlacement();

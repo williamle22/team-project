@@ -76,6 +76,10 @@ public final class CourseFilter {
     public boolean isTransfer() { return transfer; }
     /** Returns whether only courses taken Credit/No Credit match. */
     public boolean isCrNcr() { return crNcr; }
+    /**
+     * Returns whether a limit applies to each designator separately, such as at most 15.0 credits with any one
+     * designator.
+     */
     public boolean isPerDesignator() { return perDesignator; }
 
     @Override

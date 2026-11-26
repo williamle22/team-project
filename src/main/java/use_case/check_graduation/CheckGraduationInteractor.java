@@ -23,7 +23,7 @@ import java.util.*;
  * {@link EnrolmentEvaluator} and a {@link CompletionEvaluator}. It turns the results into display lines. The overall
  * status is the degree's: its rows and its program combination. A program missing from the catalog gets {@code REVIEW}
  * lines and doesn't count toward the combination. The interactor leaves out rows that don't apply to the student. Notes
- * flag courses that aren't in the current calendar, unspecified transfer credits, and courses that might count twice.
+ * flag courses that aren't in the current calendar, and unspecified transfer credits.
  */
 public final class CheckGraduationInteractor implements CheckGraduationInputBoundary {
     private final PlanReader plans;

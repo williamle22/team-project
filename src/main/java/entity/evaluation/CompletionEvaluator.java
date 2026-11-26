@@ -8,12 +8,17 @@ import entity.requirement.*;
 import java.util.*;
 
 /**
- * Checks a program's or degree's completion requirements against a snapshot. An allocation row claims the courses it
- * counts, and its constraint and limit child rows check only those courses. A transcript-scoped row checks every course
- * instead. A row applies only to students in its audience. An exceeded limit raises its parent's credit requirement by
- * the excess, and a limit without a parent credit requirement gives {@code REVIEW}. Options of a choice row count only
- * through the choice row. This is Level 1, which doesn't assign each course to one row. If two unrelated allocation
- * rows count the same course, the result is {@code REVIEW}, with a warning.
+ * Checks a program's or degree's completion requirements against a snapshot. Sibling allocation rows don't share a
+ * course unless one lists the other in its overlaps, or both are options of a choice row. Rows that refer to other
+ * rows, and choice options, pick courses last. The other rows pick in order of fewest candidate courses. A met row
+ * claims only the courses it needs, and an unmet row claims every course it matches. A row that's {@code NOT_MET} with
+ * the courses left to it, but not with every course, is {@code REVIEW}. If the contested courses, which more than one
+ * sibling could use, have at most 256 assignments, the evaluator then tries each one. It keeps the assignment with the
+ * fewest rows that aren't met, if that beats the first result. Constraint and limit child rows check only the courses
+ * their parent counts, unless a row is transcript-scoped. A row applies only to students in its audience. An exceeded
+ * limit raises a parent credit requirement by the excess. Under any other parent requirement, the evaluator drops the
+ * excess courses and checks the parent again, which gives {@code MET} or {@code REVIEW}. A limit whose parent has no
+ * requirement gives {@code REVIEW}. Options of a choice row count only through the choice row.
  */
 public final class CompletionEvaluator {
     public CompletionResult evaluate(Completion completion, AcademicSnapshot snapshot) {

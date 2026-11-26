@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * One program's result. The completion line's children are the program's rows. {@code notes} holds the calendar's notes
- * and any double-counting warnings. A program missing from the catalog has its code as its title.
+ * One program's result. The completion line's children are the program's rows. {@code notes} holds the calendar's
+ * enrolment and completion notes. A program missing from the catalog has its code as its title.
  */
 public final class ProgramSummary {
     private final String code;
