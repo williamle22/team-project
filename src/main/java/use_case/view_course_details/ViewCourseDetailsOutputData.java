@@ -31,4 +31,70 @@ public final class ViewCourseDetailsOutputData{
         this.exclusions = Objects.requireNonNull(exclusions, "exclusions");
     }
 
+    public String getCode(){
+        return code;
+    }
+
+    public String getTitle(){
+        return title;
+    }
+
+    public String getDescription(){
+        return description;
+    }
+
+    public double getWeight(){
+        return weight;
+    }
+
+    public List<String> getBreadth(){
+        return breadth;
+    }
+
+    public List<String> getFallWinterSections(){
+        return fallWinterSections;
+    }
+
+    public List<String> getSummerSections(){
+        return summerSections;
+    }
+
+    public RequirementText getPrerequisites(){
+        return prerequisites;
+    }
+
+    public RequirementText getCorequisites() {
+        return corequisites;
+    }
+
+    public RequirementText getExclusions() {
+        return exclusions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ViewCourseDetailsOutputData)) {
+            return false;
+        }
+        ViewCourseDetailsOutputData that = (ViewCourseDetailsOutputData) o;
+        return Double.compare(weight, that.weight) == 0 && code.equals(that.code) && title.equals(that.title)
+                && description.equals(that.description) && breadth.equals(that.breadth)
+                && fallWinterSections.equals(that.fallWinterSections)
+                && summerSections.equals(that.summerSections) && prerequisites.equals(that.prerequisites)
+                && corequisites.equals(that.corequisites) && exclusions.equals(that.exclusions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, title, description, weight, breadth, fallWinterSections, summerSections,
+                prerequisites, corequisites, exclusions);
+    }
+
+    @Override
+    public String toString() {
+        return "ViewCourseDetailsOutputData{" + code + ", " + title + "}";
+    }
 }
