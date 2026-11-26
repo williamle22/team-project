@@ -32,8 +32,8 @@ public final class AddCourseToPlanInteractor implements AddCourseToPlanInputBoun
         UUID planId = input.getPlanId();
         String courseCode = input.getCourseCode();
         AcademicTerm targetTerm = input.getTargetTerm();
-        if (targetTerm == null || targetTerm.getSeason() == Season.SUMMER) {
-            presenter.prepareFailView("Summer course drops aren't supported yet.");
+        if (targetTerm == null) {
+            presenter.prepareFailView("A target academic term is required.");
             return;
         }
 
@@ -64,6 +64,9 @@ public final class AddCourseToPlanInteractor implements AddCourseToPlanInputBoun
     }
 
     private static Placement placementFor(Course course, AcademicTerm targetTerm) {
+        if (targetTerm.getSeason() == Season.SUMMER) {
+            return Placement.summer(targetTerm.getYear(), Section.F);
+        }
         if (course.getWeight() == 1.0) {
             int fallYear = targetTerm.getSeason() == Season.WINTER ? targetTerm.getYear() - 1 : targetTerm.getYear();
             return Placement.fallWinter(fallYear, Section.Y);

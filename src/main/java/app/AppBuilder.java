@@ -12,6 +12,7 @@ import entity.plan.Plan;
 import interface_adapter.dgx.AcademicPlannerPresenter;
 import interface_adapter.dgx.AcademicPlannerViewModel;
 import interface_adapter.dgx.AddCourseToPlanController;
+import interface_adapter.dgx.AddTermToPlanController;
 import interface_adapter.sync_catalog.SyncCatalogController;
 import interface_adapter.sync_catalog.SyncCatalogPresenter;
 import interface_adapter.sync_catalog.SyncCatalogViewModel;
@@ -20,6 +21,8 @@ import use_case.sync_catalog.SyncCatalogInputBoundary;
 import use_case.sync_catalog.SyncCatalogInteractor;
 import use_case.add_course_to_plan.AddCourseToPlanInputBoundary;
 import use_case.add_course_to_plan.AddCourseToPlanInteractor;
+import use_case.add_term_to_plan.AddTermToPlanInputBoundary;
+import use_case.add_term_to_plan.AddTermToPlanInteractor;
 import view.CatalogStatusBar;
 import view.dgx.AcademicPlannerPanel;
 import view.dgx.DgxPane;
@@ -83,10 +86,12 @@ public final class AppBuilder {
                 plans, catalog, plannerPresenter);
         AddCourseToPlanController addCourseController =
                 new AddCourseToPlanController(plan.getId(), addCourseInteractor);
+        AddTermToPlanInputBoundary addTermInteractor = new AddTermToPlanInteractor(plans, plannerPresenter);
+        AddTermToPlanController addTermController = new AddTermToPlanController(plan.getId(), addTermInteractor);
 
         DgxPane dgxPane = new DgxPane(
             searchPanel,
-            new AcademicPlannerPanel(academicPlannerViewModel, addCourseController)
+            new AcademicPlannerPanel(academicPlannerViewModel, addCourseController, addTermController)
         );
 
         root.add(dgxPane, BorderLayout.CENTER);

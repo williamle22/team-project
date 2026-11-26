@@ -25,7 +25,7 @@ public final class AcademicPlannerState {
         return message;
     }
 
-    /** One visible, non-summer destination in the planner. */
+    /** One visible academic-term destination in the planner. */
     public static final class TermRow {
         private final int year;
         private final String season;

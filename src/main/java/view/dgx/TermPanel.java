@@ -12,7 +12,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.IOException;
 
-/** A single Fall or Winter term drop target with its planned courses. */
+/** A single academic-term drop target with its planned courses. */
 public final class TermPanel extends JPanel {
     public TermPanel(TermRow term, AddCourseToPlanController controller) {
         super(new FlowLayout(FlowLayout.LEFT, 8, 4));

@@ -4,6 +4,7 @@ import interface_adapter.dgx.AcademicPlannerState;
 import interface_adapter.dgx.AcademicPlannerState.TermRow;
 import interface_adapter.dgx.AcademicPlannerViewModel;
 import interface_adapter.dgx.AddCourseToPlanController;
+import interface_adapter.dgx.AddTermToPlanController;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,18 +13,24 @@ import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-/** Displays plan terms and accepts dragged course codes on Fall and Winter terms. */
+/** Displays plan terms and accepts dragged course codes on each term. */
 public class AcademicPlannerPanel extends JPanel implements PropertyChangeListener {
     private final AddCourseToPlanController controller;
     private final JLabel message = new JLabel(" ");
     private final JPanel termsPanel = new JPanel();
 
-    public AcademicPlannerPanel(AcademicPlannerViewModel viewModel, AddCourseToPlanController controller) {
+    public AcademicPlannerPanel(AcademicPlannerViewModel viewModel, AddCourseToPlanController controller,
+                                AddTermToPlanController addTermController) {
         super(new BorderLayout(8, 8));
         this.controller = controller;
 
         JPanel header = new JPanel(new BorderLayout());
-        header.add(new JLabel("Academic Planner"), BorderLayout.NORTH);
+        JPanel titleRow = new JPanel(new BorderLayout());
+        titleRow.add(new JLabel("Academic Planner"), BorderLayout.WEST);
+        JButton addTermButton = new JButton("Add Term");
+        addTermButton.addActionListener(e -> addTermController.execute());
+        titleRow.add(addTermButton, BorderLayout.EAST);
+        header.add(titleRow, BorderLayout.NORTH);
         header.add(message, BorderLayout.SOUTH);
 
         termsPanel.setLayout(new BoxLayout(termsPanel, BoxLayout.Y_AXIS));
@@ -52,7 +59,7 @@ public class AcademicPlannerPanel extends JPanel implements PropertyChangeListen
             termsPanel.add(Box.createRigidArea(new Dimension(0, 8)));
         }
         if (state.getTerms().isEmpty()) {
-            termsPanel.add(new JLabel("No Fall or Winter terms in this plan."));
+            termsPanel.add(new JLabel("No terms in this plan."));
         }
         termsPanel.revalidate();
         termsPanel.repaint();

@@ -8,13 +8,15 @@ import interface_adapter.dgx.AcademicPlannerState.CourseRow;
 import interface_adapter.dgx.AcademicPlannerState.TermRow;
 import use_case.add_course_to_plan.AddCourseToPlanOutputBoundary;
 import use_case.add_course_to_plan.AddCourseToPlanOutputData;
+import use_case.add_term_to_plan.AddTermToPlanOutputBoundary;
+import use_case.add_term_to_plan.AddTermToPlanOutputData;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /** Maps plan data into the planner's display-only state. */
-public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoundary {
+public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoundary, AddTermToPlanOutputBoundary {
     private final AcademicPlannerViewModel viewModel;
 
     public AcademicPlannerPresenter(AcademicPlannerViewModel viewModel) {
@@ -24,9 +26,6 @@ public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoun
     public void presentPlan(Plan plan, String message) {
         List<TermRow> rows = new ArrayList<>();
         for (AcademicTerm term : plan.getReversedTerms()) {
-            if (term.getSeason() == Season.SUMMER) {
-                continue;
-            }
             List<CourseRow> courses = new ArrayList<>();
             for (PlannedCourse course : plan.coursesIn(term)) {
                 courses.add(new CourseRow(course.getCode()));
@@ -39,6 +38,12 @@ public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoun
 
     @Override
     public void prepareSuccessView(AddCourseToPlanOutputData data) {
+        Objects.requireNonNull(data, "data");
+        presentPlan(data.getPlan(), data.getMessage());
+    }
+
+    @Override
+    public void prepareSuccessView(AddTermToPlanOutputData data) {
         Objects.requireNonNull(data, "data");
         presentPlan(data.getPlan(), data.getMessage());
     }
