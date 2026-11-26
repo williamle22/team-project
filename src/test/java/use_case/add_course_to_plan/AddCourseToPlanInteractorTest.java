@@ -91,6 +91,14 @@ class AddCourseToPlanInteractorTest {
     }
 
     @Test
+    void missingTargetTermReportsFailure() {
+        interactor.execute(new AddCourseToPlanInputData(PLAN_ID, "CSC148H1", null));
+
+        assertEquals(List.of("fail"), presenter.calls);
+        assertEquals("A target academic term is required.", presenter.failMessage);
+    }
+
+    @Test
     void missingCourseReportsFailure() {
         planWith(AcademicTerm.fall(2026));
 

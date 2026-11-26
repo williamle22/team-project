@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,8 +30,13 @@ class AddCourseToPlanInputDataTest {
                 () -> new AddCourseToPlanInputData(null, "CSC148H1", AcademicTerm.fall(2026)));
         assertThrows(NullPointerException.class,
                 () -> new AddCourseToPlanInputData(PLAN_ID, null, AcademicTerm.fall(2026)));
-        assertThrows(NullPointerException.class,
-                () -> new AddCourseToPlanInputData(PLAN_ID, "CSC148H1", null));
+    }
+
+    @Test
+    void allowsMissingTargetTerm() {
+        AddCourseToPlanInputData input = new AddCourseToPlanInputData(PLAN_ID, "CSC148H1", null);
+
+        assertNull(input.getTargetTerm());
     }
 
     @Test
@@ -51,6 +57,12 @@ class AddCourseToPlanInputDataTest {
         assertNotEquals(first, differentPlan);
         assertNotEquals(first, differentCourse);
         assertNotEquals(first, "other");
+
+        AddCourseToPlanInputData missingTerm = new AddCourseToPlanInputData(PLAN_ID, "CSC148H1", null);
+        AddCourseToPlanInputData sameMissingTerm = new AddCourseToPlanInputData(PLAN_ID, "CSC148H1", null);
+        assertEquals(missingTerm, sameMissingTerm);
+        assertEquals(missingTerm.hashCode(), sameMissingTerm.hashCode());
+        assertNotEquals(missingTerm, first);
     }
 
     @Test
