@@ -1,25 +1,24 @@
 package view.dgx;
 
 import javax.swing.JSplitPane;
-import java.awt.Color;
+import view.SearchPanel;
 
-// TODO: split pane consisting of CourseSearch and AcademicPlanner
+// Split pane consisting of the main course search and academic planner.
 public class DgxPane extends JSplitPane {
-    private final CourseSearchPanel courseSearchPanel;
+    private final SearchPanel searchPanel;
     private final AcademicPlannerPanel academicPlannerPanel;
 
-    public DgxPane(CourseSearchPanel courseSearchPanel, AcademicPlannerPanel academicPlannerPanel) {
+    public DgxPane(SearchPanel searchPanel, AcademicPlannerPanel academicPlannerPanel) {
         super(JSplitPane.HORIZONTAL_SPLIT);
 
-        this.courseSearchPanel = courseSearchPanel;
+        this.searchPanel = searchPanel;
         this.academicPlannerPanel = academicPlannerPanel;
 
-        setLeftComponent(courseSearchPanel);
+        setLeftComponent(searchPanel);
         setRightComponent(academicPlannerPanel);
 
         setResizeWeight(0.25);
         setDividerLocation(250);
         setDividerSize(8);
-        setBackground(Color.MAGENTA);
     }
 }

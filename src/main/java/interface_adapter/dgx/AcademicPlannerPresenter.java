@@ -7,6 +7,7 @@ import entity.term.Season;
 import interface_adapter.dgx.AcademicPlannerState.CourseRow;
 import interface_adapter.dgx.AcademicPlannerState.TermRow;
 import use_case.add_course_to_plan.AddCourseToPlanOutputBoundary;
+import use_case.add_course_to_plan.AddCourseToPlanOutputData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +38,14 @@ public final class AcademicPlannerPresenter implements AddCourseToPlanOutputBoun
     }
 
     @Override
-    public void prepareSuccessView(Plan plan, String message) {
-        presentPlan(plan, message);
+    public void prepareSuccessView(AddCourseToPlanOutputData data) {
+        Objects.requireNonNull(data, "data");
+        presentPlan(data.getPlan(), data.getMessage());
     }
 
     @Override
     public void prepareFailView(String message) {
+        Objects.requireNonNull(message, "message");
         AcademicPlannerState current = viewModel.getState();
         viewModel.setState(new AcademicPlannerState(current.getTerms(), message));
         viewModel.firePropertyChanged();

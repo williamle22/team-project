@@ -20,6 +20,10 @@ public final class TermPanel extends JPanel {
 
         TransferHandler dropHandler = createDropHandler(term, controller);
         setTransferHandler(dropHandler);
+        if (term.getCourses().isEmpty()) {
+            Dimension courseBoxSize = new CourseBox("", dropHandler).getPreferredSize();
+            add(Box.createRigidArea(new Dimension(1, courseBoxSize.height)));
+        }
         for (CourseRow course : term.getCourses()) {
             add(new CourseBox(course.getCode(), dropHandler));
         }

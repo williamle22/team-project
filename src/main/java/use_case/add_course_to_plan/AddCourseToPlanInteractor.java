@@ -27,7 +27,11 @@ public final class AddCourseToPlanInteractor implements AddCourseToPlanInputBoun
     }
 
     @Override
-    public void execute(UUID planId, String courseCode, AcademicTerm targetTerm) {
+    public void execute(AddCourseToPlanInputData input) {
+        Objects.requireNonNull(input, "input");
+        UUID planId = input.getPlanId();
+        String courseCode = input.getCourseCode();
+        AcademicTerm targetTerm = input.getTargetTerm();
         if (targetTerm == null || targetTerm.getSeason() == Season.SUMMER) {
             presenter.prepareFailView("Summer course drops aren't supported yet.");
             return;
@@ -50,12 +54,13 @@ public final class AddCourseToPlanInteractor implements AddCourseToPlanInputBoun
         try {
             plan.addCourse(catalogCourse.get().getCode(), placement);
         } catch (IllegalArgumentException e) {
-            presenter.prepareFailView(e.getMessage());
+            presenter.prepareFailView("Failed to add course " + courseCode + " to plan.");
             return;
         }
 
         plans.save(plan);
-        presenter.prepareSuccessView(plan, "Added " + catalogCourse.get().getCode() + " to " + targetTerm + ".");
+        presenter.prepareSuccessView(new AddCourseToPlanOutputData(plan,
+                "Added " + catalogCourse.get().getCode() + " to " + targetTerm + "."));
     }
 
     private static Placement placementFor(Course course, AcademicTerm targetTerm) {

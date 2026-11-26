@@ -3,6 +3,7 @@ package interface_adapter.dgx;
 import entity.term.AcademicTerm;
 import entity.term.Season;
 import use_case.add_course_to_plan.AddCourseToPlanInputBoundary;
+import use_case.add_course_to_plan.AddCourseToPlanInputData;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -20,6 +21,6 @@ public final class AddCourseToPlanController {
 
     public void execute(String courseCode, int year, String season) {
         Season targetSeason = Season.valueOf(season.toUpperCase(Locale.ROOT));
-        interactor.execute(planId, courseCode, new AcademicTerm(targetSeason, year));
+        interactor.execute(new AddCourseToPlanInputData(planId, courseCode, new AcademicTerm(targetSeason, year)));
     }
 }

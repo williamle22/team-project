@@ -14,14 +14,12 @@ import java.beans.PropertyChangeListener;
 
 /** Displays plan terms and accepts dragged course codes on Fall and Winter terms. */
 public class AcademicPlannerPanel extends JPanel implements PropertyChangeListener {
-    private final AcademicPlannerViewModel viewModel;
     private final AddCourseToPlanController controller;
     private final JLabel message = new JLabel(" ");
     private final JPanel termsPanel = new JPanel();
 
     public AcademicPlannerPanel(AcademicPlannerViewModel viewModel, AddCourseToPlanController controller) {
         super(new BorderLayout(8, 8));
-        this.viewModel = viewModel;
         this.controller = controller;
 
         JPanel header = new JPanel(new BorderLayout());
@@ -31,6 +29,7 @@ public class AcademicPlannerPanel extends JPanel implements PropertyChangeListen
         termsPanel.setLayout(new BoxLayout(termsPanel, BoxLayout.Y_AXIS));
         termsPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
         viewModel.addPropertyChangeListener(this);
+        setBorder(BorderFactory.createEmptyBorder(8, 4, 8, 8));
         add(header, BorderLayout.NORTH);
         add(new JScrollPane(termsPanel), BorderLayout.CENTER);
         redraw(viewModel.getState());
