@@ -24,6 +24,10 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class SqliteCatalogLoaderTest {
 
+    private static final int SUPPORTED = SqliteCatalogLoader.SUPPORTED_SCHEMA_VERSION;
+    private static final int OLD_SCHEMA = SUPPORTED - 1;
+    private static final int NEW_SCHEMA = SUPPORTED + 1;
+
     private static final String SCHEMA = "CREATE TABLE version (school_year TEXT PRIMARY KEY NOT NULL, "
             + "last_updated TEXT NOT NULL) WITHOUT ROWID;"
             + "CREATE TABLE courses (code TEXT PRIMARY KEY NOT NULL, designator TEXT NOT NULL, number TEXT NOT NULL, "
@@ -109,7 +113,7 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void loadsTinyDatabase() throws SQLException {
-        Path file = tinyDatabase(7);
+        Path file = tinyDatabase(SUPPORTED);
         insertCourse(file, fixture("PHY152H1.json"));
         insertProgram(file, fixture("ASMIN0667.json"));
 
@@ -133,7 +137,7 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void nullJsonColumnsLoad() throws SQLException {
-        Path file = tinyDatabase(7);
+        Path file = tinyDatabase(SUPPORTED);
         execute(file, "INSERT INTO courses VALUES ('CSC199H1', 'CSC', '199', 100, 0.5, 'utsg', 'First-Year Seminar', "
                 + "'A seminar.', NULL, NULL, NULL, NULL, NULL)");
         execute(file, "INSERT INTO programs VALUES ('ASMIN9999', 'Minor', '9999', 'Test Minor', NULL, NULL, NULL)");
@@ -150,7 +154,7 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void rejectsNewerSchema() throws SQLException {
-        Path file = tinyDatabase(8);
+        Path file = tinyDatabase(NEW_SCHEMA);
         CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> loader.load(file));
         assertFalse(e instanceof CatalogOutdatedException);
         assertTrue(e.getMessage().contains("newer"));
@@ -158,13 +162,13 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void rejectsOlderSchemaAsOutdated() throws SQLException {
-        Path file = tinyDatabase(6);
+        Path file = tinyDatabase(OLD_SCHEMA);
         assertThrows(CatalogOutdatedException.class, () -> loader.load(file));
     }
 
     @Test
     void missingVersionRowThrows() throws SQLException {
-        Path file = tinyDatabase(7);
+        Path file = tinyDatabase(SUPPORTED);
         execute(file, "DELETE FROM version");
         CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> loader.load(file));
         assertEquals("catalog has no version row", e.getMessage());
@@ -181,7 +185,7 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void badCourseRowNamesTheCourse() throws SQLException {
-        Path file = tinyDatabase(7);
+        Path file = tinyDatabase(SUPPORTED);
         execute(file, "INSERT INTO courses VALUES ('CSC199H1', 'CSC', '199', 100, 0.5, 'mars', 'Seminar', "
                 + "'A seminar.', NULL, NULL, NULL, NULL, NULL)");
         CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> loader.load(file));
@@ -191,7 +195,7 @@ class SqliteCatalogLoaderTest {
 
     @Test
     void badProgramJsonNamesTheProgram() throws SQLException {
-        Path file = tinyDatabase(7);
+        Path file = tinyDatabase(SUPPORTED);
         execute(file, "INSERT INTO programs VALUES ('ASMIN9999', 'Minor', '9999', 'Test Minor', NULL, "
                 + "'{\"raw\":\"no rows\"}', NULL)");
         CatalogLoadException e = assertThrows(CatalogLoadException.class, () -> loader.load(file));
