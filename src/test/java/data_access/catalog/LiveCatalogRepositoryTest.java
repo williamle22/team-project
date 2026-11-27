@@ -1,6 +1,7 @@
 package data_access.catalog;
 
 import entity.catalog.CatalogVersion;
+import entity.catalog.Program;
 import entity.catalog.ProgramType;
 import org.junit.jupiter.api.Test;
 import use_case.search_courses.SearchFilters;
@@ -8,6 +9,7 @@ import use_case.search_courses.SearchFilters;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static testutil.CatalogFixtures.course;
@@ -58,5 +60,31 @@ class LiveCatalogRepositoryTest {
         live.replace(new InMemoryCatalogRepository(List.of(course("MAT137Y1")), List.of(), VERSION));
         assertEquals(List.of(), live.search("csc148", SearchFilters.none()));
         assertEquals(List.of(course("MAT137Y1")), live.search("mat", SearchFilters.none()));
+    }
+
+    @Test
+    void searchProgramsUsesNewCatalogAfterReplace() {
+        LiveCatalogRepository live = new LiveCatalogRepository();
+        assertEquals(List.of(), live.searchPrograms("", Set.of()));
+
+        Program major = program("ASMAJ1689", ProgramType.MAJOR, null);
+        live.replace(new InMemoryCatalogRepository(List.of(), List.of(major), VERSION));
+        assertEquals(List.of(major), live.searchPrograms("asmaj", Set.of()));
+
+        live.replace(new InMemoryCatalogRepository(List.of(), List.of(program("ASMIN1689", ProgramType.MINOR, null)),
+                VERSION));
+        assertEquals(List.of(), live.searchPrograms("asmaj", Set.of()));
+    }
+
+    @Test
+    void searchProgramsFiltersByType() {
+        Program major = program("ASMAJ1689", ProgramType.MAJOR, null);
+        Program minor = program("ASMIN1689", ProgramType.MINOR, null);
+        LiveCatalogRepository live = new LiveCatalogRepository();
+        live.replace(new InMemoryCatalogRepository(List.of(), List.of(major, minor), VERSION));
+
+        assertEquals(Set.of(major, minor), Set.copyOf(live.searchPrograms("1689", Set.of())));
+        assertEquals(List.of(major), live.searchPrograms("1689", Set.of(ProgramType.MAJOR)));
+        assertEquals(List.of(), live.searchPrograms("1689", Set.of(ProgramType.FOCUS)));
     }
 }

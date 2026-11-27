@@ -58,15 +58,15 @@ Our version improves on the original in a number of ways:
 - The server rate-limits the request (`429`): the app waits for `Retry-After` and retries once.
 - The cached catalog has an older schema version: the app downloads a fresh copy.
 
-### Use Case 2: Search Courses (User Story 1)
+### Use Case 2: Search Courses and Programs (User Story 1)
 **Actor:** Student
 
 **Main flow:**
-1. The student types a query, either a course code like `CSC207` or words from a title.
-2. The app searches the in-memory catalog and shows matching courses with their code, title, and credit weight.
-3. The student can narrow the results by designator, level, campus, or breadth category.
+1. The student types a query: a course or program code, like `CSC207` or `ASMAJ1689`, or words from a title.
+2. The app searches the in-memory catalog and shows matching courses with their code, title, and credit weight, or matching programs with their code, title, and type.
+3. The student can narrow course results by designator, level, campus, or breadth category, and program results by type: Specialist, Major, Minor, Focus, or Certificate.
 
-**Alternative flow:** No courses match: the app shows an empty state suggesting a broader search.
+**Alternative flow:** Nothing matches: the app shows an empty state suggesting a broader search.
 
 ### Use Case 3: View Course Details (User Story 1)
 **Actor:** Student

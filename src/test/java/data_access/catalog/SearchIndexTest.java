@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CourseSearchIndexTest {
+class SearchIndexTest {
     private static final Course CSC108 = course("CSC108H1", "Introduction to Computer Programming");
     private static final Course CSC148 = course("CSC148H1", "Introduction to Computer Science");
     private static final Course CSC369 = course("CSC369H1", "Operating Systems");
@@ -18,8 +18,7 @@ class CourseSearchIndexTest {
     private static final Course STA130 =
             course("STA130H1", "An Introduction to Statistical Reasoning and Data Science");
 
-    private static final CourseSearchIndex INDEX =
-            new CourseSearchIndex(List.of(CSC108, CSC148, CSC369, MAT137, STA130));
+    private static final SearchIndex<Course> INDEX = index(List.of(CSC108, CSC148, CSC369, MAT137, STA130));
 
     private static Course course(String code, String title) {
         int level = (code.charAt(3) - '0') * 100;
@@ -28,8 +27,12 @@ class CourseSearchIndexTest {
                 null, null, null, List.of(), null);
     }
 
+    private static SearchIndex<Course> index(List<Course> courses) {
+        return new SearchIndex<>(courses, Course::getCode, Course::getTitle);
+    }
+
     private static List<Course> search(String query) {
-        return INDEX.search(query, SearchFilters.none());
+        return INDEX.search(query, SearchFilters.none()::accepts);
     }
 
     private static SearchFilters levels(Integer... levels) {
@@ -90,26 +93,26 @@ class CourseSearchIndexTest {
 
     @Test
     void blankQueryWithFilter() {
-        assertEquals(List.of(CSC369), INDEX.search("", levels(300)));
+        assertEquals(List.of(CSC369), INDEX.search("", levels(300)::accepts));
     }
 
     @Test
     void filtersNarrow() {
         SearchFilters csc = new SearchFilters("csc", Set.of(), Set.of(), Set.of());
-        assertEquals(List.of(CSC108, CSC148), INDEX.search("intro", csc));
-        assertEquals(List.of(CSC108, CSC148, STA130), INDEX.search("intro", levels(100)));
-        assertEquals(List.of(), INDEX.search("intro", levels(400)));
+        assertEquals(List.of(CSC108, CSC148), INDEX.search("intro", csc::accepts));
+        assertEquals(List.of(CSC108, CSC148, STA130), INDEX.search("intro", levels(100)::accepts));
+        assertEquals(List.of(), INDEX.search("intro", levels(400)::accepts));
     }
 
     @Test
     void keepsInputOrder() {
-        CourseSearchIndex reversed = new CourseSearchIndex(List.of(STA130, CSC148, CSC108));
-        assertEquals(List.of(STA130, CSC148, CSC108), reversed.search("intro", SearchFilters.none()));
+        SearchIndex<Course> reversed = index(List.of(STA130, CSC148, CSC108));
+        assertEquals(List.of(STA130, CSC148, CSC108), reversed.search("intro", SearchFilters.none()::accepts));
     }
 
     @Test
     void emptyIndexFindsNothing() {
-        assertEquals(List.of(), CourseSearchIndex.empty().search("", SearchFilters.none()));
-        assertEquals(List.of(), CourseSearchIndex.empty().search("csc148", SearchFilters.none()));
+        assertEquals(List.of(), SearchIndex.<Course>empty().search("", SearchFilters.none()::accepts));
+        assertEquals(List.of(), SearchIndex.<Course>empty().search("csc148", SearchFilters.none()::accepts));
     }
 }
