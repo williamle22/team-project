@@ -42,7 +42,7 @@ class SearchProgramsInteractorTest {
         catalog.loaded = false;
         search("asmaj");
         assertEquals(List.of("fail"), presenter.calls);
-        assertEquals("Program data is still loading.",presenter.failMessage);
+        assertEquals("Program data is still loading.", presenter.failMessage);
         assertEquals(0, catalog.searches);
     }
 
@@ -56,9 +56,9 @@ class SearchProgramsInteractorTest {
 
     @Test
     void exactCodeFirst() {
-        catalog.matches = List.of(CS_MINOR, CS_MAJOR);
-        search("asmaj1689");
-        assertEquals(List.of("ASMAJ1689", "ASMIN1689"), resultCodes());
+        catalog.matches = List.of(CS_MAJOR, CS_MINOR);
+        search("asmin1689");
+        assertEquals(List.of("ASMIN1689", "ASMAJ1689"), resultCodes());
     }
 
     @Test
