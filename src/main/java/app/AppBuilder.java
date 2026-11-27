@@ -7,13 +7,25 @@ import data_access.catalog.SqliteCatalogLoader;
 import interface_adapter.search_courses.SearchCoursesController;
 import interface_adapter.search_courses.SearchCoursesPresenter;
 import interface_adapter.search_courses.SearchCoursesViewModel;
+import data_access.plan.InMemoryPlanRepository;
+import entity.plan.Plan;
+import interface_adapter.dgx.AcademicPlannerPresenter;
+import interface_adapter.dgx.AcademicPlannerViewModel;
+import interface_adapter.dgx.AddCourseToPlanController;
+import interface_adapter.dgx.AddTermToPlanController;
 import interface_adapter.sync_catalog.SyncCatalogController;
 import interface_adapter.sync_catalog.SyncCatalogPresenter;
 import interface_adapter.sync_catalog.SyncCatalogViewModel;
 import use_case.search_courses.SearchCoursesInteractor;
 import use_case.sync_catalog.SyncCatalogInputBoundary;
 import use_case.sync_catalog.SyncCatalogInteractor;
+import use_case.add_course_to_plan.AddCourseToPlanInputBoundary;
+import use_case.add_course_to_plan.AddCourseToPlanInteractor;
+import use_case.add_term_to_plan.AddTermToPlanInputBoundary;
+import use_case.add_term_to_plan.AddTermToPlanInteractor;
 import view.CatalogStatusBar;
+import view.dgx.AcademicPlannerPanel;
+import view.dgx.DgxPane;
 import view.SearchPanel;
 
 import javax.swing.*;
@@ -26,11 +38,13 @@ import java.awt.*;
 public final class AppBuilder {
     private final AppConfig config = AppConfig.load();
     private final LiveCatalogRepository catalog = new LiveCatalogRepository();
+    private final InMemoryPlanRepository plans = new InMemoryPlanRepository();
     // CENTER is free for main views (CardLayout + ViewManagerModel)
     private final JPanel root = new JPanel(new BorderLayout());
     private final SyncCatalogViewModel syncCatalogViewModel = new SyncCatalogViewModel();
 
     private SyncCatalogController syncCatalogController;
+    private SearchPanel searchPanel;
 
     public AppBuilder addCatalogSync() {
         SyncCatalogPresenter presenter = new SyncCatalogPresenter(syncCatalogViewModel);
@@ -51,15 +65,36 @@ public final class AppBuilder {
         SearchCoursesPresenter presenter = new SearchCoursesPresenter(viewModel);
         SearchCoursesInteractor interactor = new SearchCoursesInteractor(catalog, presenter);
         SearchCoursesController controller = new SearchCoursesController(interactor);
-        SearchPanel panel = new SearchPanel(viewModel, controller);
+        searchPanel = new SearchPanel(viewModel, controller);
 
         syncCatalogViewModel.addPropertyChangeListener(e -> {
             if (!syncCatalogViewModel.getState().isLoading()) {
-                panel.refresh();
+                searchPanel.refresh();
             }
         });
 
-        root.add(panel, BorderLayout.WEST);
+        return this;
+    }
+
+    public AppBuilder addDgxPane() {
+        AcademicPlannerViewModel academicPlannerViewModel = new AcademicPlannerViewModel();
+        Plan plan = TemporaryPlanStub.createAndSave(plans);
+
+        AcademicPlannerPresenter plannerPresenter = new AcademicPlannerPresenter(academicPlannerViewModel);
+        plannerPresenter.presentPlan(plan, "Drag a course result into a term to add it to your plan.");
+        AddCourseToPlanInputBoundary addCourseInteractor = new AddCourseToPlanInteractor(
+                plans, catalog, plannerPresenter);
+        AddCourseToPlanController addCourseController =
+                new AddCourseToPlanController(plan.getId(), addCourseInteractor);
+        AddTermToPlanInputBoundary addTermInteractor = new AddTermToPlanInteractor(plans, plannerPresenter);
+        AddTermToPlanController addTermController = new AddTermToPlanController(plan.getId(), addTermInteractor);
+
+        DgxPane dgxPane = new DgxPane(
+            searchPanel,
+            new AcademicPlannerPanel(academicPlannerViewModel, addCourseController, addTermController)
+        );
+
+        root.add(dgxPane, BorderLayout.CENTER);
 
         return this;
     }

@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.datatransfer.StringSelection;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.HashSet;
@@ -77,6 +78,19 @@ public final class SearchPanel extends JPanel implements PropertyChangeListener 
         top.add(filters, BorderLayout.CENTER);
 
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setDragEnabled(true);
+        list.setTransferHandler(new TransferHandler() {
+            @Override
+            protected java.awt.datatransfer.Transferable createTransferable(JComponent component) {
+                SearchResultRow selected = list.getSelectedValue();
+                return selected == null ? null : new StringSelection(selected.getCode());
+            }
+
+            @Override
+            public int getSourceActions(JComponent component) {
+                return COPY;
+            }
+        });
         list.setCellRenderer(new RowRenderer());
         list.setPrototypeCellValue(new SearchResultRow("CSC148H1", "A title", "0.5", "UTSG"));
         list.addListSelectionListener(e -> {
@@ -108,7 +122,7 @@ public final class SearchPanel extends JPanel implements PropertyChangeListener 
         footer.setFont(footer.getFont().deriveFont(footer.getFont().getSize2D() - 1f));
         footer.setForeground(UIManager.getColor("Label.disabledForeground"));
 
-        setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 4));
         setPreferredSize(new Dimension(360, 0));
         add(top, BorderLayout.NORTH);
         add(content, BorderLayout.CENTER);
