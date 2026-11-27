@@ -5,6 +5,7 @@ import entity.requirement.*;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import testutil.CatalogFixtures;
 import testutil.JsonFixtures;
 
 import java.util.List;
@@ -123,6 +124,16 @@ class CatalogJsonMapperTest {
         assertEquals(3, lists.size());
         assertEquals("Group 1", lists.get(0).getName());
         assertEquals("Group 1 - Advanced Bioethics", lists.get(0).getTitle().orElseThrow());
+    }
+
+    @Test
+    void asmin1001EqualsHandBuiltTree() {
+        assertEquals(CatalogFixtures.asmin1001(), mapper.parseCompletion(column("ASMIN1001.json", "completion")));
+    }
+
+    @Test
+    void asmin0667EqualsHandBuiltTree() {
+        assertEquals(CatalogFixtures.asmin0667(), mapper.parseCompletion(column("ASMIN0667.json", "completion")));
     }
 
     @Test

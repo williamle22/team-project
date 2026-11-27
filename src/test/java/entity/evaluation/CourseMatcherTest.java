@@ -21,6 +21,7 @@ class CourseMatcherTest {
 
     private static final CourseRecord CSC148 = record("CSC148H1", 75);
     private static final CourseRecord MAT237 = record("MAT237Y1", 80);
+    private static final CourseRecord MAT1 = CourseRecord.unspecifiedTransfer("MAT1**", 2.0).orElseThrow();
 
     private static Match match(CourseFilter.Builder f, CourseRecord r) {
         return CourseMatcher.matches(f.build(), r, MembershipResolver.NONE);
@@ -246,5 +247,28 @@ class CourseMatcherTest {
         CourseFilter.Builder f = CourseFilter.builder().designators(List.of("MAT")).minGrade(60);
 
         assertEquals(NO, match(f, record("CSC148H1")));
+    }
+
+    @Test
+    void unspecifiedTransferMaybeMatchesDesignatorOrCourse() {
+        assertEquals(MAYBE, match(CourseFilter.builder().designators(List.of("MAT")), MAT1));
+        assertEquals(MAYBE, match(CourseFilter.builder().courses(List.of("MAT135H1")), MAT1));
+        assertEquals(NO, match(CourseFilter.builder().courses(List.of("MAT235H1")), MAT1));
+    }
+
+    @Test
+    void unspecifiedTransferMaybeMatchesBreadth() {
+        assertEquals(MAYBE, match(CourseFilter.builder().breadth(List.of(5)), MAT1));
+    }
+
+    @Test
+    void unspecifiedTransferCountsAsAnyCourse() {
+        assertEquals(YES, match(CourseFilter.builder(), MAT1));
+        assertEquals(YES, match(CourseFilter.builder().levels(List.of(100)), MAT1));
+    }
+
+    @Test
+    void maxCourseAmountUsesRecordWeight() {
+        assertEquals(NO, match(CourseFilter.builder().maxCourseAmount(1.0), MAT1));
     }
 }

@@ -1,6 +1,7 @@
 package use_case;
 
 import entity.catalog.Course;
+import entity.catalog.Section;
 import entity.evaluation.AcademicSnapshot;
 import entity.evaluation.CourseRecord;
 import entity.grades.LetterGrade;
@@ -13,11 +14,12 @@ import entity.term.AcademicTerm;
 import entity.term.Placement;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Builds the {@link AcademicSnapshot} for checking one planned course, or for the whole plan. Failed courses never
  * count, a retaken course keeps its best grade, and the factory skips codes missing from the catalog. Transfer credits
- * count as taken. Unspecified ones, such as {@code MAT1**}, count only toward the year of study.
+ * count as taken. Unspecified ones, such as {@code MAT1**}, count as {@link CourseRecord#unspecifiedTransfer} records.
  */
 public final class SnapshotFactory {
     private final CatalogReader catalog;
@@ -30,7 +32,8 @@ public final class SnapshotFactory {
 
     /**
      * Returns the snapshot for {@code target}. Courses that end before it starts are taken, and other courses in any of
-     * its terms are concurrent. The CGPA and year of study count only courses that end before it starts.
+     * its terms are concurrent. The CGPA and year of study count only courses that end before it starts. A Summer F
+     * course counts as taken for a Summer S course in the same year.
      */
     public AcademicSnapshot forCourse(Plan plan, PlannedCourse target) {
         Placement placement = target.getPlacement();
@@ -43,9 +46,10 @@ public final class SnapshotFactory {
                 continue;
             }
 
-            if (c.getPlacement().endTerm().isBefore(start)) {
+            if (c.getPlacement().endTerm().isBefore(start) || firstHalfOfSummer(c.getPlacement(), placement)) {
                 earlier.add(c);
-            } else if (!Collections.disjoint(c.getPlacement().terms(), placement.terms())) {
+            } else if (!Collections.disjoint(c.getPlacement().terms(), placement.terms())
+                    && !firstHalfOfSummer(placement, c.getPlacement())) {
                 sameTime.add(c);
             }
         }
@@ -76,12 +80,28 @@ public final class SnapshotFactory {
         return builder(plan, taken(plan, notFailed), plan.getCourses(), gpa.cgpa(plan)).build();
     }
 
+    /**
+     * Returns a snapshot for checking graduation with completed courses only. It counts transfer credits and courses
+     * with a passing final grade.
+     */
+    public AcademicSnapshot completedOnly(Plan plan) {
+        List<PlannedCourse> passed = plan.getCourses().stream().filter(SnapshotFactory::passed)
+                .collect(Collectors.toList());
+
+        return builder(plan, taken(plan, passed), passed, gpa.cgpa(plan)).build();
+    }
+
     private Map<String, CourseRecord> taken(Plan plan, List<PlannedCourse> courses) {
         Map<String, CourseRecord> taken = records(courses);
 
         for (TransferCredit t : plan.getTransferCredits()) {
-            catalog.findCourse(t.getCode())
-                    .ifPresent(course -> keepBest(taken, new CourseRecord(course, null, true, false)));
+            Optional<Course> course = catalog.findCourse(t.getCode());
+
+            if (course.isPresent()) {
+                keepBest(taken, new CourseRecord(course.get(), null, true, false));
+            } else {
+                CourseRecord.unspecifiedTransfer(t.getCode(), t.getWeight()).ifPresent(r -> keepBest(taken, r));
+            }
         }
 
         return taken;
@@ -162,6 +182,12 @@ public final class SnapshotFactory {
         }
 
         return 4;
+    }
+
+    private static boolean firstHalfOfSummer(Placement first, Placement second) {
+        int year = second.getYear();
+
+        return first.equals(Placement.summer(year, Section.F)) && second.equals(Placement.summer(year, Section.S));
     }
 
     private static boolean passed(PlannedCourse c) {

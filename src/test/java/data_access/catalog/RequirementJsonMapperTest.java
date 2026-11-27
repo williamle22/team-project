@@ -92,7 +92,7 @@ class RequirementJsonMapperTest {
                 + "\"courses\":[\"CSC110Y1\"],\"designators\":[\"MAT\"],\"levels\":[300,400],\"breadth\":[5],"
                 + "\"lists\":[\"Group A\"],\"requirements\":[2],\"exclude\":[\"MAT135H1\"],"
                 + "\"exclude_designators\":[\"JSC\"],\"max_course_amount\":0.5,\"min_grade\":70,"
-                + "\"transfer\":true,\"cr_ncr\":true}");
+                + "\"transfer\":true,\"cr_ncr\":true,\"per_designator\":true}");
         CourseFilter expected = CourseFilter.builder()
                 .courses(List.of("CSC110Y1"))
                 .designators(List.of("MAT"))
@@ -106,6 +106,7 @@ class RequirementJsonMapperTest {
                 .minGrade(70)
                 .transfer(true)
                 .crNcr(true)
+                .perDesignator(true)
                 .build();
         assertEquals(expected, r.getFilter());
     }

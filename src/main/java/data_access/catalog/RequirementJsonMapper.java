@@ -96,6 +96,7 @@ public final class RequirementJsonMapper {
 
         b.transfer(bool(obj, "transfer"));
         b.crNcr(bool(obj, "cr_ncr"));
+        b.perDesignator(bool(obj, "per_designator"));
 
         return b.build();
     }

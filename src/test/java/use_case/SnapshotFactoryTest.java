@@ -35,6 +35,8 @@ class SnapshotFactoryTest {
     private static final Placement WINTER_2026 = Placement.fallWinter(2025, Section.S);
     private static final Placement FULL_YEAR_2025 = Placement.fallWinter(2025, Section.Y);
     private static final Placement SUMMER_2026 = Placement.summer(2026, Section.F);
+    private static final Placement SUMMER_2026_S = Placement.summer(2026, Section.S);
+    private static final Placement SUMMER_2026_Y = Placement.summer(2026, Section.Y);
     private static final Placement FALL_2026 = Placement.fallWinter(2026, Section.F);
     private static final Placement WINTER_2027 = Placement.fallWinter(2026, Section.S);
 
@@ -121,6 +123,40 @@ class SnapshotFactoryTest {
     }
 
     @Test
+    void summerFirstHalfTakenBySecondHalf() {
+        Plan p = plan();
+        add(p, "CSC108H1", SUMMER_2026, 80);
+        PlannedCourse target = add(p, "CSC148H1", SUMMER_2026_S);
+
+        AcademicSnapshot s = factory.forCourse(p, target);
+
+        assertEquals(Set.of("CSC108H1"), s.getTaken().keySet());
+        assertTrue(s.getConcurrent().isEmpty());
+    }
+
+    @Test
+    void summerSecondHalfNotConcurrentWithFirstHalf() {
+        Plan p = plan();
+        add(p, "CSC148H1", SUMMER_2026_S);
+        PlannedCourse target = add(p, "CSC108H1", SUMMER_2026);
+
+        AcademicSnapshot s = factory.forCourse(p, target);
+
+        assertTrue(s.getTaken().isEmpty());
+        assertTrue(s.getConcurrent().isEmpty());
+    }
+
+    @Test
+    void summerSameHalfOrFullSummerIsConcurrent() {
+        Plan p = plan();
+        add(p, "CSC165H1", SUMMER_2026_S);
+        add(p, "MAT137Y1", SUMMER_2026_Y);
+        PlannedCourse target = add(p, "CSC148H1", SUMMER_2026_S);
+
+        assertEquals(Set.of("CSC165H1", "MAT137Y1"), factory.forCourse(p, target).getConcurrent().keySet());
+    }
+
+    @Test
     void failedCourseExcluded() {
         Plan p = plan();
         add(p, "CSC108H1", FALL_2025, 40);
@@ -173,7 +209,7 @@ class SnapshotFactoryTest {
     }
 
     @Test
-    void unspecifiedTransferCreditSkipped() {
+    void unspecifiedTransferCreditIsTaken() {
         Plan p = plan();
         p.addTransferCredit(new TransferCredit("MAT1**", 0.5));
         p.addTransferCredit(new TransferCredit("USP***", 3.5));
@@ -181,7 +217,8 @@ class SnapshotFactoryTest {
 
         AcademicSnapshot s = factory.forCourse(p, target);
 
-        assertTrue(s.getTaken().isEmpty());
+        assertEquals(Set.of("MAT1**"), s.getTaken().keySet());
+        assertEquals(0.5, s.getTaken().get("MAT1**").getWeight());
         assertEquals(Optional.of(2), yearOfStudy(s));
         assertEquals(Optional.of(true), s.profileFact("has_transfer_credits"));
     }
@@ -294,6 +331,66 @@ class SnapshotFactoryTest {
         assertTrue(s.getConcurrent().isEmpty());
         assertEquals(Optional.empty(), s.getAsOf());
         assertEquals(new GpaCalculator(CreditWeights.FROM_CODE).cgpa(p), s.getCgpa());
+    }
+
+    @Test
+    void completedOnlySkipsUngradedCourses() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 80);
+        add(p, "CSC148H1", WINTER_2026);
+
+        assertEquals(Set.of("CSC108H1"), factory.completedOnly(p).getTaken().keySet());
+        assertEquals(Set.of("CSC108H1", "CSC148H1"), factory.wholePlan(p).getTaken().keySet());
+    }
+
+    @Test
+    void completedOnlySkipsFailedCourses() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 49);
+        add(p, "CSC148H1", WINTER_2026, 50);
+
+        assertEquals(Set.of("CSC148H1"), factory.completedOnly(p).getTaken().keySet());
+    }
+
+    @Test
+    void completedOnlyKeepsTransferCredits() {
+        Plan p = plan();
+        p.addTransferCredit(new TransferCredit("STA130H1", 0.5));
+
+        CourseRecord r = factory.completedOnly(p).getTaken().get("STA130H1");
+
+        assertTrue(r.isTransfer());
+    }
+
+    @Test
+    void completedOnlyKeepsBestRetake() {
+        Plan p = plan();
+        add(p, "CSC108H1", FALL_2025, 40);
+        add(p, "CSC108H1", WINTER_2026, 75);
+        add(p, "CSC108H1", FALL_2026, 60);
+        add(p, "CSC108H1", WINTER_2027);
+
+        assertEquals(Optional.of(75), factory.completedOnly(p).getTaken().get("CSC108H1").getGrade());
+    }
+
+    @Test
+    void completedOnlyHasCgpaYearAndPrograms() {
+        Plan p = plan();
+        p.addProgram("ASMAJ1689", ProgramStatus.ENROLLED);
+        p.addProgram("ASSPE1689", ProgramStatus.INTENDED);
+        add(p, "MAT137Y1", FULL_YEAR_2025, 80);
+        add(p, "CSC108H1", FALL_2025, 70);
+        add(p, "CSC148H1", WINTER_2026);
+        p.addTransferCredit(new TransferCredit("ABC1**", 2.5));
+
+        AcademicSnapshot s = factory.completedOnly(p);
+
+        assertEquals(Set.of("ASMAJ1689"), s.getEnrolledPrograms());
+        assertEquals(Set.of("ASSPE1689"), s.getIntendedPrograms());
+        assertEquals(new GpaCalculator(CreditWeights.FROM_CODE).cgpa(p), s.getCgpa());
+        assertTrue(s.getCgpa().isPresent());
+        assertEquals(Optional.of(2), yearOfStudy(s));
+        assertEquals(Optional.empty(), s.getAsOf());
     }
 
     @Test

@@ -118,6 +118,15 @@ public final class RequirementPrinter implements RequirementVisitor<String> {
         if (!f.getExclude().isEmpty()) {
             sb.append(" excluding ").append(join(f.getExclude(), ", "));
         }
+        if (!f.getExcludeDesignators().isEmpty()) {
+            sb.append(" outside ").append(join(f.getExcludeDesignators(), "/"));
+        }
+        if (f.isTransfer()) {
+            sb.append(" in transfer credits");
+        }
+        if (f.isPerDesignator()) {
+            sb.append(" with the same designator");
+        }
         f.getMinGrade().ifPresent(g -> sb.append(" with at least ").append(g).append("%"));
         return sb.toString();
     }

@@ -2,21 +2,26 @@ package entity.degree;
 
 import entity.catalog.Completion;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
  * A degree's completion rules, in the same row format as a program's {@code Completion}, and the program combinations
- * it accepts. Degrees with the same {@code type} are equal.
+ * it accepts. If {@code eligiblePrograms} isn't empty, only those programs count toward a combination, as with BCom's
+ * three Specialists. Degrees with the same {@code type} are equal.
  */
 public final class Degree {
     private final DegreeType type;
     private final Completion completion;
     private final ProgramCombinationRule programCombinations;
+    private final List<String> eligiblePrograms;
 
-    public Degree(DegreeType type, Completion completion, ProgramCombinationRule programCombinations) {
+    public Degree(DegreeType type, Completion completion, ProgramCombinationRule programCombinations,
+                  List<String> eligiblePrograms) {
         this.type = Objects.requireNonNull(type, "type");
         this.completion = Objects.requireNonNull(completion, "completion");
         this.programCombinations = Objects.requireNonNull(programCombinations, "programCombinations");
+        this.eligiblePrograms = List.copyOf(Objects.requireNonNull(eligiblePrograms, "eligiblePrograms"));
     }
 
     public DegreeType getType() {
@@ -33,6 +38,14 @@ public final class Degree {
 
     public ProgramCombinationRule getProgramCombinations() {
         return programCombinations;
+    }
+
+    public List<String> getEligiblePrograms() {
+        return eligiblePrograms;
+    }
+
+    public boolean countsTowardCombination(String programCode) {
+        return eligiblePrograms.isEmpty() || eligiblePrograms.contains(programCode);
     }
 
     @Override
