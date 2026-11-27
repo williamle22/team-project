@@ -600,6 +600,34 @@ class CompletionEvaluatorTest {
     }
 
     @Test
+    void raisedLimitCountsOnlyParentPool() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, req("MAT135H1"), "raw"),
+                completionRow(2, RowKind.ALLOCATION, null, null, credits(1.0, CourseFilter.any()), "raw"),
+                completionRow(3, RowKind.LIMIT, null, 2, cscCap(), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c, taken("MAT135H1", "CSC108H1", "CSC148H1"));
+
+        assertEquals(NOT_MET, status(r, 3));
+        assertEquals(NOT_MET, status(r, 2));
+        assertEquals(NOT_MET, r.getOverall());
+    }
+
+    @Test
+    void trimKeepsCoursesRaisedLimitNeeds() {
+        Completion c = completion(List.of(
+                completionRow(1, RowKind.ALLOCATION, null, null, creditsIn(1.5, "CSC", "MAT"), "raw"),
+                completionRow(2, RowKind.LIMIT, null, 1, cscCap(), "raw"),
+                completionRow(3, RowKind.ALLOCATION, null, null, creditsIn(0.5, "MAT", "HPS"), "raw")));
+
+        CompletionResult r = evaluator.evaluate(c,
+                taken("CSC108H1", "CSC148H1", "MAT135H1", "MAT136H1", "HPS100H1", "HPS110H1", "HPS120H1"));
+
+        assertEquals(List.of("CSC148H1", "MAT135H1", "MAT136H1"), r.row(1).orElseThrow().getClaimed());
+        assertEquals(MET, r.getOverall());
+    }
+
+    @Test
     void limitCountsMaybeMatches() {
         CreditsReq cap = new CreditsReq(0, 0.0, null, CourseFilter.builder().lists(List.of("Unknown")).build(), false);
         Completion c = completion(List.of(
@@ -691,13 +719,15 @@ class CompletionEvaluatorTest {
         return or(creditsIn(0.5, "HPS"), text("or permission of the department"));
     }
 
+    private static CreditsReq cscCap() {
+        return new CreditsReq(0, 0.5, null, CourseFilter.builder().designators(List.of("CSC")).build(), false);
+    }
+
     private static Completion cscLimit(boolean transcriptScope, Requirement parentReq) {
-        CreditsReq cap = new CreditsReq(0, 0.5, null, CourseFilter.builder().designators(List.of("CSC")).build(),
-                false);
         return completion(List.of(
                 completionRow(1, RowKind.ALLOCATION, null, null, parentReq, "raw"),
-                new CompletionRow(2, RowKind.LIMIT, null, null, 1, List.of(), cap, null, transcriptScope, List.of(),
-                        "raw")));
+                new CompletionRow(2, RowKind.LIMIT, null, null, 1, List.of(), cscCap(), null, transcriptScope,
+                        List.of(), "raw")));
     }
 
     private static CompletionRow withAudience(int number, RowKind kind, Integer parent, Requirement req) {

@@ -436,7 +436,7 @@ public final class CompletionEvaluator {
                 CreditsReq p = parent.get();
                 CreditsReq raised = new CreditsReq(p.getAmount() + over, p.getMaxAmount().orElse(null),
                         p.getWeight().orElse(null), p.getFilter(), p.isConcurrent());
-                Status status = check(snapshot, raised).getStatus();
+                Status status = check(scope, raised).getStatus();
 
                 return new RowResult(row, true, status, reason, null, List.of());
             }
